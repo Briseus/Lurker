@@ -1,0 +1,292 @@
+package torille.fi.lurkforreddit.comments;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+
+import org.parceler.Parcels;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import torille.fi.lurkforreddit.Injection;
+import torille.fi.lurkforreddit.R;
+import torille.fi.lurkforreddit.data.Comment;
+import torille.fi.lurkforreddit.data.CommentChild;
+import torille.fi.lurkforreddit.data.Post;
+import torille.fi.lurkforreddit.utils.TextHelper;
+
+/**
+ * A simple {@link Fragment} subclass.
+ * Use the {@link CommentFragment#newInstance} factory method to
+ * create an instance of this fragment.
+ */
+public class CommentFragment extends Fragment implements CommentContract.View {
+
+    private static final String ARGUMENT_CLICKED_POST = "post";
+    private CommentContract.UserActionsListener mActionsListener;
+    private CommentRecyclerViewAdapter mCommentAdapter;
+    private Post mPost;
+
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @param clickedPost the Post which comments are to be loaded
+     * @return A new instance of fragment CommentFragment.
+     */
+    public static CommentFragment newInstance(Post clickedPost) {
+        CommentFragment fragment = new CommentFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ARGUMENT_CLICKED_POST, Parcels.wrap(clickedPost));
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mPost = Parcels.unwrap(getArguments().getParcelable(ARGUMENT_CLICKED_POST));
+        mCommentAdapter = new CommentRecyclerViewAdapter(mPost, addDummyComment(), getContext());
+        mActionsListener = new CommentPresenter(Injection.provideRedditRepository(), this);
+    }
+
+    private List<CommentChild> addDummyComment() {
+
+        Comment dummyComment = new Comment();
+        dummyComment.setId("og");
+        CommentChild dummyFirstCommentForPost = new CommentChild("og", dummyComment);
+        ArrayList<CommentChild> list = new ArrayList<>();
+        list.add(dummyFirstCommentForPost);
+        return list;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadIfEmpty();
+    }
+
+    private void loadIfEmpty() {
+        if (mCommentAdapter.getItemCount() == 1) {
+            mActionsListener.loadComments(mPost.getPostDetails().getPermalink());
+        }
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_comments, container, false);
+        RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.comments_list);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.addItemDecoration(new CommentsItemDecoration(ContextCompat.getDrawable(getContext(), R.drawable.comment_item_decorator)));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(mCommentAdapter);
+        return root;
+    }
+
+    @Override
+    public void showComments(List<CommentChild> commentChildren) {
+        mCommentAdapter.addComments(commentChildren);
+    }
+
+    public static class CommentRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        private static final int COMMENT_ORIGINAL = -1;
+        private static final int COMMENT_PROGRESSBAR = -2;
+        private static final int COMMENT_LOAD_MORE = -3;
+        private List<CommentChild> mComments;
+        private Post mClickedPost;
+        private Context mContext;
+
+        CommentRecyclerViewAdapter(Post clickedPost, List<CommentChild> commentChildren, Context context) {
+            mClickedPost = clickedPost;
+            mComments = commentChildren;
+            mContext = context;
+            setHasStableIds(true);
+        }
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            switch (viewType) {
+                case COMMENT_ORIGINAL:
+                    return new PostViewHolder(LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.item_comment_clicked_post, parent, false));
+                case COMMENT_LOAD_MORE:
+                    return new CommentLoadMoreViewHolder(LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.item_comment_loadmore, parent, false));
+                case COMMENT_PROGRESSBAR:
+                    return new ProgressViewHolder(LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.item_progressbar, parent, false));
+                default:
+                    return new CommentViewHolder(LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.item_comment, parent, false));
+            }
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            if (holder instanceof PostViewHolder) {
+                ((PostViewHolder) holder).bind();
+            } else if (holder instanceof CommentViewHolder) {
+                ((CommentViewHolder) holder).bind(mComments.get(position));
+            } else if (holder instanceof CommentLoadMoreViewHolder) {
+                ((CommentLoadMoreViewHolder) holder).bind(mComments.get(position));
+            } else if (holder instanceof ProgressViewHolder) {
+                ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
+                ((ProgressViewHolder) holder).bind(mComments.get(position));
+            }
+        }
+
+
+        //TODO When comment kind is "continue" return load more type
+        @Override
+        public int getItemViewType(int position) {
+
+            switch (mComments.get(position).getKind()) {
+                case "more":
+                    return COMMENT_LOAD_MORE;
+                case "Progressbar":
+                    return COMMENT_PROGRESSBAR;
+                case "og":
+                    return COMMENT_ORIGINAL;
+                default:
+                    return mComments.get(position).getType();
+            }
+
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return mComments.size();
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return mComments.get(position).getData().getId().hashCode();
+        }
+
+        public void addComments(List<CommentChild> commentChildren) {
+            int oldDataEnd = mComments.size();
+            mComments.addAll(commentChildren);
+            notifyItemRangeInserted(oldDataEnd, commentChildren.size());
+        }
+
+        public class PostViewHolder extends RecyclerView.ViewHolder {
+            final TextView mAuthor;
+            final TextView mSelftext;
+            final TextView mTitle;
+            final ImageView mImage;
+            final Button mScoreButton;
+
+            PostViewHolder(View view) {
+                super(view);
+                mAuthor = (TextView) view.findViewById(R.id.comment_post_author);
+                mSelftext = (TextView) view.findViewById(R.id.comment_post_selftext);
+                mTitle = (TextView) view.findViewById(R.id.comment_post_title);
+                mImage = (ImageView) view.findViewById(R.id.comment_post_image);
+                mScoreButton = (Button) view.findViewById(R.id.comment_post_score);
+            }
+
+            public void bind() {
+                String time = (String) DateUtils.getRelativeTimeSpanString(mClickedPost.getPostDetails().getCreatedUtc() * 1000);
+                String author = "Submitted " + time + " by " + mClickedPost.getPostDetails().getAuthor();
+                mAuthor.setText(author);
+                mScoreButton.setText(String.valueOf(mClickedPost.getPostDetails().getScore()));
+                mTitle.setText(mClickedPost.getPostDetails().getTitle());
+                if (mClickedPost.getPostDetails().getPreviewImage().isEmpty()) {
+                    mImage.setVisibility(View.GONE);
+                } else {
+                    Glide.with(mContext).load(mClickedPost.getPostDetails().getPreviewImage()).centerCrop().crossFade().into(mImage);
+                }
+                if (mClickedPost.getPostDetails().getSelftextHtml() != null && !mClickedPost.getPostDetails().getSelftextHtml().isEmpty()) {
+                    mSelftext.setText(TextHelper.trimTrailingWhitespace(TextHelper.fromHtml(mClickedPost.getPostDetails().getSelftextHtml())));
+                } else {
+                    mSelftext.setVisibility(View.GONE);
+                }
+            }
+        }
+
+        public class CommentViewHolder extends RecyclerView.ViewHolder {
+            final TextView mCommentText;
+            final TextView mCommentScore;
+            final TextView mCommentAuthor;
+            CommentChild mComment;
+
+            CommentViewHolder(View view) {
+                super(view);
+                mCommentText = (TextView) view.findViewById(R.id.comment_text);
+                mCommentText.setMovementMethod(LinkMovementMethod.getInstance());
+                mCommentText.setLinksClickable(true);
+                mCommentScore = (TextView) view.findViewById(R.id.comment_score);
+                mCommentAuthor = (TextView) view.findViewById(R.id.comment_author);
+            }
+
+            public void bind(CommentChild commentChild) {
+                this.mComment = commentChild;
+                Comment comment = mComment.getData();
+                mCommentText.setText(comment.getFormattedComment());
+                mCommentAuthor.setText(comment.getFormatAuthor());
+                mCommentScore.setText(String.valueOf(comment.getScore()));
+            }
+        }
+
+        public class CommentLoadMoreViewHolder extends RecyclerView.ViewHolder {
+            final TextView mClickMore;
+            CommentChild mComment;
+
+            CommentLoadMoreViewHolder(View view) {
+                super(view);
+                mClickMore = (TextView) view.findViewById(R.id.comment_loadmore);
+            }
+
+            public void bind(CommentChild commentChild) {
+                this.mComment = commentChild;
+                Comment comment = mComment.getData();
+                String text;
+                if (comment.getId().equals("_")) {
+                    text = "Continue this thread ->";
+                } else {
+                    text = "Load more comments (" + commentChild.getData().getCount() + ")";
+                }
+                mClickMore.setText(text);
+            }
+        }
+
+        public class ProgressViewHolder extends RecyclerView.ViewHolder {
+            final ProgressBar progressBar;
+            CommentChild mComment;
+
+            ProgressViewHolder(View view) {
+                super(view);
+                progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+            }
+
+            public void bind(CommentChild commentChild) {
+                this.mComment = commentChild;
+            }
+        }
+    }
+
+}
