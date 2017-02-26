@@ -95,18 +95,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
                         Log.d("Test", "Got " + posts.size() + " posts");
 
-                        for (Post post : posts) {
-                            Log.d("Test", "Got title " + post.getPostDetails().getTitle());
-                            post.getPostDetails().setPreviewImage(DisplayHelper.getBestPreviewPicture(post.getPostDetails()));
-                            final String text = DateUtils.getRelativeTimeSpanString(post.getPostDetails().getCreatedUtc() * 1000)
-                                    + " ● "
-                                    + "/r/" + post.getPostDetails().getSubreddit()
-                                    + " ● "
-                                    + "/u/" + post.getPostDetails().getAuthor();
-
-                            post.getPostDetails().setPreviewText(text);
-                        }
-                        callback.onLoaded(posts, nextpage);
+                        callback.onLoaded(formatPosts(posts), nextpage);
                     }
                 }
 
@@ -132,17 +121,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                     List<Post> posts = response.body().getData().getPosts();
                     String nextpage = response.body().getData().getNextPage();
 
-                    for (Post post : posts) {
-                        post.getPostDetails().setPreviewImage(DisplayHelper.getBestPreviewPicture(post.getPostDetails()));
-                        final String text = DateUtils.getRelativeTimeSpanString(post.getPostDetails().getCreatedUtc() * 1000)
-                                + " ● "
-                                + "/r/" + post.getPostDetails().getSubreddit()
-                                + " ● "
-                                + "/u/" + post.getPostDetails().getAuthor();
-
-                        post.getPostDetails().setPreviewText(text);
-                    }
-                    callback.onLoaded(posts, nextpage);
+                    callback.onLoaded(formatPosts(posts), nextpage);
                 }
             }
 
@@ -151,6 +130,32 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                 Log.e("Subreddits", "Failed to load more posts " + t.toString());
             }
         });
+    }
+
+    private static List<Post> formatPosts(List<Post> posts ) {
+        for (Post post : posts) {
+            post.getPostDetails().setPreviewImage(DisplayHelper.getBestPreviewPicture(post.getPostDetails()));
+            final String text = DateUtils.getRelativeTimeSpanString(post.getPostDetails().getCreatedUtc() * 1000)
+                    + " ● "
+                    + "/r/" + post.getPostDetails().getSubreddit()
+                    + " ● "
+                    + "/u/" + post.getPostDetails().getAuthor();
+
+            post.getPostDetails().setPreviewText(text);
+            final int score = post.getPostDetails().getScore();
+            final String value = String.valueOf(score);
+            if (score < 1000) {
+                post.getPostDetails().setPreviewScore(value);
+            } else if (score < 10000) {
+                post.getPostDetails().setPreviewScore(value.charAt(0) + "." + value.charAt(1) + "k");
+            } else if (score < 100000) {
+                post.getPostDetails().setPreviewScore(value.charAt(0) + value.charAt(1) + "k");
+            } else if (score < 10000000) {
+                post.getPostDetails().setPreviewScore(value.charAt(0) + value.charAt(1) + value.charAt(2) + "k");
+            }
+        }
+
+        return posts;
     }
 
     @Override
@@ -190,7 +195,6 @@ public class RedditServiceApiImpl implements RedditServiceApi {
             }
         });
     }
-
 
     private void authenticateApp(final SubredditsServiceCallback<List<SubredditChildren>> callback) {
         Call<RedditToken> call = NetworkHelper.createAuthCall();

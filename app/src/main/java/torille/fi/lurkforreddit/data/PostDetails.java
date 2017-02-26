@@ -50,12 +50,14 @@ public class PostDetails {
     public String previewImage;
     @Nullable
     public String previewText;
+    @Nullable
+    public String previewScore;
 
     public PostDetails() {
     }
 
     @ParcelConstructor
-    public PostDetails(String subreddit, String selftext, @Nullable String selftextHtml, int likes, String author, String name, int score, @Nullable String thumbnail, String subredditId, String url, String title, @Nullable String postHint, String domain, String id, Boolean isSelf, long created, long createdUtc, boolean stickied, @Nullable String distinguished, String permalink, int numberOfComments, ImagePreview images, @Nullable String previewImage, @Nullable String previewText) {
+    public PostDetails(String subreddit, String selftext, @Nullable String selftextHtml, int likes, String author, String name, int score, @Nullable String thumbnail, String subredditId, String url, String title, @Nullable String postHint, String domain, String id, Boolean isSelf, long created, long createdUtc, boolean stickied, @Nullable String distinguished, String permalink, int numberOfComments, ImagePreview images, @Nullable String previewImage, @Nullable String previewText, String previewScore) {
         this.subreddit = subreddit;
         this.selftext = selftext;
         this.selftextHtml = selftextHtml;
@@ -80,6 +82,7 @@ public class PostDetails {
         this.images = images;
         this.previewImage = previewImage;
         this.previewText = previewText;
+        this.previewScore = previewScore;
     }
 
     public int getNumberOfComments() {
@@ -274,5 +277,11 @@ public class PostDetails {
         this.previewText = previewText;
     }
 
+    public String getPreviewScore() {
+        return previewScore;
+    }
 
+    public void setPreviewScore(String previewScore) {
+        this.previewScore = previewScore;
+    }
 }

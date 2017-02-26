@@ -23,11 +23,17 @@ public class Subreddit {
     public boolean subscribed;
     @SerializedName("created_utc")
     public long createdUtc;
+    @SerializedName("icon_img")
+    @Nullable
+    public String icon;
+    @SerializedName("banner_img")
+    @Nullable
+    public String banner;
 
     public Subreddit() {
     }
 
-    public Subreddit(String id, String title, String url, String name, String key_color, String display_name, @Nullable String descriptionHtml, boolean over18, int subscribers, boolean subscribed, long createdUtc) {
+    public Subreddit(String id, String title, String url, String name, String key_color, String display_name, @Nullable String descriptionHtml, boolean over18, int subscribers, boolean subscribed, long createdUtc, String icon, String banner) {
         this.id = id;
         this.title = title;
         this.url = url;
@@ -39,6 +45,8 @@ public class Subreddit {
         this.subscribers = subscribers;
         this.subscribed = subscribed;
         this.createdUtc = createdUtc;
+        this.icon = icon;
+        this.banner = banner;
     }
 
     public String getDisplay_name() {
@@ -127,6 +135,22 @@ public class Subreddit {
 
     public void setCreatedUtc(long createdUtc) {
         this.createdUtc = createdUtc;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public String getBanner() {
+        return banner;
+    }
+
+    public void setBanner(String banner) {
+        this.banner = banner;
     }
 
     @Override

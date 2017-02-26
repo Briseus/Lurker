@@ -10,7 +10,6 @@
         android:id="@+id/posts_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorDarkBackground"
         android:scrollbars="vertical"
         tools:context="torille.fi.lurkforreddit.subreddit.SubredditFragment"
         tools:listitem="@layout/item_post"

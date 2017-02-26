@@ -18,11 +18,10 @@
 
     <TextView
         android:text="The super awesome pun of an title for this awesome post"
-        android:layout_width="352dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/comment_post_title"
-        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-        android:fontFamily="sans-serif"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
         android:layout_marginStart="16dp"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginEnd="16dp"

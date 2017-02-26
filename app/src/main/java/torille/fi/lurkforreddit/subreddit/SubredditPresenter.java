@@ -1,6 +1,5 @@
 package torille.fi.lurkforreddit.subreddit;
 
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 

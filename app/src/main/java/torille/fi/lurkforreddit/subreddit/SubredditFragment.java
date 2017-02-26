@@ -439,7 +439,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 }
 
                 domain.setText(postDetails.getDomain());
-                score.setText(String.valueOf(postDetails.getScore()));
+                score.setText(postDetails.getPreviewScore());
 
                 details.setText(postDetails.getPreviewText());
                 comments.setText(String.valueOf(postDetails.getNumberOfComments()));
