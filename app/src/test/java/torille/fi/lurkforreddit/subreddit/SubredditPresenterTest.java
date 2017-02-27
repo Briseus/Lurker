@@ -1,7 +1,5 @@
 package torille.fi.lurkforreddit.subreddit;
 
-import android.net.Uri;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -21,13 +19,13 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 
 /**
- *  Unit tests for the implementation of {@link SubredditPresenter}
+ * Unit tests for the implementation of {@link SubredditPresenter}
  */
 
 public class SubredditPresenterTest {
     private static String AFTER = "t3_5tkppe";
 
-    private static Subreddit SUBREDDIT_WORLDNEWS = new Subreddit("2qh13", "World News", "/r/worldnews", "t5_2qh13", "", "worldnews", "", false, 15325795, true, (long) 1201231119);
+    private static Subreddit SUBREDDIT_WORLDNEWS = new Subreddit("2qh13", "World News", "/r/worldnews", "t5_2qh13", "", "worldnews", "", false, 15325795, true, (long) 1201231119, null, null);
 
     private static PostDetails POSTDETAILS_1_WORLDNEWS = new PostDetails(
             "worldnews",
@@ -53,6 +51,7 @@ public class SubredditPresenterTest {
             1874,
             null,
             "",
+            "",
             "");
 
     private static PostDetails POSTDETAILS_2_WORLDNEWS = new PostDetails(
@@ -77,6 +76,7 @@ public class SubredditPresenterTest {
             null,
             "/r/worldnews/comments/5tkad1/china_tells_india_to_stay_off_its_indian_ocean/",
             25,
+            null,
             null,
             null,
             null);

@@ -67,6 +67,26 @@ public class InMemoryRedditRepository implements RedditRepository {
             public void onLoaded(List<CommentChild> comments) {
                 callback.onCommentsLoaded(comments);
             }
+
+            @Override
+            public void onMoreLoaded(List<CommentChild> comments, int position) {
+
+            }
+        });
+    }
+
+    @Override
+    public void getMoreCommentsForPostAt(@NonNull CommentChild parentComment, @NonNull String linkId, int position, @NonNull final LoadPostCommentsCallback callback) {
+        mRedditServiceApi.getMorePostComments(parentComment, linkId, position, new RedditServiceApi.CommentsServiceCallback<List<CommentChild>>() {
+            @Override
+            public void onLoaded(List<CommentChild> comments) {
+
+            }
+
+            @Override
+            public void onMoreLoaded(List<CommentChild> comments, int position) {
+                callback.onMoreCommentsLoaded(comments, position);
+            }
         });
     }
 }

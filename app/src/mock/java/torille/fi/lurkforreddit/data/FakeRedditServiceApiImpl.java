@@ -32,6 +32,16 @@ public class FakeRedditServiceApiImpl implements RedditServiceApi {
         callback.onLoaded(POSTS_SERVICE_DATA, AFTER);
     }
 
+    @Override
+    public void getPostComments(String permaLinkUrl, CommentsServiceCallback<List<CommentChild>> callback) {
+
+    }
+
+    @Override
+    public void getMorePostComments(CommentChild parentComment, String linkId, int position, CommentsServiceCallback<List<CommentChild>> callback) {
+
+    }
+
     @VisibleForTesting
     public static void addPosts(Post... posts) {
         for (Post post: posts) {

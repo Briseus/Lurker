@@ -96,7 +96,6 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     SubredditItemListener mItemListener = new SubredditItemListener() {
         @Override
         public void onSubredditClick(Subreddit subreddit) {
-            Toast.makeText(getContext(), "Clicked " + subreddit.getDisplay_name(), Toast.LENGTH_SHORT).show();
             mActionsListener.openSubreddit(subreddit);
         }
     };

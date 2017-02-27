@@ -18,6 +18,60 @@ import torille.fi.lurkforreddit.data.CommentListing;
 
 public final class CommentsStreamingParser {
 
+    /**
+     * End point to read more comment api response
+     * @param reader needed for parsing
+     * @return a list of {@link CommentChild}
+     * @throws IOException
+     */
+    public static List<CommentChild> readMoreComments(JsonReader reader) throws IOException {
+        List<CommentChild> comments = new ArrayList<>();
+        reader.beginObject();
+        while (reader.hasNext()) {
+            String name = reader.nextName();
+            if (name.equals("json")) {
+                comments = readMore(reader, "data");
+            } else {
+                reader.skipValue();
+            }
+        }
+        reader.endObject();
+
+        return comments;
+    }
+
+    /**
+     * Reads and parses more comments api response
+     * @param reader used for parsing
+     * @param searchFor used to travel the response
+     * @return at the end returns a list of  {@link CommentChild}
+     * @throws IOException
+     */
+    private static List<CommentChild> readMore(JsonReader reader, String searchFor) throws IOException {
+        List<CommentChild> comments = new ArrayList<>();
+
+        reader.beginObject();
+        while (reader.hasNext()) {
+            if (reader.nextName().equals(searchFor)) {
+                switch (searchFor) {
+                    case "json":
+                        return readMore(reader, "data");
+                    case "data":
+                        return readMore(reader, "things");
+                    case "things":
+                        return readCommentChildren(reader);
+                    default:
+                        reader.skipValue();
+                }
+            } else {
+                reader.skipValue();
+            }
+
+        }
+        reader.endObject();
+        return comments;
+    }
+
     public static List<CommentListing> readCommentListingArray(JsonReader reader) throws IOException {
         List<CommentListing> list = new ArrayList<>();
 

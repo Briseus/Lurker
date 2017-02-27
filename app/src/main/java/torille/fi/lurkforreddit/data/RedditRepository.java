@@ -18,6 +18,8 @@ public interface RedditRepository {
 
     interface LoadPostCommentsCallback {
         void onCommentsLoaded(List<CommentChild> commentChildren);
+
+        void onMoreCommentsLoaded(List<CommentChild> comments, int position);
     }
 
     interface GetSubredditsCallback {
@@ -34,4 +36,6 @@ public interface RedditRepository {
     void refreshData();
 
     void getCommentsForPost(@NonNull String permaLinkUrl, @NonNull LoadPostCommentsCallback callback);
+
+    void getMoreCommentsForPostAt(@NonNull CommentChild parentComment, @NonNull String linkId, int position, @NonNull LoadPostCommentsCallback callback);
 }

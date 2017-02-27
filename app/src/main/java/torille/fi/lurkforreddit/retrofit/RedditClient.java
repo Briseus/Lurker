@@ -37,8 +37,9 @@ public interface RedditClient {
     @GET("{subreddit}")
     Call<PostListing> getSubredditNextPage(@Path(value = "subreddit", encoded = true) String subredditUrl, @Query("after") String afterPage);
 
-
     @GET("{comments}")
     Call<ResponseBody> getComments(@Path(value = "comments", encoded = true) String commentUrl);
 
+    @GET("api/morechildren")
+    Call<ResponseBody> getMoreComments(@Query(value = "link_id") String parentId, @Query(value = "children") String childId, @Query(value = "api_type") String json);
 }

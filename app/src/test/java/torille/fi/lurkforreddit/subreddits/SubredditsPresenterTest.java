@@ -23,8 +23,8 @@ import static org.mockito.Mockito.verify;
 
 public class SubredditsPresenterTest {
 
-    private static Subreddit SUBREDDIT_PICS = new Subreddit("2qh0u", "Reddit Pics", "/r/pics", "t5_2qh0u", "#222222", "pics", "", false, 15295521, true, (long) 1201221069);
-    private static Subreddit SUBREDDIT_WORLDNEWS = new Subreddit("2qh13", "World News", "/r/worldnews", "t5_2qh13", "", "worldnews", "", false, 15325795, true, (long) 1201231119);
+    private static Subreddit SUBREDDIT_PICS = new Subreddit("2qh0u", "Reddit Pics", "/r/pics", "t5_2qh0u", "#222222", "pics", "", false, 15295521, true, (long) 1201221069, null, null);
+    private static Subreddit SUBREDDIT_WORLDNEWS = new Subreddit("2qh13", "World News", "/r/worldnews", "t5_2qh13", "", "worldnews", "", false, 15325795, true, (long) 1201231119, null, null);
 
     private static SubredditChildren PICS = new SubredditChildren("t5", SUBREDDIT_PICS);
     private static SubredditChildren WORLDNEWS = new SubredditChildren("t5", SUBREDDIT_WORLDNEWS);

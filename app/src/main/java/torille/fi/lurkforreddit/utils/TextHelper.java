@@ -38,13 +38,11 @@ public class TextHelper {
             commentChild.getData().setFormattedComment(trimTrailingWhitespace(fromHtml((commentChild.getData().getBodyHtml()))));
         }
 
-        String author;
+        String author = "";
         if (commentChild.getData().getAuthor() != null && commentChild.getData().getStickied()) {
             author = "<font color='#64FFDA'> Sticky post<font> &nbsp &nbsp";
         } else if (commentChild.getData().getAuthor() != null) {
             author = commentChild.getData().getAuthor();
-        } else {
-            author = "";
         }
         commentChild.getData().setFormatAuthor(fromHtml(author + " " + DateUtils.getRelativeTimeSpanString(commentChild.getData().getCreatedUtc() * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)));
 

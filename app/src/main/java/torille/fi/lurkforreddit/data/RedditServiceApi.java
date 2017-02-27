@@ -24,6 +24,8 @@ public interface RedditServiceApi {
     interface CommentsServiceCallback<T> {
 
         void onLoaded(T comments);
+
+        void onMoreLoaded(T comments, int position);
     }
 
     void getSubreddits(SubredditsServiceCallback<List<SubredditChildren>> callback);
@@ -33,4 +35,6 @@ public interface RedditServiceApi {
     void getMorePosts(String subredditId, String nextpage, PostsServiceCallback<List<Post>, String> callback);
 
     void getPostComments(String permaLinkUrl, CommentsServiceCallback<List<CommentChild>> callback);
+
+    void getMorePostComments(CommentChild parentComment, String linkId, int position, CommentsServiceCallback<List<CommentChild>> callback);
 }

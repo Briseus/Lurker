@@ -26,10 +26,35 @@ public class CommentPresenter implements CommentContract.UserActionsListener {
 
     @Override
     public void loadComments(@NonNull String permaLinkUrl) {
+        mCommentsView.showProgressbarAt(1, 0);
         mRedditRepository.getCommentsForPost(permaLinkUrl, new RedditRepository.LoadPostCommentsCallback() {
             @Override
             public void onCommentsLoaded(List<CommentChild> commentChildren) {
+                mCommentsView.hideProgressbarAt(1);
                 mCommentsView.showComments(commentChildren);
+            }
+
+            @Override
+            public void onMoreCommentsLoaded(List<CommentChild> comments, int position) {
+
+            }
+        });
+    }
+
+    @Override
+    public void loadMoreCommentsAt(CommentChild parentComment, String linkId, int position) {
+        final int level = parentComment.getType();
+        mCommentsView.showProgressbarAt(position, level);
+        mRedditRepository.getMoreCommentsForPostAt(parentComment, linkId, position, new RedditRepository.LoadPostCommentsCallback() {
+            @Override
+            public void onCommentsLoaded(List<CommentChild> commentChildren) {
+
+            }
+
+            @Override
+            public void onMoreCommentsLoaded(List<CommentChild> comments, int position) {
+                mCommentsView.hideProgressbarAt(position);
+                mCommentsView.addCommentsAt(comments, position);
             }
         });
     }

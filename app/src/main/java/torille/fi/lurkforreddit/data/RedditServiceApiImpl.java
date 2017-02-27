@@ -1,14 +1,13 @@
 package torille.fi.lurkforreddit.data;
 
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -132,7 +131,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
         });
     }
 
-    private static List<Post> formatPosts(List<Post> posts ) {
+    private static List<Post> formatPosts(List<Post> posts) {
         for (Post post : posts) {
             post.getPostDetails().setPreviewImage(DisplayHelper.getBestPreviewPicture(post.getPostDetails()));
             final String text = DateUtils.getRelativeTimeSpanString(post.getPostDetails().getCreatedUtc() * 1000)
@@ -164,7 +163,6 @@ public class RedditServiceApiImpl implements RedditServiceApi {
         final RedditClient client = RedditService.createService(RedditClient.class, token);
         Call<ResponseBody> call = client.getComments(permaLinkUrl);
 
-
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -194,6 +192,55 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                 Log.e("Comments", "Something went wrong fetching comments " + t.toString());
             }
         });
+    }
+
+    @Override
+    public void getMorePostComments(final CommentChild parentComment, String linkId, final int position, final CommentsServiceCallback<List<CommentChild>> callback) {
+        String token = SharedPreferencesHelper.getToken();
+        final RedditClient client = RedditService.createService(RedditClient.class, token);
+        Call<ResponseBody> call = client.getMoreComments(linkId, TextUtils.join(",", parentComment.getData().getChildren()), "json");
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        InputStreamReader in = new InputStreamReader(response.body().source().inputStream(), "UTF-8");
+                        JsonReader reader = new JsonReader(in);
+                        List<CommentChild> additionalComments = CommentsStreamingParser.readMoreComments(reader);
+                        reader.close();
+                        in.close();
+                        response.body().close();
+                        for (int i = 0; i < additionalComments.size(); i++) {
+                            /*
+                            If type is "continue this thread ->"
+                             */
+                            if (additionalComments.get(i).getData().getId().equals("_")) {
+                                additionalComments.get(i).setKind("more");
+                                additionalComments.get(i).setType(parentComment.getType());
+                            } else {
+                                additionalComments.get(i).setKind("t3");
+                                additionalComments.get(i).setType(parentComment.getType());
+                            }
+                            TextHelper.formatCommentData(additionalComments.get(i));
+                            for (int j = 0; j < additionalComments.size(); j++) {
+                                if (additionalComments.get(i).getData().getName().equals(additionalComments.get(j).getData().getParentId())) {
+                                    additionalComments.get(j).setType(additionalComments.get(i).getType() + 1);
+                                }
+                            }
+                        }
+                        callback.onMoreLoaded(additionalComments, position);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+
     }
 
     private void authenticateApp(final SubredditsServiceCallback<List<SubredditChildren>> callback) {

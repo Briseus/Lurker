@@ -2,6 +2,7 @@ package torille.fi.lurkforreddit.comments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -9,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,7 +64,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPost = Parcels.unwrap(getArguments().getParcelable(ARGUMENT_CLICKED_POST));
-        mCommentAdapter = new CommentRecyclerViewAdapter(mPost, addDummyComment(), getContext());
+        mCommentAdapter = new CommentRecyclerViewAdapter(mPost, addDummyComment(), getContext(), mClickListener);
         mActionsListener = new CommentPresenter(Injection.provideRedditRepository(), this);
     }
 
@@ -111,6 +113,33 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         mCommentAdapter.addComments(commentChildren);
     }
 
+    @Override
+    public void showProgressbarAt(int position, int level) {
+        mCommentAdapter.addProgressbar(position, level);
+    }
+
+    @Override
+    public void hideProgressbarAt(int position) {
+        mCommentAdapter.removeAt(position);
+    }
+
+    @Override
+    public void addCommentsAt(List<CommentChild> comments, int position) {
+        if (!comments.isEmpty()) {
+            mCommentAdapter.addAllCommentsTo(position, comments);
+        }
+    }
+
+    /**
+     * Listener for clicks on notes in the RecyclerView.
+     */
+    CommentClickListener mClickListener = new CommentClickListener() {
+        @Override
+        public void onClick(CommentChild parentComment, String linkId, int position) {
+            mActionsListener.loadMoreCommentsAt(parentComment, linkId, position);
+        }
+    };
+
     public static class CommentRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private static final int COMMENT_ORIGINAL = -1;
         private static final int COMMENT_PROGRESSBAR = -2;
@@ -118,11 +147,13 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         private List<CommentChild> mComments;
         private Post mClickedPost;
         private Context mContext;
+        private CommentClickListener mClickListener;
 
-        CommentRecyclerViewAdapter(Post clickedPost, List<CommentChild> commentChildren, Context context) {
+        CommentRecyclerViewAdapter(Post clickedPost, List<CommentChild> commentChildren, Context context, CommentClickListener listener) {
             mClickedPost = clickedPost;
             mComments = commentChildren;
             mContext = context;
+            mClickListener = listener;
             setHasStableIds(true);
         }
 
@@ -193,6 +224,55 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             notifyItemRangeInserted(oldDataEnd, commentChildren.size());
         }
 
+        /**
+         * Creates a progressbar with certain padding
+         *
+         * @param level deepness of the comment
+         *              the bigger the level the bigger the left padding
+         * @return progressbar with padding info
+         */
+        public CommentChild createProgressbar(int level) {
+            CommentChild dummyComment = new CommentChild();
+            Comment dummy = new Comment();
+            dummy.setId("Progressbar");
+            dummyComment.setData(dummy);
+            dummyComment.setKind("Progressbar");
+            dummyComment.setType(level);
+            return dummyComment;
+        }
+
+        public void addProgressbar(int position, int level) {
+            Log.d("more", "Adding to " + position);
+            if (position > 2) {
+                mComments.set(position, createProgressbar(level));
+                notifyItemChanged(position);
+            } else {
+                mComments.add(position, createProgressbar(level));
+                notifyItemInserted(position);
+            }
+
+        }
+
+        public void removeAt(int position) {
+            mComments.remove(position);
+            notifyItemRemoved(position);
+        }
+
+        public void addAllCommentsTo(int position, @NonNull List<CommentChild> comments) {
+            mComments.addAll(position, comments);
+            notifyItemRangeInserted(position, comments.size());
+        }
+
+        public void removeAndAddProgressBar(int position, int level) {
+            mComments.set(position, createProgressbar(level));
+            notifyItemChanged(position);
+        }
+
+        public void changeCommentAt(int position, CommentChild comment) {
+            mComments.set(position, comment);
+            notifyItemChanged(position);
+        }
+
         public class PostViewHolder extends RecyclerView.ViewHolder {
             final TextView mAuthor;
             final TextView mSelftext;
@@ -250,15 +330,18 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 mCommentAuthor.setText(comment.getFormatAuthor());
                 mCommentScore.setText(String.valueOf(comment.getScore()));
             }
+
+
         }
 
-        public class CommentLoadMoreViewHolder extends RecyclerView.ViewHolder {
+        public class CommentLoadMoreViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
             final TextView mClickMore;
             CommentChild mComment;
 
             CommentLoadMoreViewHolder(View view) {
                 super(view);
                 mClickMore = (TextView) view.findViewById(R.id.comment_loadmore);
+                view.setOnClickListener(this);
             }
 
             public void bind(CommentChild commentChild) {
@@ -272,6 +355,16 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 }
                 mClickMore.setText(text);
             }
+
+            @Override
+            public void onClick(View v) {
+                Log.d("more", mComment.toString());
+                if (!mComment.getData().getId().equals("_")) {
+                    mClickListener.onClick(mComment, mClickedPost.getPostDetails().getName(), getAdapterPosition());
+                }
+            }
+
+
         }
 
         public class ProgressViewHolder extends RecyclerView.ViewHolder {
@@ -287,6 +380,10 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 this.mComment = commentChild;
             }
         }
+    }
+
+    public interface CommentClickListener {
+        void onClick(CommentChild parentComment, String linkId, int position);
     }
 
 }

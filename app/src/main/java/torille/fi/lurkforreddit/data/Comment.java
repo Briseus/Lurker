@@ -382,4 +382,37 @@ public class Comment {
         this.formattedComment = formattedComment;
     }
 
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "subredditId='" + subredditId + '\'' +
+                ", linkId='" + linkId + '\'' +
+                ", replies=" + replies +
+                ", saved=" + saved +
+                ", id='" + id + '\'' +
+                ", gilded=" + gilded +
+                ", archived=" + archived +
+                ", author='" + author + '\'' +
+                ", parentId='" + parentId + '\'' +
+                ", score=" + score +
+                ", controversiality=" + controversiality +
+                ", body='" + body + '\'' +
+                ", downs=" + downs +
+                ", bodyHtml='" + bodyHtml + '\'' +
+                ", stickied=" + stickied +
+                ", subreddit='" + subreddit + '\'' +
+                ", scoreHidden=" + scoreHidden +
+                ", name='" + name + '\'' +
+                ", created=" + created +
+                ", authorFlairText='" + authorFlairText + '\'' +
+                ", createdUtc=" + createdUtc +
+                ", ups=" + ups +
+                ", count=" + count +
+                ", children=" + children +
+                ", formattedComment=" + formattedComment +
+                ", formatAuthor=" + formatAuthor +
+                ", formatTime='" + formatTime + '\'' +
+                '}';
+    }
 }
