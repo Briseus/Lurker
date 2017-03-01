@@ -222,6 +222,9 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                                 additionalComments.get(i).setType(parentComment.getType());
                             }
                             TextHelper.formatCommentData(additionalComments.get(i));
+
+                        }
+                        for (int i = 0; i < additionalComments.size(); i++) {
                             for (int j = 0; j < additionalComments.size(); j++) {
                                 if (additionalComments.get(i).getData().getName().equals(additionalComments.get(j).getData().getParentId())) {
                                     additionalComments.get(j).setType(additionalComments.get(i).getType() + 1);
