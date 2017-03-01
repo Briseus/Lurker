@@ -45,6 +45,7 @@ public class CommentPresenter implements CommentContract.UserActionsListener {
     public void loadMoreCommentsAt(CommentChild parentComment, String linkId, int position) {
         final int level = parentComment.getType();
         mCommentsView.showProgressbarAt(position, level);
+
         mRedditRepository.getMoreCommentsForPostAt(parentComment, linkId, position, new RedditRepository.LoadPostCommentsCallback() {
             @Override
             public void onCommentsLoaded(List<CommentChild> commentChildren) {

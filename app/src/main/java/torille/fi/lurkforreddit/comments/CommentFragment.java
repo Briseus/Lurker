@@ -243,7 +243,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
         public void addProgressbar(int position, int level) {
             Log.d("more", "Adding to " + position);
-            if (position > 2) {
+            if (position > 1) {
                 mComments.set(position, createProgressbar(level));
                 notifyItemChanged(position);
             } else {
@@ -278,7 +278,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             final TextView mSelftext;
             final TextView mTitle;
             final ImageView mImage;
-            final Button mScoreButton;
+            final TextView mScoreButton;
 
             PostViewHolder(View view) {
                 super(view);
@@ -286,7 +286,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 mSelftext = (TextView) view.findViewById(R.id.comment_post_selftext);
                 mTitle = (TextView) view.findViewById(R.id.comment_post_title);
                 mImage = (ImageView) view.findViewById(R.id.comment_post_image);
-                mScoreButton = (Button) view.findViewById(R.id.comment_post_score);
+                mScoreButton = (TextView) view.findViewById(R.id.comment_post_score);
             }
 
             public void bind() {
@@ -319,7 +319,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 mCommentText = (TextView) view.findViewById(R.id.comment_text);
                 mCommentText.setMovementMethod(LinkMovementMethod.getInstance());
                 mCommentText.setLinksClickable(true);
-                mCommentScore = (TextView) view.findViewById(R.id.comment_score);
+                mCommentScore = (TextView) view.findViewById(R.id.comment_post_score);
                 mCommentAuthor = (TextView) view.findViewById(R.id.comment_author);
             }
 

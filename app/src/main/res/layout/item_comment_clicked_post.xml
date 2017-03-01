@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,68 +7,66 @@
     android:background="@color/colorDarkBackground">
 
     <ImageView
+        android:id="@+id/comment_post_image"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:id="@+id/comment_post_image"
         app:layout_constraintDimensionRatio="16:9"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:text="The super awesome pun of an title for this awesome post"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/comment_post_title"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        android:layout_marginStart="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:text="The super awesome pun of an title for this awesome post"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse"
+        android:textSize="18sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/comment_post_image" />
 
     <TextView
-        android:text="Here is an example of a selftext thats is found in some reddit posts"
+        android:id="@+id/comment_post_selftext"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:id="@+id/comment_post_selftext"
-        android:layout_marginStart="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
-        app:layout_constraintRight_toRightOf="parent"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
+        android:layout_marginStart="16dp"
         android:fontFamily="sans-serif"
-        app:layout_constraintHorizontal_bias="0.66"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/comment_post_score"
+        android:text="Here is an example of a selftext thats is found in some reddit posts"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="16dp" />
+        app:layout_constraintHorizontal_bias="0.66"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <TextView
-        android:text="author"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/comment_post_author"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/comment_post_title"
-        android:layout_marginStart="8dp"
-        app:layout_constraintLeft_toRightOf="@+id/comment_post_score"
-        app:layout_constraintBottom_toTopOf="@+id/comment_post_selftext"
-        android:layout_marginBottom="8dp" />
-
-    <Button
-        android:text="12200"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:id="@+id/comment_post_score"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
-        android:background="@drawable/circle"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/comment_post_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginStart="16dp"
+        android:text="author"
+        app:layout_constraintBaseline_toBaselineOf="@+id/comment_post_score"
+        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintLeft_toRightOf="@+id/comment_post_score"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <TextView
+        android:id="@+id/comment_post_score"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:text="13377"
+        app:layout_constraintBottom_toTopOf="@+id/comment_post_selftext"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:fontFamily="sans-serif-medium"
-        android:textSize="12sp"
-        android:textColor="@android:color/black" />
+        app:layout_constraintTop_toBottomOf="@+id/comment_post_title" />
+
 </android.support.constraint.ConstraintLayout>

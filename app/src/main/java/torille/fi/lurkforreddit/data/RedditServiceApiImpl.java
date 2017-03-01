@@ -142,19 +142,25 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
             post.getPostDetails().setPreviewText(text);
             final int score = post.getPostDetails().getScore();
-            final String value = String.valueOf(score);
-            if (score < 1000) {
-                post.getPostDetails().setPreviewScore(value);
-            } else if (score < 10000) {
-                post.getPostDetails().setPreviewScore(value.charAt(0) + "." + value.charAt(1) + "k");
-            } else if (score < 100000) {
-                post.getPostDetails().setPreviewScore(value.charAt(0) + value.charAt(1) + "k");
-            } else if (score < 10000000) {
-                post.getPostDetails().setPreviewScore(value.charAt(0) + value.charAt(1) + value.charAt(2) + "k");
-            }
+            post.getPostDetails().setPreviewScore(formatScore(score));
         }
 
         return posts;
+    }
+
+    private static String formatScore(int score) {
+        final String value = String.valueOf(score);
+        if (score < 1000) {
+            return value;
+        } else if (score < 10000) {
+            return value.charAt(0) + "." + value.charAt(1) + "k";
+        } else if (score < 100000) {
+            return value.charAt(0) + value.charAt(1) + "k";
+        } else if (score < 10000000) {
+            return value.charAt(0) + value.charAt(1) + value.charAt(2) + "k";
+        } else {
+            return value;
+        }
     }
 
     @Override
@@ -179,7 +185,6 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    Log.d("commentstest", "SUCCESS");
                     //TODO when no comments callback
                     //List<CommentChild> commentChildList = response.body().get(1).getCommentData().getCommentChildren();
 
