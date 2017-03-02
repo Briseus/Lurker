@@ -10,11 +10,14 @@
         <item name="android:textColorSecondary">@android:color/secondary_text_dark</item>
         <item name="android:textColorTertiary">@android:color/tertiary_text_dark</item>
         <item name="android:itemBackground">@color/colorPrimary</item>
-
-
     </style>
 
-    <style name="AppTheme.NoActionBar">
+    <style name="AppTheme.Launcher" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+        <item name="colorPrimaryDark">@color/cardview_dark_background</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
