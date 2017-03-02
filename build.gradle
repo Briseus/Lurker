@@ -32,8 +32,8 @@ ext {
 
     // App dependencies
     supportLibraryVersion = '25.2.0'
-    constraintVersion = '1.0.0'
-    retrofitVersion = '2.1.0'
+    constraintVersion = '1.0.1'
+    retrofitVersion = '2.2.0'
     okHttpVersion = '3.5.0'
     glideVersion = '3.7.0'
     junitVersion = '4.12'
