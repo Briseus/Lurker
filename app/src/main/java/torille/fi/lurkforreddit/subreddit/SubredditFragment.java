@@ -442,7 +442,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 score.setText(postDetails.getPreviewScore());
 
                 //details.setText(postDetails.getPreviewText());
-                details.setVisibility(GONE);
+
                 comments.setText(String.valueOf(postDetails.getNumberOfComments()));
 
                 switch (postDetails.getThumbnail()) {

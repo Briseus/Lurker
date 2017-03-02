@@ -11,6 +11,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import torille.fi.lurkforreddit.R;
+import torille.fi.lurkforreddit.data.Subreddit;
+import torille.fi.lurkforreddit.subreddit.SubredditFragment;
 
 /**
  * Created by eva on 2/8/17.
@@ -29,7 +31,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
         if (null == savedInstanceState) {
-            initFragment(SubredditsFragment.newInstance());
+            initFrontpage();
         }
     }
 
@@ -37,12 +39,26 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
         // Add the NotesFragment to the layout
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.content, subredditsFragment);
+        transaction.replace(R.id.content, subredditsFragment);
         transaction.commit();
+    }
+
+    private void initFrontpage() {
+        Subreddit frontpage = new Subreddit();
+        frontpage.setUrl("");
+        initFragment(SubredditFragment.newInstance(frontpage));
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_frontpage:
+                initFrontpage();
+                return true;
+            case R.id.action_subreddits:
+                initFragment(SubredditsFragment.newInstance());
+                return true;
+        }
         return false;
     }
 }

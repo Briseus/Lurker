@@ -16,6 +16,10 @@
     <string name="post_sub">Subscribe</string>
     <string name="post_no_description">No description</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="navigation_bottom_frontpage">Frontpage</string>
+    <string name="navigation_bottom_search">Search</string>
+    <string name="navigation_bottom_subreddits">Subreddits</string>
+    <string name="navigation_bottom_multireddits">Multireddits</string>
+
+
 </resources>
