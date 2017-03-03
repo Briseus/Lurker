@@ -20,6 +20,9 @@ import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.Subreddit;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
 
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
+
 public class SubredditActivity extends AppCompatActivity {
 
     public static final String EXTRA_SUBREDDIT = "subreddit";
@@ -58,9 +61,9 @@ public class SubredditActivity extends AppCompatActivity {
         if ( hasBannerSource && hasCustomColor) {
             int color = Color.parseColor(subreddit.getKey_color());
             collapsingToolbarLayout.setContentScrimColor(color);
-            Glide.with(this).load(subreddit.getBanner()).centerCrop().crossFade().into(banner);
+            Glide.with(this).load(subreddit.getBanner()).transition(withCrossFade()).apply(centerCropTransform(this)).into(banner);
         } else if (hasBannerSource) {
-            Glide.with(this).load(subreddit.getBanner()).centerCrop().crossFade().into(banner);
+            Glide.with(this).load(subreddit.getBanner()).transition(withCrossFade()).apply(centerCropTransform(this)).into(banner);
         } else if (hasCustomColor) {
             int color = Color.parseColor(subreddit.getKey_color());
             banner.setBackgroundColor(color);

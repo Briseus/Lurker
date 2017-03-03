@@ -3,9 +3,11 @@ package torille.fi.lurkforreddit.subreddit;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -22,12 +24,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.integration.okhttp3.OkHttpStreamFetcher;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
 import org.parceler.Parcels;
 
@@ -42,12 +48,13 @@ import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper;
 import torille.fi.lurkforreddit.data.Post;
 import torille.fi.lurkforreddit.data.PostDetails;
 import torille.fi.lurkforreddit.data.Subreddit;
-import torille.fi.lurkforreddit.glide.RecyclerViewPreloader;
 import torille.fi.lurkforreddit.utils.DisplayHelper;
 import torille.fi.lurkforreddit.utils.MediaHelper;
 import torille.fi.lurkforreddit.utils.TextHelper;
 
 import static android.view.View.GONE;
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -85,7 +92,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mListAdapter = new PostsAdapter(new ArrayList<Post>(0), mBrowserListener, mOpenCommentsListener, Glide.with(getContext()), ContextCompat.getColor(getContext(), R.color.colorAccent));
         mActionsListener = new SubredditPresenter(Injection.provideRedditRepository(),
                 this);
         mCustomTabActivityHelper = new CustomTabActivityHelper();
@@ -99,8 +105,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_subreddit, container, false);
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.posts_list);
-        recyclerView.setAdapter(mListAdapter);
-        recyclerView.setHasFixedSize(true);
+
         mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);
 
@@ -125,7 +130,17 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 }
             }
         });
-        recyclerView.addOnScrollListener(new RecyclerViewPreloader<>(mListAdapter, mListAdapter, 5));
+
+        ViewPreloadSizeProvider<Post> preloadSizeProvider = new ViewPreloadSizeProvider<>();
+        RequestBuilder<Drawable> preloadRequest = Glide.with(getActivity()).asDrawable().transition(withCrossFade()).apply(centerCropTransform(getActivity()));
+
+        mListAdapter = new PostsAdapter(new ArrayList<Post>(0), mBrowserListener, mOpenCommentsListener, preloadRequest, preloadSizeProvider, ContextCompat.getColor(getContext(), R.color.colorAccent));
+
+        RecyclerViewPreloader<Post> preloader = new RecyclerViewPreloader<>(Glide.with(getActivity()), mListAdapter, preloadSizeProvider, 5);
+        recyclerView.addOnScrollListener(preloader);
+
+        recyclerView.setAdapter(mListAdapter);
+        recyclerView.setHasFixedSize(true);
 
         // Pull-to-refresh
         SwipeRefreshLayout swipeRefreshLayout =
@@ -259,24 +274,24 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         startActivity(intent);
     }
 
-    private static class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ListPreloader.PreloadModelProvider<Post>,
-            ListPreloader.PreloadSizeProvider<Post> {
+    private static class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ListPreloader.PreloadModelProvider<Post> {
         private final static int VIEW_ITEM = 1;
         private final static int VIEW_PROGRESS = 0;
         private List<Post> mPosts;
-        private final GenericRequestBuilder<String, ?, ?, ?> glide;
-        private int[] stolenSize;
         private openBrowserListener mBrowserListener;
         private openCommentsListener mCommentsListener;
         private int mDefaultAccentColor;
+        private RequestBuilder<Drawable> preloadRequest;
+        private ViewPreloadSizeProvider<Post> preloadSizeProvider;
 
         //TODO Add click listeners
-        public PostsAdapter(List<Post> posts, openBrowserListener listener, openCommentsListener commentsListener, RequestManager glide, int color) {
-            mPosts = posts;
-            mBrowserListener = listener;
-            mCommentsListener = commentsListener;
-            this.glide = glide.fromString().centerCrop().crossFade();
-            mDefaultAccentColor = color;
+        public PostsAdapter(List<Post> posts, openBrowserListener listener, openCommentsListener commentsListener, RequestBuilder<Drawable> glide, ViewPreloadSizeProvider<Post> preloadSizeProvider, int color) {
+            this.mPosts = posts;
+            this.mBrowserListener = listener;
+            this.mCommentsListener = commentsListener;
+            this.preloadRequest = glide;
+            this.preloadSizeProvider = preloadSizeProvider;
+            this.mDefaultAccentColor = color;
             setHasStableIds(true);
         }
 
@@ -284,8 +299,10 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             switch (viewType) {
                 case VIEW_ITEM:
-                    return new PostViewHolder(LayoutInflater.from(parent.getContext())
+                    PostViewHolder vh = new PostViewHolder(LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.item_post, parent, false));
+                    preloadSizeProvider.setView(vh.image);
+                    return vh;
                 case VIEW_PROGRESS:
                 default:
                     return new ProgressViewHolder(LayoutInflater.from(parent.getContext())
@@ -387,13 +404,11 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         }
 
         @Override
-        public GenericRequestBuilder getPreloadRequestBuilder(Post item) {
-            return glide.load(item.getPostDetails().getPreviewImage());
-        }
-
-        @Override
-        public int[] getPreloadSize(Post item, int adapterPosition, int perItemPosition) {
-            return stolenSize;
+        public RequestBuilder<Drawable> getPreloadRequestBuilder(Post post) {
+            if (post.getPostDetails().getPreviewImage() != null && post.getPostDetails().getPreviewImage().isEmpty()) {
+                return preloadRequest;
+            }
+            return preloadRequest.load(post.getPostDetails().getPreviewImage());
         }
 
         public class PostViewHolder extends RecyclerView.ViewHolder {
@@ -461,17 +476,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                             image.setVisibility(GONE);
                         } else {
                             image.setVisibility(View.VISIBLE);
-                            Target<?> target = glide.load(postDetails.getPreviewImage()).into(image);
-                            if (stolenSize == null) {
-                                target.getSize(new SizeReadyCallback() {
-                                    @Override
-                                    public void onSizeReady(int width, int height) {
-                                        if (0 < width && 0 < height) {
-                                            stolenSize = new int[]{width, height};
-                                        }
-                                    }
-                                });
-                            }
+                            preloadRequest.load(postDetails.getPreviewImage()).into(image);
                         }
 
                 }

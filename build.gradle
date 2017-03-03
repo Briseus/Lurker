@@ -6,7 +6,7 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0-rc1'
+        classpath 'com.android.tools.build:gradle:2.3.0'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -16,6 +16,10 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven {
+            name 'glide-snapshot'
+            url 'http://oss.sonatype.org/content/repositories/snapshots'
+        }
     }
 }
 
@@ -44,5 +48,5 @@ ext {
     rulesVersion = '0.5'
     espressoVersion = '2.2.2'
     glidePreReleaseVersion ='4.0.0-SNAPSHOT'
-    glidePreReleasOkHttpVersion = '2.0.0-SNAPSHOT'
+    glidePreReleasIntegrationVersion = '2.0.0-SNAPSHOT@aar'
 }

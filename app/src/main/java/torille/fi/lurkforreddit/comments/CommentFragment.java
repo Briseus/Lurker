@@ -33,6 +33,9 @@ import torille.fi.lurkforreddit.data.CommentChild;
 import torille.fi.lurkforreddit.data.Post;
 import torille.fi.lurkforreddit.utils.TextHelper;
 
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link CommentFragment#newInstance} factory method to
@@ -298,7 +301,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 if (mClickedPost.getPostDetails().getPreviewImage().isEmpty()) {
                     mImage.setVisibility(View.GONE);
                 } else {
-                    Glide.with(mContext).load(mClickedPost.getPostDetails().getPreviewImage()).centerCrop().crossFade().into(mImage);
+                    Glide.with(mContext).load(mClickedPost.getPostDetails().getPreviewImage()).transition(withCrossFade()).apply(centerCropTransform(mContext)).into(mImage);
                 }
                 if (mClickedPost.getPostDetails().getSelftextHtml() != null && !mClickedPost.getPostDetails().getSelftextHtml().isEmpty()) {
                     mSelftext.setText(TextHelper.trimTrailingWhitespace(TextHelper.fromHtml(mClickedPost.getPostDetails().getSelftextHtml())));
