@@ -42,13 +42,13 @@ public class SubredditPresenter implements SubredditContract.UserActionsListener
     }
 
     @Override
-    public void loadPosts(@Nullable String subredditUrl) {
+    public void loadPosts(String subredditUrl) {
         mSubredditsView.setProgressIndicator(true);
 
         // The network request might be handled in a different thread so make sure Espresso knows
         // that the appm is busy until the response is handled.
         EspressoIdlingResource.increment(); // App is busy until further notice
-        //TODO check if null and load frontpage
+
         mRedditRepository.getSubredditPosts(subredditUrl, new RedditRepository.LoadSubredditPostsCallback() {
             @Override
             public void onPostsLoaded(List<Post> posts, String nextpage) {

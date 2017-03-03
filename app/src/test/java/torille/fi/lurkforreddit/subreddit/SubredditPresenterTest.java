@@ -132,4 +132,10 @@ public class SubredditPresenterTest {
         mSubredditPresenter.openCustomTabs(POSTDETAILS_1_WORLDNEWS.getUrl());
         verify(mSubredditView).showCustomTabsUI(any(String.class));
     }
+
+    @Test
+    public void clickOnComments_ShowCommentsUi() {
+        mSubredditPresenter.openComments(POST_1_WORLDNEWS);
+        verify(mSubredditView).showCommentsUI(any(Post.class));
+    }
 }
