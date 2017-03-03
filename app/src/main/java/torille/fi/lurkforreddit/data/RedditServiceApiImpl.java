@@ -34,53 +34,51 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     @Override
     public void getSubreddits(final SubredditsServiceCallback<List<SubredditChildren>> callback) {
         String token = SharedPreferencesHelper.getToken();
-        if (token == null) {
-            authenticateApp(callback);
+
+        final RedditClient redditClient = RedditService.createService(RedditClient.class, token);
+        Call<SubredditListing> call;
+        if (SharedPreferencesHelper.isLoggedIn()) {
+            Log.d("LoginStatus", "Was logged in, getting personal subreddits");
+            call = redditClient.getMySubreddits();
         } else {
-            final RedditClient redditClient = RedditService.createService(RedditClient.class, token);
-            Call<SubredditListing> call;
-            if (SharedPreferencesHelper.isLoggedIn()) {
-                Log.d("LoginStatus", "Was logged in, getting personal subreddits");
-                call = redditClient.getMySubreddits();
-            } else {
-                Log.d("LoginStatus", "Was not logged in, getting default subreddits");
-                call = redditClient.getDefaultSubreddits(100);
+            Log.d("LoginStatus", "Was not logged in, getting default subreddits");
+            call = redditClient.getDefaultSubreddits(100);
+        }
+
+        call.enqueue(new Callback<SubredditListing>() {
+            @Override
+            public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
+
+                if (response.isSuccessful() && response.body().getData().getChildren() != null) {
+                    Log.d("Subreddits", response.body().toString());
+                    List<SubredditChildren> subreddits = response.body().getData().getChildren();
+                    Log.d("Subreddits", "Got " + subreddits.size() + " Subreddits");
+                    // sort subreddits by name before callback
+                    Collections.sort(subreddits, new Comparator<SubredditChildren>() {
+                        @Override
+                        public int compare(SubredditChildren o1, SubredditChildren o2) {
+                            return o1.getSubreddit().getDisplay_name().compareToIgnoreCase(o2.getSubreddit().getDisplay_name());
+                        }
+                    });
+                    callback.onLoaded(subreddits);
+
+                }
             }
 
-            call.enqueue(new Callback<SubredditListing>() {
-                @Override
-                public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
 
-                    if (response.isSuccessful() && response.body().getData().getChildren() != null) {
-                        Log.d("Subreddits", response.body().toString());
-                        List<SubredditChildren> subreddits = response.body().getData().getChildren();
-                        Log.d("Subreddits", "Got " + subreddits.size() + " Subreddits");
-                        // sort subreddits by name before callback
-                        Collections.sort(subreddits, new Comparator<SubredditChildren>() {
-                            @Override
-                            public int compare(SubredditChildren o1, SubredditChildren o2) {
-                                return o1.getSubreddit().getDisplay_name().compareToIgnoreCase(o2.getSubreddit().getDisplay_name());
-                            }
-                        });
-                        callback.onLoaded(subreddits);
+            @Override
+            public void onFailure(Call<SubredditListing> call, Throwable t) {
+                Log.e("Subreddits", "Failed to get subreddits " + t.toString());
+            }
+        });
 
-                    }
-                }
-
-
-                @Override
-                public void onFailure(Call<SubredditListing> call, Throwable t) {
-                    Log.e("Subreddits", "Failed to get subreddits " + t.toString());
-                }
-            });
-        }
     }
 
     @Override
     public void getSubredditPosts(String subredditId, final PostsServiceCallback<List<Post>, String> callback) {
         String token = SharedPreferencesHelper.getToken();
         if (token == null) {
-            Log.d("PostFragment", "Token was null. Going to refresh");
+            authenticateApp(subredditId, callback);
         } else {
             final RedditClient client = RedditService.createService(RedditClient.class, token);
             Call<PostListing> call = client.getSubreddit(subredditId);
@@ -251,7 +249,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
     }
 
-    private void authenticateApp(final SubredditsServiceCallback<List<SubredditChildren>> callback) {
+    private void authenticateApp(final String subredditId, final PostsServiceCallback<List<Post>, String> callback) {
         Call<RedditToken> call = NetworkHelper.createAuthCall();
         call.enqueue(new Callback<RedditToken>() {
             @Override
@@ -259,7 +257,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                 if (response.isSuccessful()) {
                     Log.d("Jee", "Got new token " + response.body().getAccess_token());
                     SharedPreferencesHelper.setToken(response.body().getAccess_token());
-                    getSubreddits(callback);
+                    getSubredditPosts(subredditId, callback);
                 }
             }
 
