@@ -6,7 +6,7 @@
 
     <string name="action_settings">Settings</string>
 
-    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="title_activity_fullscreen"> </string>
     <string name="title_activity_comments">Comments</string>
 
     <string name="search_hint">Search Reddit…</string>
@@ -20,6 +20,8 @@
     <string name="navigation_bottom_search">Search</string>
     <string name="navigation_bottom_subreddits">Subreddits</string>
     <string name="navigation_bottom_multireddits">Multireddits</string>
+
+    <string name="fullscreen_image">Image</string>
 
 
 </resources>

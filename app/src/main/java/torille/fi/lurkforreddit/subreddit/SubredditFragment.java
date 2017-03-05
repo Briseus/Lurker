@@ -48,6 +48,7 @@ import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper;
 import torille.fi.lurkforreddit.data.Post;
 import torille.fi.lurkforreddit.data.PostDetails;
 import torille.fi.lurkforreddit.data.Subreddit;
+import torille.fi.lurkforreddit.media.FullscreenActivity;
 import torille.fi.lurkforreddit.utils.DisplayHelper;
 import torille.fi.lurkforreddit.utils.MediaHelper;
 import torille.fi.lurkforreddit.utils.TextHelper;
@@ -134,7 +135,13 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         ViewPreloadSizeProvider<Post> preloadSizeProvider = new ViewPreloadSizeProvider<>();
         RequestBuilder<Drawable> preloadRequest = Glide.with(getActivity()).asDrawable().transition(withCrossFade()).apply(centerCropTransform(getActivity()));
 
-        mListAdapter = new PostsAdapter(new ArrayList<Post>(0), mBrowserListener, mOpenCommentsListener, preloadRequest, preloadSizeProvider, ContextCompat.getColor(getContext(), R.color.colorAccent));
+        mListAdapter = new PostsAdapter(new ArrayList<Post>(0),
+                mBrowserListener,
+                mOpenCommentsListener,
+                mOpenMediaListener,
+                preloadRequest,
+                preloadSizeProvider,
+                ContextCompat.getColor(getContext(), R.color.colorAccent));
 
         RecyclerViewPreloader<Post> preloader = new RecyclerViewPreloader<>(Glide.with(getActivity()), mListAdapter, preloadSizeProvider, 5);
         recyclerView.addOnScrollListener(preloader);
@@ -211,6 +218,12 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             mActionsListener.openComments(clickedPost);
         }
     };
+    openMediaListener mOpenMediaListener = new openMediaListener() {
+        @Override
+        public void onClick(Post post) {
+            mActionsListener.openMedia(post);
+        }
+    };
 
     @Override
     public void setProgressIndicator(final boolean active) {
@@ -263,7 +276,17 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     }
 
     @Override
-    public void showMedia(String url, String domain) {
+    public void showMedia(Post post) {
+        if (MediaHelper.isContentMedia(post) || MediaHelper.checkDomainForMedia(post)) {
+            Intent intent = new Intent(getContext(), FullscreenActivity.class);
+            intent.putExtra(FullscreenActivity.EXTRA_POST, Parcels.wrap(post));
+            startActivity(intent);
+        } else if (MediaHelper.launchCustomActivity(post)) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(post.getPostDetails().getUrl()));
+            startActivity(intent);
+        } else {
+            showCustomTabsUI(post.getPostDetails().getUrl());
+        }
 
     }
 
@@ -280,15 +303,17 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         private List<Post> mPosts;
         private openBrowserListener mBrowserListener;
         private openCommentsListener mCommentsListener;
+        private openMediaListener mMediaListener;
         private int mDefaultAccentColor;
         private RequestBuilder<Drawable> preloadRequest;
         private ViewPreloadSizeProvider<Post> preloadSizeProvider;
 
         //TODO Add click listeners
-        public PostsAdapter(List<Post> posts, openBrowserListener listener, openCommentsListener commentsListener, RequestBuilder<Drawable> glide, ViewPreloadSizeProvider<Post> preloadSizeProvider, int color) {
+        public PostsAdapter(List<Post> posts, openBrowserListener listener, openCommentsListener commentsListener, openMediaListener mOpenMediaListener, RequestBuilder<Drawable> glide, ViewPreloadSizeProvider<Post> preloadSizeProvider, int color) {
             this.mPosts = posts;
             this.mBrowserListener = listener;
             this.mCommentsListener = commentsListener;
+            this.mMediaListener = mOpenMediaListener;
             this.preloadRequest = glide;
             this.preloadSizeProvider = preloadSizeProvider;
             this.mDefaultAccentColor = color;
@@ -431,6 +456,12 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 comments = (Button) postView.findViewById(R.id.post_messages);
                 openBrowser = (ImageButton) postView.findViewById(R.id.post_open_browser);
                 image = (ImageView) postView.findViewById(R.id.post_image);
+                image.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mMediaListener.onClick(getItem(getAdapterPosition()));
+                    }
+                });
                 openBrowser.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -500,5 +531,9 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     public interface openCommentsListener {
         void onClick(Post clickedPost);
+    }
+
+    public interface openMediaListener {
+        void onClick(Post post);
     }
 }

@@ -1,8 +1,6 @@
 package torille.fi.lurkforreddit.subreddit;
 
-import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.util.List;
 
@@ -26,7 +24,7 @@ public interface SubredditContract {
 
         void showCustomTabsUI(String url);
 
-        void showMedia(String url, String domain);
+        void showMedia(Post post);
 
         void showCommentsUI(Post clickedPost);
     }
@@ -37,9 +35,9 @@ public interface SubredditContract {
 
         void openCustomTabs(@NonNull String url);
 
-        void openMedia(@NonNull String url, @NonNull String domain);
+        void openMedia(@NonNull Post post);
 
-        void loadPosts(@Nullable String subredditUrl);
+        void loadPosts(@NonNull String subredditUrl);
 
         void loadMorePosts(@NonNull String subredditUrl, @NonNull String nextpage);
     }

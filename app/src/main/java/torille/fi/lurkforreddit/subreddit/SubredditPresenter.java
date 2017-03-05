@@ -37,8 +37,8 @@ public class SubredditPresenter implements SubredditContract.UserActionsListener
     }
 
     @Override
-    public void openMedia(@NonNull String url, @NonNull String domain) {
-
+    public void openMedia(@NonNull Post post) {
+        mSubredditsView.showMedia(post);
     }
 
     @Override
