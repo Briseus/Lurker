@@ -13,8 +13,6 @@ public interface FullscreenContract {
     interface View {
         void showImage(String url);
 
-        void showGif(String url);
-
         void showVideo(String url);
 
         void showGfycatVideo(String url);

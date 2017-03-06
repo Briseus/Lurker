@@ -1,6 +1,5 @@
 package torille.fi.lurkforreddit.media;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -16,14 +15,12 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
@@ -33,6 +30,8 @@ import java.io.IOException;
 
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.Post;
+import uk.co.senab.photoview.PhotoView;
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 import static android.view.View.GONE;
 
@@ -44,7 +43,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
     public static final String EXTRA_POST = "post";
 
-    private ImageView mImageView;
+    private PhotoView mImageView;
     private SurfaceView mVideoView;
     private ProgressBar mProgressBar;
     private MediaPlayer mMediaPlayer;
@@ -109,23 +108,9 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_fullscreen, container, false);
-        mImageView = (ImageView) root.findViewById(R.id.fullscreen_image);
+        mImageView = (PhotoView) root.findViewById(R.id.fullscreen_image);
         mVideoView = (SurfaceView) root.findViewById(R.id.fullscreen_video);
         mView = root;
-        /*mVideoView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (mMediaController != null) {
-                    *//**
-         * the MediaController will hide after 3 seconds - tap the screen to
-         * make it appear again
-         *//*
-                    mMediaController.show();
-
-                }
-                return false;
-            }
-        });*/
         mProgressBar = (ProgressBar) root.findViewById(R.id.progressBarHorizontal);
 
         return root;
@@ -140,6 +125,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     @Override
     public void showImage(String url) {
         mImageView.setVisibility(View.INVISIBLE);
+        final PhotoViewAttacher attacher = new PhotoViewAttacher(mImageView);
         Glide.with(getActivity())
                 .asDrawable()
                 .load(url)
@@ -154,28 +140,8 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                         Log.d("fullscreen", "image ready");
                         mProgressBar.setVisibility(View.GONE);
                         mImageView.setVisibility(View.VISIBLE);
+                        attacher.update();
                         return false;
-                    }
-                })
-                .into(mImageView);
-    }
-
-    @Override
-    public void showGif(String url) {
-        Glide.with(getActivity())
-                .asGif()
-                .load(url)
-                .listener(new RequestListener<GifDrawable>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<GifDrawable> target, boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
-                        mProgressBar.setVisibility(View.GONE);
-                        mImageView.setVisibility(View.VISIBLE);
-                        return true;
                     }
                 })
                 .into(mImageView);
