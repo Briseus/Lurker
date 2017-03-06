@@ -5,6 +5,6 @@
     <item
         android:id="@+id/action_login"
         android:orderInCategory="200"
-        android:title="Log in"
+        android:title="@string/menu_item_login"
         app:showAsAction="never" />
 </menu>

@@ -39,10 +39,10 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
 
     private static final String STATE = NetworkHelper.nextStateId();
     private static final String REDIRECT_URI = "lurk://redirecturi";
-    private String CLIENT_ID;
     private static final String RESPONSE_TYPE = "code";
     private static final String DURATION = "permanent";
     private static final String SCOPE = "identity,mysubreddits,read,account";
+    private String CLIENT_ID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +94,18 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
         checkIntent(getIntent());
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_login);
+        if (SharedPreferencesHelper.isLoggedIn()) {
+            item.setTitle(R.string.menu_item_login_logout);
+        } else {
+            item.setTitle(R.string.menu_item_login);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     private void checkIntent(@Nullable Intent intent) {
         if (intent != null) {
             Uri uri = getIntent().getData();
@@ -132,9 +144,10 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
                     SharedPreferencesHelper.setToken(response.body().getAccess_token());
                     SharedPreferencesHelper.setRefreshToken(response.body().getRefresh_token());
                     SharedPreferencesHelper.loggedIn(true);
-                    Toast.makeText(SubredditsActivity.this, "Logged in successfully!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(SubredditsActivity.this, R.string.toast_login_success, Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(SubredditsActivity.this, "Failed to log in" + response.errorBody(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(SubredditsActivity.this, R.string.toast_login_failed + "" + response.errorBody(), Toast.LENGTH_LONG).show();
+
                 }
             }
 
@@ -163,11 +176,22 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
 
         switch (item.getItemId()) {
             case R.id.action_login:
-                logIn();
+                if (SharedPreferencesHelper.isLoggedIn()) {
+                    logOut();
+                } else {
+                    logIn();
+                }
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void logOut() {
+        SharedPreferencesHelper.loggedIn(false);
+        SharedPreferencesHelper.setToken(null);
+        SharedPreferencesHelper.setRefreshToken(null);
+        Toast.makeText(this, R.string.toast_logout_success, Toast.LENGTH_SHORT).show();
     }
 
     private void logIn() {
