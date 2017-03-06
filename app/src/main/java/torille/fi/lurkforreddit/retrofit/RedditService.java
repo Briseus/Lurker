@@ -1,5 +1,6 @@
 package torille.fi.lurkforreddit.retrofit;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.IOException;
@@ -21,44 +22,38 @@ import torille.fi.lurkforreddit.utils.NetworkHelper;
  */
 
 public class RedditService {
-    public static final String API_BASE_URL = "https://oauth.reddit.com/";
 
-    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+    private static final String API_BASE_URL = "https://oauth.reddit.com/";
+    private static RedditService instance;
+    private RedditClient redditClient;
+    private static String TOKEN;
 
-    private static Retrofit.Builder builder =
-            new Retrofit.Builder()
-                    .baseUrl(API_BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create());
-
-    public static <S> S createService(Class<S> serviceClass, final String token) {
-        if (token != null) {
-
-            httpClient.addNetworkInterceptor(new Interceptor() {
-                @Override
-                public Response intercept(Chain chain) throws IOException {
-
-                    Request original = chain.request();
-                    HttpUrl url = original.url().newBuilder().addQueryParameter("raw_json", "1").build();
-                    original = original.newBuilder().url(url).build();
-
-                    if (original.header("Authorization") != null) {
-                        return chain.proceed(original);
-                    }
-                    Request.Builder requestBuilder = original.newBuilder()
-                            .header("Authorization", "bearer " + token)
-                            .method(original.method(), original.body());
-
-                    Request request = requestBuilder.build();
-                    return chain.proceed(request);
-                }
-            });
-        }
+    private RedditService() {
 
         final HttpLoggingInterceptor logger = new HttpLoggingInterceptor();
         logger.setLevel(HttpLoggingInterceptor.Level.HEADERS);
 
-        OkHttpClient client = httpClient
+        final OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(logger)
+                .addNetworkInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+
+                        Request original = chain.request();
+                        HttpUrl url = original.url().newBuilder().addQueryParameter("raw_json", "1").build();
+                        original = original.newBuilder().url(url).build();
+
+                        if (original.header("Authorization") != null) {
+                            return chain.proceed(original);
+                        }
+                        Request.Builder requestBuilder = original.newBuilder()
+                                .header("Authorization", "bearer " + TOKEN)
+                                .method(original.method(), original.body());
+
+                        Request request = requestBuilder.build();
+                        return chain.proceed(request);
+                    }
+                })
                 .authenticator(new Authenticator() {
                     @Override
                     public Request authenticate(Route route, Response response) throws IOException {
@@ -77,9 +72,21 @@ public class RedditService {
                     }
                 }).build();
 
-        Retrofit retrofit = builder.client(client).build();
+        final Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
 
-        return retrofit.create(serviceClass);
+        redditClient = retrofit.create(RedditClient.class);
+    }
+
+    public static RedditClient getInstance(@NonNull String token) {
+        TOKEN = token;
+        if (instance == null) {
+            instance = new RedditService();
+        }
+        return instance.redditClient;
     }
 
     private static int responseCount(Response response) {
@@ -89,4 +96,5 @@ public class RedditService {
         }
         return result;
     }
+
 }

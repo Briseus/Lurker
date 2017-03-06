@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -27,12 +26,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.integration.okhttp3.OkHttpStreamFetcher;
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
 import org.parceler.Parcels;
@@ -136,9 +130,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         RequestBuilder<Drawable> preloadRequest = Glide.with(getActivity()).asDrawable().transition(withCrossFade()).apply(centerCropTransform(getActivity()));
 
         mListAdapter = new PostsAdapter(new ArrayList<Post>(0),
-                mBrowserListener,
-                mOpenCommentsListener,
-                mOpenMediaListener,
+                mClickListener,
                 preloadRequest,
                 preloadSizeProvider,
                 ContextCompat.getColor(getContext(), R.color.colorAccent));
@@ -206,21 +198,19 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     /**
      * Listeners for clicks in the Recyclerview
      */
-    openBrowserListener mBrowserListener = new openBrowserListener() {
+    postClickListener mClickListener = new postClickListener() {
         @Override
         public void onButtonClick(String url) {
             mActionsListener.openCustomTabs(url);
         }
-    };
-    openCommentsListener mOpenCommentsListener = new openCommentsListener() {
+
         @Override
-        public void onClick(Post clickedPost) {
+        public void onPostClick(Post clickedPost) {
             mActionsListener.openComments(clickedPost);
         }
-    };
-    openMediaListener mOpenMediaListener = new openMediaListener() {
+
         @Override
-        public void onClick(Post post) {
+        public void onMediaClick(Post post) {
             mActionsListener.openMedia(post);
         }
     };
@@ -301,19 +291,15 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         private final static int VIEW_ITEM = 1;
         private final static int VIEW_PROGRESS = 0;
         private List<Post> mPosts;
-        private openBrowserListener mBrowserListener;
-        private openCommentsListener mCommentsListener;
-        private openMediaListener mMediaListener;
+        private postClickListener mClicklistener;
         private int mDefaultAccentColor;
         private RequestBuilder<Drawable> preloadRequest;
         private ViewPreloadSizeProvider<Post> preloadSizeProvider;
 
         //TODO Add click listeners
-        public PostsAdapter(List<Post> posts, openBrowserListener listener, openCommentsListener commentsListener, openMediaListener mOpenMediaListener, RequestBuilder<Drawable> glide, ViewPreloadSizeProvider<Post> preloadSizeProvider, int color) {
+        public PostsAdapter(List<Post> posts, postClickListener listener, RequestBuilder<Drawable> glide, ViewPreloadSizeProvider<Post> preloadSizeProvider, int color) {
             this.mPosts = posts;
-            this.mBrowserListener = listener;
-            this.mCommentsListener = commentsListener;
-            this.mMediaListener = mOpenMediaListener;
+            this.mClicklistener = listener;
             this.preloadRequest = glide;
             this.preloadSizeProvider = preloadSizeProvider;
             this.mDefaultAccentColor = color;
@@ -459,19 +445,19 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mMediaListener.onClick(getItem(getAdapterPosition()));
+                        mClicklistener.onMediaClick(getItem(getAdapterPosition()));
                     }
                 });
                 openBrowser.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mBrowserListener.onButtonClick(getItem(getAdapterPosition()).getPostDetails().getUrl());
+                        mClicklistener.onButtonClick(getItem(getAdapterPosition()).getPostDetails().getUrl());
                     }
                 });
                 comments.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mCommentsListener.onClick(getItem(getAdapterPosition()));
+                        mClicklistener.onPostClick(getItem(getAdapterPosition()));
                     }
                 });
                 score.getBackground().setTint(mDefaultAccentColor);
@@ -525,15 +511,13 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         }
     }
 
-    public interface openBrowserListener {
+    interface postClickListener {
+
         void onButtonClick(String url);
-    }
 
-    public interface openCommentsListener {
-        void onClick(Post clickedPost);
-    }
+        void onPostClick(Post clickedPost);
 
-    public interface openMediaListener {
-        void onClick(Post post);
+        void onMediaClick(Post post);
+
     }
 }

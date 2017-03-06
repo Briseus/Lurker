@@ -35,14 +35,13 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     public void getSubreddits(final SubredditsServiceCallback<List<SubredditChildren>> callback) {
         String token = SharedPreferencesHelper.getToken();
 
-        final RedditClient redditClient = RedditService.createService(RedditClient.class, token);
         Call<SubredditListing> call;
         if (SharedPreferencesHelper.isLoggedIn()) {
             Log.d("LoginStatus", "Was logged in, getting personal subreddits");
-            call = redditClient.getMySubreddits();
+            call = RedditService.getInstance(token).getMySubreddits();
         } else {
             Log.d("LoginStatus", "Was not logged in, getting default subreddits");
-            call = redditClient.getDefaultSubreddits(100);
+            call = RedditService.getInstance(token).getDefaultSubreddits(100);
         }
 
         call.enqueue(new Callback<SubredditListing>() {
@@ -80,8 +79,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
         if (token == null) {
             authenticateApp(subredditId, callback);
         } else {
-            final RedditClient client = RedditService.createService(RedditClient.class, token);
-            Call<PostListing> call = client.getSubreddit(subredditId);
+            Call<PostListing> call = RedditService.getInstance(token).getSubreddit(subredditId);
             call.enqueue(new Callback<PostListing>() {
                 @Override
                 public void onResponse(Call<PostListing> call, Response<PostListing> response) {
@@ -109,8 +107,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     @Override
     public void getMorePosts(String subredditUrl, String nextpageId, final PostsServiceCallback<List<Post>, String> callback) {
         String token = SharedPreferencesHelper.getToken();
-        final RedditClient client = RedditService.createService(RedditClient.class, token);
-        Call<PostListing> call = client.getSubredditNextPage(subredditUrl, nextpageId);
+        Call<PostListing> call = RedditService.getInstance(token).getSubredditNextPage(subredditUrl, nextpageId);
         call.enqueue(new Callback<PostListing>() {
             @Override
             public void onResponse(Call<PostListing> call, Response<PostListing> response) {
@@ -164,8 +161,8 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     @Override
     public void getPostComments(String permaLinkUrl, final CommentsServiceCallback<List<CommentChild>> callback) {
         String token = SharedPreferencesHelper.getToken();
-        final RedditClient client = RedditService.createService(RedditClient.class, token);
-        Call<ResponseBody> call = client.getComments(permaLinkUrl);
+
+        Call<ResponseBody> call = RedditService.getInstance(token).getComments(permaLinkUrl);
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -200,8 +197,8 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     @Override
     public void getMorePostComments(final CommentChild parentComment, String linkId, final int position, final CommentsServiceCallback<List<CommentChild>> callback) {
         String token = SharedPreferencesHelper.getToken();
-        final RedditClient client = RedditService.createService(RedditClient.class, token);
-        Call<ResponseBody> call = client.getMoreComments(linkId, TextUtils.join(",", parentComment.getData().getChildren()), "json");
+
+        Call<ResponseBody> call = RedditService.getInstance(token).getMoreComments(linkId, TextUtils.join(",", parentComment.getData().getChildren()), "json");
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
