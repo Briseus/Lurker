@@ -23,6 +23,10 @@ public interface RedditClient {
 
     @FormUrlEncoded
     @POST("access_token")
+    Call<RedditToken> getUserAuthToken(@Field("grant_type") String grant_type, @Field("code") String code, @Field("redirect_uri") String redirectUri);
+
+    @FormUrlEncoded
+    @POST("access_token")
     Call<RedditToken> refreshUserToken(@Field("grant_type") String grant_type, @Field("refresh_token") String token);
 
     @GET("subreddits/mine/subscriber")

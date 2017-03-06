@@ -38,8 +38,6 @@ public class FullscreenActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-
-
         if (null == savedInstanceState) {
             Post post = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_POST));
             Log.d("Fullscreen", "activity got " + post.toString());
@@ -50,7 +48,6 @@ public class FullscreenActivity extends AppCompatActivity {
         // while interacting with the UI.
         //findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
     }
-
 
 
     @Override

@@ -25,7 +25,7 @@ final public class NetworkHelper {
     }
 
     public static String nextStateId() {
-        final SecureRandom random = new SecureRandom();
+        SecureRandom random = new SecureRandom();
         return new BigInteger(130, random).toString(32);
     }
 
@@ -87,6 +87,8 @@ final public class NetworkHelper {
         final RedditClient redditClient = RedditAuthService.createService(RedditClient.class, client_id, "");
         return redditClient.getAuthToken(grant_type, UUID);
     }
+
+
 
 
 }

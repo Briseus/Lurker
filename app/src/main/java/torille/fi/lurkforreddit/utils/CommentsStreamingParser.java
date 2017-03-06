@@ -118,9 +118,7 @@ public final class CommentsStreamingParser {
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
-            if (name.equals("modhash")) {
-                modhash = reader.nextString();
-            } else if (name.equals("children") && reader.peek() != JsonToken.NULL) {
+            if (name.equals("children") && reader.peek() != JsonToken.NULL) {
                 commentChildren = readCommentChildren(reader);
             } else if (name.equals("after") && reader.peek() != JsonToken.NULL) {
                 after = reader.nextString();
