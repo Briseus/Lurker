@@ -10,18 +10,14 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.parceler.Parcels;
 
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.Subreddit;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
-
-import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 
 public class SubredditActivity extends AppCompatActivity {
 
@@ -53,22 +49,22 @@ public class SubredditActivity extends AppCompatActivity {
     }
 
     private void loadBannerImage(Subreddit subreddit) {
-        ImageView banner = (ImageView) findViewById(R.id.banner);
+        SimpleDraweeView banner = (SimpleDraweeView) findViewById(R.id.banner);
         CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsingToolbar);
         boolean hasBannerSource = (subreddit.getBanner() != null && !subreddit.getBanner().isEmpty());
         boolean hasCustomColor = (subreddit.getKey_color() != null && !subreddit.getKey_color().isEmpty());
 
-        if ( hasBannerSource && hasCustomColor) {
-            int color = Color.parseColor(subreddit.getKey_color());
-            collapsingToolbarLayout.setContentScrimColor(color);
-            Glide.with(this).load(subreddit.getBanner()).transition(withCrossFade()).apply(centerCropTransform(this)).into(banner);
-        } else if (hasBannerSource) {
-            Glide.with(this).load(subreddit.getBanner()).transition(withCrossFade()).apply(centerCropTransform(this)).into(banner);
-        } else if (hasCustomColor) {
+        if (hasBannerSource) {
+            banner.setImageURI(subreddit.getBanner());
+        }
+
+        if (hasCustomColor) {
             int color = Color.parseColor(subreddit.getKey_color());
             banner.setBackgroundColor(color);
             collapsingToolbarLayout.setContentScrimColor(color);
         }
+
+
     }
 
     private void initFragment(Fragment subredditFragment) {

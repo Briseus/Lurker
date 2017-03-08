@@ -3,7 +3,6 @@ package torille.fi.lurkforreddit.subreddit;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,21 +17,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
-import com.bumptech.glide.util.ViewPreloadSizeProvider;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.interfaces.DraweeController;
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.request.ImageRequest;
 
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import torille.fi.lurkforreddit.Injection;
@@ -48,8 +45,6 @@ import torille.fi.lurkforreddit.utils.MediaHelper;
 import torille.fi.lurkforreddit.utils.TextHelper;
 
 import static android.view.View.GONE;
-import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -68,6 +63,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     private boolean refreshing;
     private String mNextPageId;
     private CustomTabActivityHelper mCustomTabActivityHelper;
+    private ImagePipeline mImagePipeline;
 
     /**
      * Use this factory method to create a new instance of
@@ -89,7 +85,11 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         super.onCreate(savedInstanceState);
         mActionsListener = new SubredditPresenter(Injection.provideRedditRepository(),
                 this);
+        mListAdapter = new PostsAdapter(new ArrayList<Post>(0),
+                mClickListener,
+                ContextCompat.getColor(getContext(), R.color.colorAccent));
         mCustomTabActivityHelper = new CustomTabActivityHelper();
+        mImagePipeline = Fresco.getImagePipeline();
         DisplayHelper.init(getContext());
 
     }
@@ -102,9 +102,10 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.posts_list);
 
         mLayoutManager = new LinearLayoutManager(getContext());
-        recyclerView.setLayoutManager(mLayoutManager);
+        mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        // TODO Single on scroll listener
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setHasFixedSize(true);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             int pastVisiblesItems, visibleItemCount, totalItemCount;
@@ -125,21 +126,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 }
             }
         });
-
-        ViewPreloadSizeProvider<Post> preloadSizeProvider = new ViewPreloadSizeProvider<>();
-        RequestBuilder<Drawable> preloadRequest = Glide.with(getActivity()).asDrawable().transition(withCrossFade()).apply(centerCropTransform(getActivity()));
-
-        mListAdapter = new PostsAdapter(new ArrayList<Post>(0),
-                mClickListener,
-                preloadRequest,
-                preloadSizeProvider,
-                ContextCompat.getColor(getContext(), R.color.colorAccent));
-
-        RecyclerViewPreloader<Post> preloader = new RecyclerViewPreloader<>(Glide.with(getActivity()), mListAdapter, preloadSizeProvider, 5);
-        recyclerView.addOnScrollListener(preloader);
-
         recyclerView.setAdapter(mListAdapter);
-        recyclerView.setHasFixedSize(true);
 
         // Pull-to-refresh
         SwipeRefreshLayout swipeRefreshLayout =
@@ -234,6 +221,11 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     @Override
     public void showPosts(List<Post> posts, String nextpage) {
+
+        for (Post post : posts) {
+            mImagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(post.getPostDetails().getPreviewImage()), null);
+        }
+
         mListAdapter.addAll(posts);
         mNextPageId = nextpage;
     }
@@ -245,6 +237,11 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     @Override
     public void addMorePosts(List<Post> posts, String nextpage) {
+
+        for (Post post : posts) {
+            mImagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(post.getPostDetails().getPreviewImage()), null);
+        }
+
         mListAdapter.addMorePosts(posts);
         refreshing = false;
         mNextPageId = nextpage;
@@ -287,21 +284,18 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         startActivity(intent);
     }
 
-    private static class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ListPreloader.PreloadModelProvider<Post> {
+    private static class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final static int VIEW_ITEM = 1;
         private final static int VIEW_PROGRESS = 0;
         private List<Post> mPosts;
         private postClickListener mClicklistener;
         private int mDefaultAccentColor;
-        private RequestBuilder<Drawable> preloadRequest;
-        private ViewPreloadSizeProvider<Post> preloadSizeProvider;
+        private DraweeController mDraweeController;
 
         //TODO Add click listeners
-        public PostsAdapter(List<Post> posts, postClickListener listener, RequestBuilder<Drawable> glide, ViewPreloadSizeProvider<Post> preloadSizeProvider, int color) {
+        public PostsAdapter(List<Post> posts, postClickListener listener, int color) {
             this.mPosts = posts;
             this.mClicklistener = listener;
-            this.preloadRequest = glide;
-            this.preloadSizeProvider = preloadSizeProvider;
             this.mDefaultAccentColor = color;
             setHasStableIds(true);
         }
@@ -310,10 +304,8 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             switch (viewType) {
                 case VIEW_ITEM:
-                    PostViewHolder vh = new PostViewHolder(LayoutInflater.from(parent.getContext())
+                    return new PostViewHolder(LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.item_post, parent, false));
-                    preloadSizeProvider.setView(vh.image);
-                    return vh;
                 case VIEW_PROGRESS:
                 default:
                     return new ProgressViewHolder(LayoutInflater.from(parent.getContext())
@@ -405,22 +397,10 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             return mPosts.get(position).getPostDetails().getId().hashCode();
         }
 
-        public Post getItem(int position) {
+        final Post getItem(int position) {
             return mPosts.get(position);
         }
 
-        @Override
-        public List<Post> getPreloadItems(int position) {
-            return Collections.singletonList(getItem(position));
-        }
-
-        @Override
-        public RequestBuilder<Drawable> getPreloadRequestBuilder(Post post) {
-            if (post.getPostDetails().getPreviewImage() != null && post.getPostDetails().getPreviewImage().isEmpty()) {
-                return preloadRequest;
-            }
-            return preloadRequest.load(post.getPostDetails().getPreviewImage());
-        }
 
         public class PostViewHolder extends RecyclerView.ViewHolder {
             final View view;
@@ -430,7 +410,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             final Button score;
             final Button comments;
             final ImageButton openBrowser;
-            final ImageView image;
+            final SimpleDraweeView image;
 
             public PostViewHolder(View postView) {
                 super(postView);
@@ -441,7 +421,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 score = (Button) postView.findViewById(R.id.post_likes);
                 comments = (Button) postView.findViewById(R.id.post_messages);
                 openBrowser = (ImageButton) postView.findViewById(R.id.post_open_browser);
-                image = (ImageView) postView.findViewById(R.id.post_image);
+                image = (SimpleDraweeView) postView.findViewById(R.id.post_image);
                 image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -493,7 +473,12 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                             image.setVisibility(GONE);
                         } else {
                             image.setVisibility(View.VISIBLE);
-                            preloadRequest.load(postDetails.getPreviewImage()).into(image);
+                            mDraweeController = Fresco.newDraweeControllerBuilder()
+                                    .setImageRequest(ImageRequest.fromUri(postDetails.getPreviewImage()))
+                                    .setOldController(image.getController())
+                                    .build();
+                            image.setController(mDraweeController);
+
                         }
 
                 }

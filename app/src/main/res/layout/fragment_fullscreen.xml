@@ -3,9 +3,10 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="-6dp"
     android:background="@color/black_overlay">
 
-    <uk.co.senab.photoview.PhotoView
+    <me.relex.photodraweeview.PhotoDraweeView
         android:id="@+id/fullscreen_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -23,8 +24,7 @@
 
     <include
         layout="@layout/progress_bar_horizontal"
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:visibility="visible" />
 </FrameLayout>

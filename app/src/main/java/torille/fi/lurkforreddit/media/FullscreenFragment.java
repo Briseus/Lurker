@@ -1,7 +1,10 @@
 package torille.fi.lurkforreddit.media;
 
+import android.graphics.Canvas;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -18,20 +21,23 @@ import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
+import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.drawable.ProgressBarDrawable;
+import com.facebook.drawee.drawable.ScalingUtils;
+import com.facebook.drawee.generic.GenericDraweeHierarchy;
+import com.facebook.imagepipeline.image.ImageInfo;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import org.parceler.Parcels;
 
 import java.io.IOException;
 
+import me.relex.photodraweeview.PhotoDraweeView;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.Post;
-import uk.co.senab.photoview.PhotoView;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 import static android.view.View.GONE;
 
@@ -43,7 +49,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
     public static final String EXTRA_POST = "post";
 
-    private PhotoView mImageView;
+    private PhotoDraweeView mImageView;
     private SurfaceView mVideoView;
     private ProgressBar mProgressBar;
     private MediaPlayer mMediaPlayer;
@@ -108,7 +114,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_fullscreen, container, false);
-        mImageView = (PhotoView) root.findViewById(R.id.fullscreen_image);
+        mImageView = (PhotoDraweeView) root.findViewById(R.id.fullscreen_image);
         mVideoView = (SurfaceView) root.findViewById(R.id.fullscreen_video);
         mView = root;
         mProgressBar = (ProgressBar) root.findViewById(R.id.progressBarHorizontal);
@@ -124,33 +130,39 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
     @Override
     public void showImage(String url) {
-        mImageView.setVisibility(View.INVISIBLE);
-        final PhotoViewAttacher attacher = new PhotoViewAttacher(mImageView);
-        Glide.with(getActivity())
-                .asDrawable()
-                .load(url)
-                .listener(new RequestListener<Drawable>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        return false;
-                    }
+        mProgressBar.setVisibility(View.INVISIBLE);
+        mImageView.setVisibility(View.VISIBLE);
 
+        GenericDraweeHierarchy hierarchy = mImageView.getHierarchy();
+        hierarchy.setProgressBarImage(mProgressBar.getProgressDrawable());
+
+        ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
+                .setProgressiveRenderingEnabled(true)
+                .build();
+
+        PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder()
+                .setAutoPlayAnimations(true)
+                .setUri(url)
+                .setImageRequest(request)
+                .setOldController(mImageView.getController())
+                .setControllerListener(new BaseControllerListener<ImageInfo>() {
                     @Override
-                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        Log.d("fullscreen", "image ready");
-                        mProgressBar.setVisibility(View.GONE);
-                        mImageView.setVisibility(View.VISIBLE);
-                        attacher.update();
-                        return false;
+                    public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
+                        super.onFinalImageSet(id, imageInfo, animatable);
+                        if (imageInfo == null || mImageView == null) {
+                            return;
+                        }
+                        removeMarginTop();
+                        mImageView.update(imageInfo.getWidth(), imageInfo.getHeight());
                     }
-                })
-                .into(mImageView);
+                });
+
+        mImageView.setController(controller.build());
     }
 
     @Override
     public void showVideo(final String url) {
         Log.d("Video", "Got url " + url);
-        final SurfaceHolder surfaceHolder = mVideoView.getHolder();
         final FrameLayout.LayoutParams svLayoutParams = new FrameLayout.LayoutParams(0, 0);
         mMediaPlayer = new MediaPlayer();
         mMediaController = new MediaController(getContext());
@@ -161,9 +173,9 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
             public boolean onTouch(View v, MotionEvent event) {
 
                 if (mMediaController != null && mMediaPlayer.isPlaying()) {
-                    /**
-                     * the MediaController will hide after 3 seconds - tap the screen to
-                     * make it appear again
+                    /*
+                      the MediaController will hide after 3 seconds - tap the screen to
+                      make it appear again
                      */
                     mMediaController.show();
 
@@ -172,6 +184,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
             }
         });
         mVideoView.setVisibility(View.VISIBLE);
+        final SurfaceHolder surfaceHolder = mVideoView.getHolder();
         surfaceHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -202,9 +215,18 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                 mMediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
                     @Override
                     public void onBufferingUpdate(MediaPlayer mp, int percent) {
+
                         mBufferPercent = percent;
-                        if (percent > 40 && !mp.isPlaying()) {
-                            Log.d("Video", "Buffering percent over 40! " + percent);
+                        mProgressBar.setIndeterminate(false);
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                            mProgressBar.setProgress(mBufferPercent, true);
+                        } else {
+                            mProgressBar.setProgress(mBufferPercent);
+                        }
+                        if (percent == 100 && !mp.isPlaying()) {
+                            removeMarginTop();
+                            Log.d("Video", "Buffering percent over 40! " + mBufferPercent);
+                            mProgressBar.setProgress(0);
                             mProgressBar.setVisibility(GONE);
                             playMedia();
                         }
@@ -223,26 +245,18 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
             }
 
             private void configureSurfaceForVideo(int videoWidth, int videoHeight) {
-                //Get the width of the screen
 
-                DisplayMetrics dm = getActivity().getResources().getDisplayMetrics();
-                //Get the width of the screen
-                /*int screenWidth = dm.widthPixels;
-                int screenHeight = dm.heightPixels ;*/
                 int screenHeight = mView.getHeight();
-                int screenWidth = mView.getRootView().getWidth();
-                Log.d("Video", "Height " + screenHeight + " width " + screenHeight);
-                Log.d("Video", "mp h " + screenHeight + " width " + screenHeight);
+                int screenWidth = mView.getWidth();
 
                 double aspectRatio = ((double) videoHeight / (double) videoWidth);
-                Log.d("Video ", " AP " + aspectRatio);
+
                 if (screenHeight > (int) (screenWidth * aspectRatio)) {
                     // limited by narrow width; restrict height
                     svLayoutParams.width = screenWidth;
                     svLayoutParams.height = (screenWidth * videoHeight) / videoWidth;
                 } else {
                     // limited by short height; restrict width
-
                     svLayoutParams.width = (screenHeight * videoWidth) / videoHeight;
                     svLayoutParams.height = screenHeight;
                 }
@@ -257,37 +271,6 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                 });
 
             }
-            /*private void configureSurfaceForVideo(final MediaPlayer mp, int videoWidth, int videoHeight) {
-                final DisplayMetrics dm = getActivity().getResources().getDisplayMetrics();
-                //Get the width of the screen
-                final int screenWidth = dm.widthPixels;
-
-                final float aspectRatio = ((float) videoWidth / (float) videoHeight);
-                Log.d("Video ", " AP " + aspectRatio);
-
-                if (aspectRatio >= 1) {
-                    //Set the width of the SurfaceView to the width of the screen
-                    svLayoutParams.width = screenWidth;
-                    //Set the height of the SurfaceView to match the aspect ratio of the video
-                    //be sure to cast these as floats otherwise the calculation will likely be 0
-                    svLayoutParams.height = (int) (((float) videoHeight / (float) videoWidth) * dm.widthPixels);
-                    Log.d("Video", "Height is " + svLayoutParams.height);
-                } else {
-                    svLayoutParams.width = (int) (((float) videoWidth / (float) videoHeight) * dm.heightPixels);
-                    svLayoutParams.height = mVideoView.getHeight();
-                }
-
-                svLayoutParams.gravity = Gravity.CENTER;
-
-                mVideoView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mVideoView.setLayoutParams(svLayoutParams);
-                    }
-                });
-
-            }*/
-
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -296,9 +279,14 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-
+                Log.d("Video", "Surface destroyed");
             }
         });
+    }
+
+    private void removeMarginTop() {
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mView.getLayoutParams();
+        params.setMargins(0, 0, 0, 0);
     }
 
     @Override

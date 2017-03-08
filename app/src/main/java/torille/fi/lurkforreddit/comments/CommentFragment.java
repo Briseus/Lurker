@@ -14,12 +14,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.parceler.Parcels;
 
@@ -32,9 +30,6 @@ import torille.fi.lurkforreddit.data.Comment;
 import torille.fi.lurkforreddit.data.CommentChild;
 import torille.fi.lurkforreddit.data.Post;
 import torille.fi.lurkforreddit.utils.TextHelper;
-
-import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -280,7 +275,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             final TextView mAuthor;
             final TextView mSelftext;
             final TextView mTitle;
-            final ImageView mImage;
+            final SimpleDraweeView mImage;
             final TextView mScoreButton;
 
             PostViewHolder(View view) {
@@ -288,7 +283,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 mAuthor = (TextView) view.findViewById(R.id.comment_post_author);
                 mSelftext = (TextView) view.findViewById(R.id.comment_post_selftext);
                 mTitle = (TextView) view.findViewById(R.id.comment_post_title);
-                mImage = (ImageView) view.findViewById(R.id.comment_post_image);
+                mImage = (SimpleDraweeView) view.findViewById(R.id.comment_post_image);
                 mScoreButton = (TextView) view.findViewById(R.id.comment_post_score);
             }
 
@@ -301,7 +296,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 if (mClickedPost.getPostDetails().getPreviewImage().isEmpty()) {
                     mImage.setVisibility(View.GONE);
                 } else {
-                    Glide.with(mContext).load(mClickedPost.getPostDetails().getPreviewImage()).transition(withCrossFade()).apply(centerCropTransform(mContext)).into(mImage);
+                    mImage.setImageURI(mClickedPost.getPostDetails().getPreviewImage());
                 }
                 if (mClickedPost.getPostDetails().getSelftextHtml() != null && !mClickedPost.getPostDetails().getSelftextHtml().isEmpty()) {
                     mSelftext.setText(TextHelper.trimTrailingWhitespace(TextHelper.fromHtml(mClickedPost.getPostDetails().getSelftextHtml())));
