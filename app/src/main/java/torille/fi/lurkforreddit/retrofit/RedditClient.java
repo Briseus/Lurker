@@ -30,7 +30,7 @@ public interface RedditClient {
     Call<RedditToken> refreshUserToken(@Field("grant_type") String grant_type, @Field("refresh_token") String token);
 
     @GET("subreddits/mine/subscriber")
-    Call<SubredditListing> getMySubreddits();
+    Call<SubredditListing> getMySubreddits(@Query("limit") int count);
 
     @GET("subreddits/default")
     Call<SubredditListing> getDefaultSubreddits(@Query("limit") int count);

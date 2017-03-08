@@ -38,7 +38,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
         Call<SubredditListing> call;
         if (SharedPreferencesHelper.isLoggedIn()) {
             Log.d("LoginStatus", "Was logged in, getting personal subreddits");
-            call = RedditService.getInstance(token).getMySubreddits();
+            call = RedditService.getInstance(token).getMySubreddits(100);
         } else {
             Log.d("LoginStatus", "Was not logged in, getting default subreddits");
             call = RedditService.getInstance(token).getDefaultSubreddits(100);

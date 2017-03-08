@@ -28,54 +28,56 @@ public class RedditService {
     private RedditClient redditClient;
     private static String TOKEN;
 
+    private final static OkHttpClient okHttpClient = new OkHttpClient();
+
     private RedditService() {
 
         final HttpLoggingInterceptor logger = new HttpLoggingInterceptor();
         logger.setLevel(HttpLoggingInterceptor.Level.HEADERS);
 
-        final OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logger)
-                .addNetworkInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Chain chain) throws IOException {
+        final Authenticator authenticator = new Authenticator() {
+            @Override
+            public Request authenticate(Route route, Response response) throws IOException {
+                if (responseCount(response) >= 3) {
+                    Log.e("Authentication", "Too many retries");
+                    return null;
+                }
+                String newAccessToken = NetworkHelper.authenticateApp();
+                if (newAccessToken.length() < 3) {
+                    Log.e("Authentication", "New token " + newAccessToken + " was too short");
+                    return null;
+                }
+                return response.request().newBuilder()
+                        .addHeader("Authorization", "bearer " + newAccessToken)
+                        .build();
+            }
+        };
 
-                        Request original = chain.request();
-                        HttpUrl url = original.url().newBuilder().addQueryParameter("raw_json", "1").build();
-                        original = original.newBuilder().url(url).build();
+        final Interceptor tokenInterceptor = new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request original = chain.request();
+                HttpUrl url = original.url().newBuilder().addQueryParameter("raw_json", "1").build();
+                original = original.newBuilder().url(url).build();
 
-                        if (original.header("Authorization") != null) {
-                            return chain.proceed(original);
-                        }
-                        Request.Builder requestBuilder = original.newBuilder()
-                                .header("Authorization", "bearer " + TOKEN)
-                                .method(original.method(), original.body());
+                if (original.header("Authorization") != null) {
+                    return chain.proceed(original);
+                }
+                Request.Builder requestBuilder = original.newBuilder()
+                        .header("Authorization", "bearer " + TOKEN)
+                        .method(original.method(), original.body());
 
-                        Request request = requestBuilder.build();
-                        return chain.proceed(request);
-                    }
-                })
-                .authenticator(new Authenticator() {
-                    @Override
-                    public Request authenticate(Route route, Response response) throws IOException {
-                        if (responseCount(response) >= 3) {
-                            Log.e("Authentication", "Too many retries");
-                            return null;
-                        }
-                        String newAccessToken = NetworkHelper.authenticateApp();
-                        if (newAccessToken.length() < 3) {
-                            Log.e("Authentication", "New token " + newAccessToken + " was too short");
-                            return null;
-                        }
-                        return response.request().newBuilder()
-                                .addHeader("Authorization", "bearer " + newAccessToken)
-                                .build();
-                    }
-                }).build();
-
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
+            }
+        };
         final Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(API_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(client)
+                .client(okHttpClient
+                        .newBuilder()
+                        .addNetworkInterceptor(tokenInterceptor)
+                        .authenticator(authenticator).build())
                 .build();
 
         redditClient = retrofit.create(RedditClient.class);
@@ -87,6 +89,10 @@ public class RedditService {
             instance = new RedditService();
         }
         return instance.redditClient;
+    }
+
+    public static OkHttpClient getClient() {
+        return okHttpClient;
     }
 
     private static int responseCount(Response response) {
