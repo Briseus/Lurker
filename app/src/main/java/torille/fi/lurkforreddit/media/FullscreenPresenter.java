@@ -1,6 +1,7 @@
 package torille.fi.lurkforreddit.media;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import torille.fi.lurkforreddit.data.Post;
@@ -18,7 +19,6 @@ public class FullscreenPresenter implements FullscreenContract.UserActionsListen
         mFullscreenView = fullscreenView;
     }
 
-    @Override
     public void checkDomain(@NonNull Post post) {
         switch (post.getPostDetails().getDomain()) {
             case "gfycat.com":
@@ -34,7 +34,8 @@ public class FullscreenPresenter implements FullscreenContract.UserActionsListen
         }
     }
 
-    private void checkType(String urlString) {
+    @VisibleForTesting
+    void checkType(String urlString) {
 
         switch (TextHelper.getLastFourChars(urlString)) {
             case ".gif":
@@ -54,7 +55,6 @@ public class FullscreenPresenter implements FullscreenContract.UserActionsListen
                 break;
             }
             default:
-                Log.d("Image", "Got with end " + urlString);
                 mFullscreenView.showImage(urlString + ".jpg");
                 break;
         }
