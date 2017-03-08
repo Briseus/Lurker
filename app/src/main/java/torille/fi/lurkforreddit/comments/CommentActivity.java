@@ -30,13 +30,16 @@ public class CommentActivity extends AppCompatActivity {
 
         Post originalPost = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_CLICKED_POST));
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.appBarLayout);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.appBarLayout);
         toolbar.setTitle(originalPost.getPostDetails().getSubreddit());
 
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setHomeAsUpIndicator(getResources().getDrawable(R.drawable.ic_arrow_back_white_24px, null));
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
 
         initFragment(CommentFragment.newInstance(originalPost));
     }

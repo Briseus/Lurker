@@ -20,6 +20,7 @@
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:titleEnabled="false">
+
             <com.facebook.drawee.view.SimpleDraweeView
                 android:id="@+id/banner"
                 android:layout_width="match_parent"

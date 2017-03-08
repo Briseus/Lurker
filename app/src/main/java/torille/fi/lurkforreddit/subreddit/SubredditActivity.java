@@ -32,12 +32,17 @@ public class SubredditActivity extends AppCompatActivity {
         Subreddit subreddit = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_SUBREDDIT));
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.appBarLayout);
-        toolbar.setTitle(subreddit.getUrl());
+        toolbar.setTitle(subreddit.getDisplay_name());
+
         loadBannerImage(subreddit);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setHomeAsUpIndicator(getResources().getDrawable(R.drawable.ic_arrow_back_white_24px, null));
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
 
         initFragment(SubredditFragment.newInstance(subreddit));
     }
