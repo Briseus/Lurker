@@ -37,6 +37,7 @@ import torille.fi.lurkforreddit.utils.SharedPreferencesHelper;
 
 public class SubredditsActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
+    private static final String TAG = "SubredditsActivity";
     private static final String STATE = NetworkHelper.nextStateId();
     private static final String REDIRECT_URI = "lurk://redirecturi";
     private static final String RESPONSE_TYPE = "code";
@@ -107,27 +108,28 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
     }
 
     private void checkIntent(@Nullable Intent intent) {
-        if (intent != null) {
-            Uri uri = getIntent().getData();
-            Log.d("Login", "Uri is " + uri);
-            if (uri != null) {
-                String state = uri.getQueryParameter("state");
-                if (state.equals(STATE)) {
-                    String code = uri.getQueryParameter("code");
-                    if (code != null) {
-                        Log.d("Login", "Code was " + code);
-                        getToken(code);
-                    } else if (uri.getQueryParameter("error") != null){
-                        // show an error message here
-                        Log.e("Login", "Got error " + uri.getQueryParameter("error"));
-                        Toast.makeText(this, "Got error " + uri.getQueryParameter("error"), Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Log.e("Login", state + " does not match " + STATE);
-                    Toast.makeText(this,  state + " does not match " + STATE, Toast.LENGTH_LONG).show();
+        if (intent != null && intent.getData() != null) {
+            Uri uri = intent.getData();
+            intent.setData(null);
+            Log.d(TAG, "Uri is " + uri);
+            String state = uri.getQueryParameter("state");
+            // check that state matches
+            if (state.equals(STATE)) {
+                String code = uri.getQueryParameter("code");
+                if (code != null) {
+                    Log.d(TAG, "Code was " + code);
+                    getToken(code);
+                } else if (uri.getQueryParameter("error") != null) {
+                    // show an error message here
+                    Log.e(TAG, "Got error " + uri.getQueryParameter("error"));
+                    Toast.makeText(this, "Got error " + uri.getQueryParameter("error"), Toast.LENGTH_LONG).show();
                 }
-
+            } else {
+                Log.e(TAG, state + " does not match " + STATE);
+                Toast.makeText(this, state + " does not match " + STATE, Toast.LENGTH_LONG).show();
             }
+
+
         }
     }
 
@@ -140,7 +142,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
             @Override
             public void onResponse(Call<RedditToken> call, Response<RedditToken> response) {
                 if (response.isSuccessful()) {
-                    Log.d("Login", "Got " + response.body().toString());
+                    Log.d(TAG, "Got " + response.body().toString());
                     SharedPreferencesHelper.setToken(response.body().getAccess_token());
                     SharedPreferencesHelper.setRefreshToken(response.body().getRefresh_token());
                     SharedPreferencesHelper.loggedIn(true);
@@ -153,7 +155,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
 
             @Override
             public void onFailure(Call<RedditToken> call, Throwable t) {
-                Log.e("Error", t.toString());
+                Log.e(TAG, t.toString());
             }
         });
     }
