@@ -14,6 +14,8 @@ import torille.fi.lurkforreddit.data.CommentChild;
  */
 
 public class TextHelper {
+    private TextHelper() {}
+
     public static String getLastFourChars(String url) {
         return url.substring(url.length() - 4);
     }

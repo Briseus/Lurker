@@ -20,7 +20,9 @@ import static java.util.UUID.randomUUID;
 
 final public class NetworkHelper {
 
-    public static String createUUID() {
+    private NetworkHelper() {}
+
+    private static String createUUID() {
         return randomUUID().toString();
     }
 

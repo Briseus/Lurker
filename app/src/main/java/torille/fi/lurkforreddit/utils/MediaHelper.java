@@ -15,6 +15,9 @@ import torille.fi.lurkforreddit.data.Post;
  */
 
 final public class MediaHelper {
+
+    private MediaHelper() {}
+
     public static boolean isContentMedia(final Post post) {
         switch (TextHelper.getLastFourChars(post.getPostDetails().getUrl())) {
             case ".jpg":

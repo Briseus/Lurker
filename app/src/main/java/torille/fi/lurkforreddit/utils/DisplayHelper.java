@@ -13,6 +13,9 @@ import torille.fi.lurkforreddit.data.PostDetails;
 final public class DisplayHelper {
     private static int mDisplayDPI;
 
+    private DisplayHelper() {}
+
+
     /**
      * @param postDetails model containing data
      * @return "" or url of the picture if the picture is not too small or large
@@ -42,7 +45,7 @@ final public class DisplayHelper {
         return ((double) pictureWidth / (double) displayWidth);
     }
 
-    public static int getDisplayDPI(Context context) {
+    private static int getDisplayDPI(Context context) {
         final DisplayMetrics dm = context.getResources().getDisplayMetrics();
         return (int) (dm.widthPixels / dm.density);
 
