@@ -52,13 +52,31 @@ public class RedditService {
                         .build();
             }
         };
+        final Interceptor rawJsonInterceptor = new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request original = chain.request();
+                HttpUrl originalHttpUrl = original.url();
 
+                HttpUrl url = originalHttpUrl.newBuilder()
+                        .addQueryParameter("raw_json", "1")
+                        .build();
+
+                // Request customization: add request headers
+                Request.Builder requestBuilder = original.newBuilder()
+                        .url(url);
+
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
+            }
+        };
         final Interceptor tokenInterceptor = new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request original = chain.request();
+                /*
                 HttpUrl url = original.url().newBuilder().addQueryParameter("raw_json", "1").build();
-                original = original.newBuilder().url(url).build();
+                original = original.newBuilder().url(url).build();*/
 
                 if (original.header("Authorization") != null) {
                     return chain.proceed(original);
@@ -76,6 +94,7 @@ public class RedditService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(okHttpClient
                         .newBuilder()
+                        .addNetworkInterceptor(rawJsonInterceptor)
                         .addNetworkInterceptor(tokenInterceptor)
                         .authenticator(authenticator).build())
                 .build();

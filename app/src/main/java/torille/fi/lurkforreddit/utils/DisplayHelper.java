@@ -2,6 +2,7 @@ package torille.fi.lurkforreddit.utils;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import torille.fi.lurkforreddit.data.PostDetails;
 
@@ -26,7 +27,7 @@ final public class DisplayHelper {
                     if (result >= 0.7
                             && result <= 1.3) {
                         return postDetails.getImages().getImages().get(0).getResolutions().get(i).getUrl();
-                        // if no hits check last resolution again
+
                     }
                 }
                 return "";

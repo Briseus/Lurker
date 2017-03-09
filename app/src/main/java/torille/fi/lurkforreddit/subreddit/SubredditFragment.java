@@ -22,9 +22,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.controller.BaseControllerListener;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 
 import org.parceler.Parcels;
@@ -62,7 +64,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     private boolean refreshing;
     private String mNextPageId;
     private CustomTabActivityHelper mCustomTabActivityHelper;
-    private ImagePipeline mImagePipeline;
 
     /**
      * Use this factory method to create a new instance of
@@ -86,9 +87,9 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 this);
         mListAdapter = new PostsAdapter(new ArrayList<Post>(0),
                 mClickListener,
-                ContextCompat.getColor(getContext(), R.color.colorAccent));
+                ContextCompat.getColor(getContext(), R.color.colorAccent),
+                Fresco.getImagePipeline());
         mCustomTabActivityHelper = new CustomTabActivityHelper();
-        mImagePipeline = Fresco.getImagePipeline();
         DisplayHelper.init(getContext());
 
     }
@@ -105,8 +106,9 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
+            private static final int PREFETCH_SIZE = 5;
             int pastVisiblesItems, visibleItemCount, totalItemCount;
+            int lastFetch = 0;
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -115,6 +117,14 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     visibleItemCount = mLayoutManager.getChildCount();
                     totalItemCount = mLayoutManager.getItemCount();
                     pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
+
+
+                    if (!refreshing && (visibleItemCount + pastVisiblesItems) > lastFetch) {
+                        lastFetch = (visibleItemCount + pastVisiblesItems) + (PREFETCH_SIZE - 1);
+                        lastFetch = lastFetch > totalItemCount ? totalItemCount : lastFetch;
+                        mListAdapter.prefetchImages(lastFetch, PREFETCH_SIZE, totalItemCount);
+                    }
+
 
                     if (!refreshing && (visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                         refreshing = true;
@@ -219,11 +229,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     @Override
     public void showPosts(List<Post> posts, String nextpage) {
-
-        for (Post post : posts) {
-            mImagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(post.getPostDetails().getPreviewImage()), null);
-        }
-
         mListAdapter.addAll(posts);
         mNextPageId = nextpage;
     }
@@ -235,15 +240,11 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     @Override
     public void addMorePosts(List<Post> posts, String nextpage) {
-
-        for (Post post : posts) {
-            mImagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(post.getPostDetails().getPreviewImage()), null);
-        }
-
         mListAdapter.addMorePosts(posts);
         refreshing = false;
         mNextPageId = nextpage;
     }
+
 
     @Override
     public void showCustomTabsUI(final String url) {
@@ -291,14 +292,16 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         private final static int VIEW_PROGRESS = 0;
 
         private List<Post> mPosts;
-        private postClickListener mClicklistener;
-        private int mDefaultAccentColor;
+        private final postClickListener mClicklistener;
+        private final int mDefaultAccentColor;
         private DraweeController mDraweeController;
+        private ImagePipeline imagePipeline;
 
-        PostsAdapter(List<Post> posts, postClickListener listener, int color) {
-            this.mPosts = posts;
-            this.mClicklistener = listener;
-            this.mDefaultAccentColor = color;
+        PostsAdapter(List<Post> posts, postClickListener listener, int color, ImagePipeline pipeline) {
+            mPosts = posts;
+            mClicklistener = listener;
+            mDefaultAccentColor = color;
+            imagePipeline = pipeline;
             setHasStableIds(true);
         }
 
@@ -319,11 +322,36 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof PostViewHolder) {
                 ((PostViewHolder) holder).bind(mPosts.get(position).getPostDetails());
-
             } else if (holder instanceof ProgressViewHolder) {
                 ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
             }
 
+
+        }
+
+        /**
+         * Prefetch to bitmap cache in fresco to make
+         * images appear without fading or waiting
+         *
+         * @param fromIndex     tells the position in mPosts
+         * @param prefetchCount how much to cache ahead
+         * @param listMaxSize   the maxsize which you cant go over
+         */
+        private void prefetchImages(int fromIndex, int prefetchCount, int listMaxSize) {
+
+            final int to = (fromIndex + prefetchCount);
+                /*
+                make toIndex value of "to" only if its not bigger than maxsize
+                so you dont get indexOutOfBounds errors
+                 */
+            final int toIndex = to >= listMaxSize ? listMaxSize : to;
+            Log.d("TAG", "Prefetching from " + fromIndex + " to " + toIndex);
+            for (int i = fromIndex; i < toIndex; i++) {
+                final String url = mPosts.get(i).getPostDetails().getPreviewImage();
+                if (!url.isEmpty()) {
+                    imagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(url), null);
+                }
+            }
 
         }
 
@@ -376,6 +404,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 Post dummy = new Post();
                 PostDetails dummyDetails = new PostDetails();
                 dummyDetails.setId("Progressbar");
+                dummyDetails.setPreviewImage("");
                 dummy.setPostDetails(dummyDetails);
                 dummy.setKind("Progressbar");
                 mPosts.add(dummy);
@@ -449,7 +478,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 score.getBackground().setTint(mDefaultAccentColor);
             }
 
-            final void bind(PostDetails postDetails) {
+            final void bind(final PostDetails postDetails) {
 
                 title.setText(postDetails.getPreviewTitle());
                 domain.setText(postDetails.getDomain());
@@ -461,6 +490,14 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 } else {
                     image.setVisibility(View.VISIBLE);
                     mDraweeController = Fresco.newDraweeControllerBuilder()
+                            .setControllerListener(new BaseControllerListener<ImageInfo>() {
+                                @Override
+                                public void onFailure(String id, Throwable throwable) {
+                                    super.onFailure(id, throwable);
+                                    Log.e("Subreddit", "Failed to load image id: " + id + " error " + throwable.getLocalizedMessage());
+                                    image.setImageURI(postDetails.getThumbnail());
+                                }
+                            })
                             .setImageRequest(ImageRequest.fromUri(postDetails.getPreviewImage()))
                             .setOldController(image.getController())
                             .build();
