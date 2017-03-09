@@ -127,17 +127,31 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     }
 
     private static List<Post> formatPosts(List<Post> posts) {
-        for (Post post : posts) {
-            post.getPostDetails().setPreviewImage(DisplayHelper.getBestPreviewPicture(post.getPostDetails()));
-            final String text = DateUtils.getRelativeTimeSpanString(post.getPostDetails().getCreatedUtc() * 1000)
-                    + " ● "
-                    + "/r/" + post.getPostDetails().getSubreddit()
-                    + " ● "
-                    + "/u/" + post.getPostDetails().getAuthor();
 
-            post.getPostDetails().setPreviewText(text);
-            final int score = post.getPostDetails().getScore();
-            post.getPostDetails().setPreviewScore(formatScore(score));
+        for (Post post : posts) {
+
+            post.getPostDetails().setPreviewScore(formatScore(post.getPostDetails().getScore()));
+
+            if (post.getPostDetails().isStickied()) {
+                post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle() + "<font color='#64FFDA'> Stickied </font>"));
+            } else {
+                post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle()));
+            }
+            switch (post.getPostDetails().getThumbnail()) {
+                case "default":
+                case "self":
+                case "":
+                case "image":
+                    post.getPostDetails().setPreviewImage("");
+                    break;
+                case "nsfw":
+                    post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle() + "<font color='#FF1744'> NSFW</font>"));
+                    post.getPostDetails().setPreviewImage("");
+                    break;
+                default:
+                    post.getPostDetails().setPreviewImage(DisplayHelper.getBestPreviewPicture(post.getPostDetails()));
+            }
+
         }
 
         return posts;

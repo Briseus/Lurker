@@ -42,7 +42,6 @@ import torille.fi.lurkforreddit.data.Subreddit;
 import torille.fi.lurkforreddit.media.FullscreenActivity;
 import torille.fi.lurkforreddit.utils.DisplayHelper;
 import torille.fi.lurkforreddit.utils.MediaHelper;
-import torille.fi.lurkforreddit.utils.TextHelper;
 
 import static android.view.View.GONE;
 
@@ -103,7 +102,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
         mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -264,6 +262,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     @Override
     public void showMedia(Post post) {
+        //TODO Move this to presenter?
         if (MediaHelper.isContentMedia(post) || MediaHelper.checkDomainForMedia(post)) {
             Intent intent = new Intent(getContext(), FullscreenActivity.class);
             intent.putExtra(FullscreenActivity.EXTRA_POST, Parcels.wrap(post));
@@ -271,9 +270,12 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         } else if (MediaHelper.launchCustomActivity(post)) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(post.getPostDetails().getUrl()));
             startActivity(intent);
+        } else if (post.getPostDetails().isSelf) {
+            mActionsListener.openComments(post);
         } else {
             showCustomTabsUI(post.getPostDetails().getUrl());
         }
+
 
     }
 
@@ -287,13 +289,13 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     private static class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final static int VIEW_ITEM = 1;
         private final static int VIEW_PROGRESS = 0;
+
         private List<Post> mPosts;
         private postClickListener mClicklistener;
         private int mDefaultAccentColor;
         private DraweeController mDraweeController;
 
-        //TODO Add click listeners
-        public PostsAdapter(List<Post> posts, postClickListener listener, int color) {
+        PostsAdapter(List<Post> posts, postClickListener listener, int color) {
             this.mPosts = posts;
             this.mClicklistener = listener;
             this.mDefaultAccentColor = color;
@@ -402,26 +404,30 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         }
 
 
-        public class PostViewHolder extends RecyclerView.ViewHolder {
+        class PostViewHolder extends RecyclerView.ViewHolder {
             final View view;
             final TextView title;
             final TextView domain;
-            final TextView details;
             final Button score;
             final Button comments;
             final ImageButton openBrowser;
             final SimpleDraweeView image;
 
-            public PostViewHolder(View postView) {
+            PostViewHolder(View postView) {
                 super(postView);
                 view = postView;
                 title = (TextView) postView.findViewById(R.id.post_title);
                 domain = (TextView) postView.findViewById(R.id.post_domain);
-                details = (TextView) postView.findViewById(R.id.post_details);
                 score = (Button) postView.findViewById(R.id.post_likes);
                 comments = (Button) postView.findViewById(R.id.post_messages);
                 openBrowser = (ImageButton) postView.findViewById(R.id.post_open_browser);
                 image = (SimpleDraweeView) postView.findViewById(R.id.post_image);
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mClicklistener.onMediaClick(getItem(getAdapterPosition()));
+                    }
+                });
                 image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -443,45 +449,26 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 score.getBackground().setTint(mDefaultAccentColor);
             }
 
-            void bind(PostDetails postDetails) {
-                if (postDetails.isStickied()) {
-                    title.setText(TextHelper.fromHtml(postDetails.getTitle() + "<font color='#64FFDA'> Stickied </font>"));
-                } else {
-                    title.setText(postDetails.getTitle());
-                }
+            final void bind(PostDetails postDetails) {
 
+                title.setText(postDetails.getPreviewTitle());
                 domain.setText(postDetails.getDomain());
                 score.setText(postDetails.getPreviewScore());
-
-                //details.setText(postDetails.getPreviewText());
-
                 comments.setText(String.valueOf(postDetails.getNumberOfComments()));
 
-                switch (postDetails.getThumbnail()) {
-                    case "default":
-                    case "self":
-                    case "":
-                    case "image":
-                        image.setVisibility(GONE);
-                        break;
-                    case "nsfw":
-                        title.setText(TextHelper.fromHtml(postDetails.getTitle() + "<font color='#FF1744'> NSFW</font>"));
-                        image.setVisibility(GONE);
-                        break;
-                    default:
-                        if (postDetails.getPreviewImage().isEmpty()) {
-                            image.setVisibility(GONE);
-                        } else {
-                            image.setVisibility(View.VISIBLE);
-                            mDraweeController = Fresco.newDraweeControllerBuilder()
-                                    .setImageRequest(ImageRequest.fromUri(postDetails.getPreviewImage()))
-                                    .setOldController(image.getController())
-                                    .build();
-                            image.setController(mDraweeController);
-
-                        }
+                if (postDetails.getPreviewImage().isEmpty()) {
+                    image.setVisibility(GONE);
+                } else {
+                    image.setVisibility(View.VISIBLE);
+                    mDraweeController = Fresco.newDraweeControllerBuilder()
+                            .setImageRequest(ImageRequest.fromUri(postDetails.getPreviewImage()))
+                            .setOldController(image.getController())
+                            .build();
+                    image.setController(mDraweeController);
 
                 }
+
+
             }
 
         }

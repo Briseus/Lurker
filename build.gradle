@@ -32,7 +32,7 @@ ext {
 
     // App dependencies
     supportLibraryVersion = '25.2.0'
-    constraintVersion = '1.0.1'
+    constraintVersion = '1.0.2'
     retrofitVersion = '2.2.0'
     okHttpVersion = '3.5.0'
     junitVersion = '4.12'

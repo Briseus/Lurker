@@ -1,6 +1,9 @@
 package torille.fi.lurkforreddit.data;
 
 import android.support.annotation.Nullable;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -52,6 +55,8 @@ public class PostDetails {
     public String previewText;
     @Nullable
     public String previewScore;
+    @Nullable
+    transient Spanned previewTitle;
 
     public PostDetails() {
     }
@@ -283,5 +288,14 @@ public class PostDetails {
 
     public void setPreviewScore(String previewScore) {
         this.previewScore = previewScore;
+    }
+
+    @Nullable
+    public Spanned getPreviewTitle() {
+        return previewTitle;
+    }
+
+    public void setPreviewTitle(@Nullable Spanned previewTitle) {
+        this.previewTitle = previewTitle;
     }
 }

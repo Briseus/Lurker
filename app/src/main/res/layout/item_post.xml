@@ -36,6 +36,9 @@
             style="@style/Widget.AppCompat.ImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/list_selector"
             android:clickable="true"
             android:padding="8dp"
@@ -43,17 +46,18 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/post_details"
-            android:layout_marginRight="16dp"
-            app:layout_constraintVertical_bias="0.466"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" />
+            app:layout_constraintVertical_bias="0.466" />
 
         <Button
             android:id="@+id/post_messages"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/list_selector_bound"
+            android:backgroundTint="@color/colorAccent"
             android:clickable="true"
             android:drawableStart="@drawable/ic_forum_white_24px"
             android:padding="8dp"
@@ -64,10 +68,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/post_open_browser"
             app:layout_constraintTop_toBottomOf="@+id/post_details"
-            app:layout_constraintVertical_bias="0.466"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginRight="8dp" />
+            app:layout_constraintVertical_bias="0.466" />
 
         <Button
             android:id="@+id/post_likes"
