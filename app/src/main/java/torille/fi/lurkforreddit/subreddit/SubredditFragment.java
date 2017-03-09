@@ -106,7 +106,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private static final int PREFETCH_SIZE = 5;
+            private static final int PREFETCH_SIZE = 4;
             int pastVisiblesItems, visibleItemCount, totalItemCount;
             int lastFetch = 0;
 
@@ -121,7 +121,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
                     if (!refreshing && (visibleItemCount + pastVisiblesItems) > lastFetch) {
                         lastFetch = (visibleItemCount + pastVisiblesItems) + (PREFETCH_SIZE - 1);
-                        lastFetch = lastFetch > totalItemCount ? totalItemCount : lastFetch;
+                        lastFetch = lastFetch > totalItemCount ? (totalItemCount - 1) : lastFetch;
                         mListAdapter.prefetchImages(lastFetch, PREFETCH_SIZE, totalItemCount);
                     }
 
