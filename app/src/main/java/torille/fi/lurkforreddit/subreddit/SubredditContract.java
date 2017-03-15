@@ -27,6 +27,8 @@ public interface SubredditContract {
         void showMedia(Post post);
 
         void showCommentsUI(Post clickedPost);
+
+        void launchCustomActivity(Post clickedPost);
     }
 
     interface UserActionsListener {

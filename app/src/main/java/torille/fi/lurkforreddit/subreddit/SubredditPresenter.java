@@ -1,13 +1,13 @@
 package torille.fi.lurkforreddit.subreddit;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.util.List;
 
 import torille.fi.lurkforreddit.data.Post;
 import torille.fi.lurkforreddit.data.RedditRepository;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
+import torille.fi.lurkforreddit.utils.MediaHelper;
 
 /**
  * Created by eva on 2/11/17.
@@ -38,11 +38,19 @@ public class SubredditPresenter implements SubredditContract.UserActionsListener
 
     @Override
     public void openMedia(@NonNull Post post) {
-        mSubredditsView.showMedia(post);
+        if (MediaHelper.isContentMedia(post) || MediaHelper.checkDomainForMedia(post)) {
+            mSubredditsView.showMedia(post);
+        } else if (MediaHelper.launchCustomActivity(post)) {
+            mSubredditsView.launchCustomActivity(post);
+        } else if (post.getPostDetails().isSelf) {
+            openComments(post);
+        } else {
+            mSubredditsView.showCustomTabsUI(post.getPostDetails().getUrl());
+        }
     }
 
     @Override
-    public void loadPosts(String subredditUrl) {
+    public void loadPosts(@NonNull String subredditUrl) {
         mSubredditsView.setProgressIndicator(true);
 
         // The network request might be handled in a different thread so make sure Espresso knows

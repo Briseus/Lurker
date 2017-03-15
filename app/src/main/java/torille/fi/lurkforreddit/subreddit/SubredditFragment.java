@@ -4,7 +4,6 @@ package torille.fi.lurkforreddit.subreddit;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -24,7 +23,6 @@ import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.drawee.controller.ControllerListener;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.core.ImagePipeline;
@@ -268,27 +266,21 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     @Override
     public void showMedia(Post post) {
-        //TODO Move this to presenter?
-        if (MediaHelper.isContentMedia(post) || MediaHelper.checkDomainForMedia(post)) {
-            Intent intent = new Intent(getContext(), FullscreenActivity.class);
-            intent.putExtra(FullscreenActivity.EXTRA_POST, Parcels.wrap(post));
-            startActivity(intent);
-        } else if (MediaHelper.launchCustomActivity(post)) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(post.getPostDetails().getUrl()));
-            startActivity(intent);
-        } else if (post.getPostDetails().isSelf) {
-            mActionsListener.openComments(post);
-        } else {
-            showCustomTabsUI(post.getPostDetails().getUrl());
-        }
-
-
+        Intent intent = new Intent(getContext(), FullscreenActivity.class);
+        intent.putExtra(FullscreenActivity.EXTRA_POST, Parcels.wrap(post));
+        startActivity(intent);
     }
 
     @Override
     public void showCommentsUI(Post clickedPost) {
         Intent intent = new Intent(getContext(), CommentActivity.class);
         intent.putExtra(CommentActivity.EXTRA_CLICKED_POST, Parcels.wrap(clickedPost));
+        startActivity(intent);
+    }
+
+    @Override
+    public void launchCustomActivity(Post clickedPost) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickedPost.getPostDetails().getUrl()));
         startActivity(intent);
     }
 
@@ -343,32 +335,14 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
          */
         private void prefetchImages(final int fromIndex, final int prefetchCount, final int listMaxSize) {
 
-            /*new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... params) {
-                    final int to = (fromIndex + prefetchCount);
-                *//*
-                make toIndex value of "to" only if its not bigger than maxsize
-                so you dont get indexOutOfBounds errors
-                 *//*
-                    final int toIndex = to > listMaxSize ? listMaxSize : to;
-                    for (int i = fromIndex; i < toIndex; i++) {
-                        final String url = mPosts.get(i).getPostDetails().getPreviewImage();
-                        if (!url.isEmpty()) {
-                            imagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(url), null);
-                        }
-                    }
 
-                    return null;
-                }
-            }.execute();*/
             final int to = (fromIndex + prefetchCount);
                 /*
                 make toIndex value of "to" only if its not bigger than maxsize
                 so you dont get indexOutOfBounds errors
                  */
             final int toIndex = to > listMaxSize ? listMaxSize : to;
-            Log.d("TAG", "Prefetching from " + fromIndex + " to " + toIndex);
+
             for (int i = fromIndex; i < toIndex; i++) {
                 final String url = mPosts.get(i).getPostDetails().getPreviewImage();
                 if (!url.isEmpty()) {

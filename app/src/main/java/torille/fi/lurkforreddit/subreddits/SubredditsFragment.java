@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.parceler.Parcels;
 
@@ -54,13 +53,6 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     public void onResume() {
         super.onResume();
         mActionsListener.loadSubreddits(false);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        setRetainInstance(true);
     }
 
     @Nullable
@@ -134,7 +126,7 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
         private SubredditItemListener mItemListener;
         private int mDefaultColor;
 
-        public SubredditsAdapter(List<SubredditChildren> subreddits, SubredditItemListener itemListener, int color) {
+        SubredditsAdapter(List<SubredditChildren> subreddits, SubredditItemListener itemListener, int color) {
             setList(subreddits);
             mItemListener = itemListener;
             mDefaultColor = color;
@@ -146,7 +138,6 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
             Context context = parent.getContext();
             LayoutInflater inflater = LayoutInflater.from(context);
             View subredditsView = inflater.inflate(R.layout.item_subreddit, parent, false);
-
             return new ViewHolder(subredditsView, mItemListener);
         }
 
@@ -163,7 +154,7 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
         }
 
-        public void replaceData(List<SubredditChildren> subreddits) {
+        void replaceData(List<SubredditChildren> subreddits) {
             setList(subreddits);
             notifyDataSetChanged();
         }
@@ -182,15 +173,15 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
             return mSubreddits.get(position).getSubreddit().getId().hashCode();
         }
 
-        public Subreddit getItem(int position) {
+        Subreddit getItem(int position) {
             return mSubreddits.get(position).getSubreddit();
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
             final TextView title;
             final Button colorButton;
 
-            public ViewHolder(View itemView, SubredditItemListener listener) {
+            ViewHolder(View itemView, SubredditItemListener listener) {
                 super(itemView);
                 mItemListener = listener;
                 title = (TextView) itemView.findViewById(R.id.item_subreddit_title);
@@ -208,7 +199,7 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
     }
 
-    public interface SubredditItemListener {
+    interface SubredditItemListener {
         void onSubredditClick(Subreddit subreddit);
     }
 }
