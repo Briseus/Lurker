@@ -4,6 +4,7 @@ package torille.fi.lurkforreddit.subreddit;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.controller.ControllerListener;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.core.ImagePipeline;
@@ -106,9 +108,10 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private static final int PREFETCH_SIZE = 4;
+            private static final int PREFETCH_SIZE = 2;
             int pastVisiblesItems, visibleItemCount, totalItemCount;
             int lastFetch = 0;
+            int scrolledItems;
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -117,16 +120,18 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     visibleItemCount = mLayoutManager.getChildCount();
                     totalItemCount = mLayoutManager.getItemCount();
                     pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
+                    scrolledItems = (visibleItemCount + pastVisiblesItems);
 
+                    if (lastFetch == 0) {
+                        mListAdapter.prefetchImages(2, PREFETCH_SIZE, totalItemCount);
+                    }
 
-                    if (!refreshing && (visibleItemCount + pastVisiblesItems) > lastFetch) {
-                        lastFetch = (visibleItemCount + pastVisiblesItems) + (PREFETCH_SIZE - 1);
-                        lastFetch = lastFetch > totalItemCount ? (totalItemCount - 1) : lastFetch;
+                    if (!refreshing && scrolledItems > lastFetch) {
+                        lastFetch = scrolledItems + (PREFETCH_SIZE - 1);
                         mListAdapter.prefetchImages(lastFetch, PREFETCH_SIZE, totalItemCount);
                     }
 
-
-                    if (!refreshing && (visibleItemCount + pastVisiblesItems) >= totalItemCount) {
+                    if (!refreshing && scrolledItems >= totalItemCount) {
                         refreshing = true;
                         Log.d("SubredditFragment", "Last item reached, getting more!");
                         mActionsListener.loadMorePosts(getSubredditUrl(), mNextPageId);
@@ -294,7 +299,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         private List<Post> mPosts;
         private final postClickListener mClicklistener;
         private final int mDefaultAccentColor;
-        private DraweeController mDraweeController;
         private ImagePipeline imagePipeline;
 
         PostsAdapter(List<Post> posts, postClickListener listener, int color, ImagePipeline pipeline) {
@@ -337,14 +341,33 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
          * @param prefetchCount how much to cache ahead
          * @param listMaxSize   the maxsize which you cant go over
          */
-        private void prefetchImages(int fromIndex, int prefetchCount, int listMaxSize) {
+        private void prefetchImages(final int fromIndex, final int prefetchCount, final int listMaxSize) {
 
+            /*new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    final int to = (fromIndex + prefetchCount);
+                *//*
+                make toIndex value of "to" only if its not bigger than maxsize
+                so you dont get indexOutOfBounds errors
+                 *//*
+                    final int toIndex = to > listMaxSize ? listMaxSize : to;
+                    for (int i = fromIndex; i < toIndex; i++) {
+                        final String url = mPosts.get(i).getPostDetails().getPreviewImage();
+                        if (!url.isEmpty()) {
+                            imagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(url), null);
+                        }
+                    }
+
+                    return null;
+                }
+            }.execute();*/
             final int to = (fromIndex + prefetchCount);
                 /*
                 make toIndex value of "to" only if its not bigger than maxsize
                 so you dont get indexOutOfBounds errors
                  */
-            final int toIndex = to >= listMaxSize ? listMaxSize : to;
+            final int toIndex = to > listMaxSize ? listMaxSize : to;
             Log.d("TAG", "Prefetching from " + fromIndex + " to " + toIndex);
             for (int i = fromIndex; i < toIndex; i++) {
                 final String url = mPosts.get(i).getPostDetails().getPreviewImage();
@@ -352,7 +375,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     imagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(url), null);
                 }
             }
-
         }
 
         @Override
@@ -489,19 +511,21 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     image.setVisibility(GONE);
                 } else {
                     image.setVisibility(View.VISIBLE);
-                    mDraweeController = Fresco.newDraweeControllerBuilder()
+
+                    DraweeController draweeController = Fresco.newDraweeControllerBuilder()
                             .setControllerListener(new BaseControllerListener<ImageInfo>() {
                                 @Override
                                 public void onFailure(String id, Throwable throwable) {
                                     super.onFailure(id, throwable);
                                     Log.e("Subreddit", "Failed to load image id: " + id + " error " + throwable.getLocalizedMessage());
-                                    image.setImageURI(postDetails.getThumbnail());
+                                    image.setImageURI(getItem(getAdapterPosition()).getPostDetails().getThumbnail());
                                 }
                             })
                             .setImageRequest(ImageRequest.fromUri(postDetails.getPreviewImage()))
                             .setOldController(image.getController())
                             .build();
-                    image.setController(mDraweeController);
+
+                    image.setController(draweeController);
 
                 }
 

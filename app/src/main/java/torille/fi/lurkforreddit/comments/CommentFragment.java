@@ -298,7 +298,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 } else {
                     DraweeController controller = Fresco.newDraweeControllerBuilder()
                             .setOldController(mImage.getController())
-                            .setUri(mClickedPost.getPostDetails().getPreviewImage())
+                            .setImageRequest(ImageRequest.fromUri(mClickedPost.getPostDetails().getPreviewImage()))
                             .build();
                     mImage.setController(controller);
                 }
