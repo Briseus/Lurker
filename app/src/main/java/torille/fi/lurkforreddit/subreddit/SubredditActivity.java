@@ -1,6 +1,8 @@
 package torille.fi.lurkforreddit.subreddit;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -28,13 +30,7 @@ public class SubredditActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_subreddit);
-
-        Subreddit subreddit = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_SUBREDDIT));
-
         final Toolbar toolbar = (Toolbar) findViewById(R.id.appBarLayout);
-        toolbar.setTitle(subreddit.getDisplay_name());
-
-        loadBannerImage(subreddit);
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -42,9 +38,41 @@ public class SubredditActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+        Subreddit subreddit = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_SUBREDDIT));
 
+        if (subreddit != null) {
+            getSupportActionBar().setTitle(subreddit.getDisplay_name());
+            loadBannerImage(subreddit);
+            initFragment(SubredditFragment.newInstance(subreddit));
+        } else {
+            handleIntent(getIntent());
+        }
 
-        initFragment(SubredditFragment.newInstance(subreddit));
+    }
+
+    public void handleIntent(Intent intent) {
+        if (intent != null && intent.getData() != null) {
+            Uri appLinkData = intent.getData();
+
+            String name = appLinkData.getLastPathSegment();
+            Subreddit subreddit = new Subreddit();
+            subreddit.setName(name);
+            subreddit.setUrl("/r/" + name.toUpperCase());
+
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(name);
+            }
+
+            initFragment(SubredditFragment.newInstance(subreddit));
+        }
+
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+
     }
 
     @Override

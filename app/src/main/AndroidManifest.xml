@@ -19,8 +19,10 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="redirecturi"
                     android:scheme="lurk" />
@@ -29,7 +31,19 @@
         <activity
             android:name=".subreddit.SubredditActivity"
             android:parentActivityName=".subreddits.SubredditsActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="www.reddit.com"
+                    android:pathPattern=".*\/r\/.*\/" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".comments.CommentActivity"
             android:parentActivityName=".subreddit.SubredditActivity"
