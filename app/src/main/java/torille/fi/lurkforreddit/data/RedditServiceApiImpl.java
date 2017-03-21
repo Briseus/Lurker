@@ -260,6 +260,77 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
     }
 
+    @Override
+    public void getSearchResults(String query, final SearchServiceCallback<List<SubredditChildren>> callback) {
+        String token = SharedPreferencesHelper.getToken();
+        Call<SubredditListing> call = RedditService.getInstance(token).searchSubreddits(query, "relevance");
+        call.enqueue(new Callback<SubredditListing>() {
+            @Override
+            public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
+                if (response.isSuccessful()) {
+                    List<SubredditChildren> results = response.body().getData().getChildren();
+                    String after = response.body().getData().getAfter();
+                    callback.onLoaded(formatSubreddits(results), after);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SubredditListing> call, Throwable t) {
+                Log.e("API", "Failed to load seach results " + t.toString());
+            }
+        });
+    }
+
+    @Override
+    public void getMoreSearchResults(String query, String after, final SearchServiceCallback<List<SubredditChildren>> callback) {
+        String token = SharedPreferencesHelper.getToken();
+        Call<SubredditListing> call = RedditService.getInstance(token).searchSubredditsNextPage(query, "relevance", after);
+        call.enqueue(new Callback<SubredditListing>() {
+            @Override
+            public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
+                if (response.isSuccessful()) {
+                    List<SubredditChildren> results = response.body().getData().getChildren();
+                    String after = response.body().getData().getAfter();
+                    callback.onLoaded(formatSubreddits(results), after);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SubredditListing> call, Throwable t) {
+                Log.e("API", "Failed to load more seach results " + t.toString());
+            }
+        });
+
+    }
+
+    private static List<SubredditChildren> formatSubreddits(List<SubredditChildren> childrens) {
+        for (SubredditChildren result : childrens) {
+            Subreddit subreddit = result.getSubreddit();
+
+            final String info = subreddit.getSubscribers() + " subscribers, Community since " + DateUtils.getRelativeTimeSpanString(subreddit.getCreatedUtc() * 1000);
+            subreddit.setFormattedInfo(info);
+
+            if (subreddit.isOver18()) {
+                subreddit.setFormattedTitle(TextHelper.fromHtml(subreddit.getUrl() + "<font color='#FF1744'> NSFW</font>"));
+            } else {
+                subreddit.setFormattedTitle(subreddit.getUrl());
+            }
+
+            if (subreddit.isSubscribed()) {
+                subreddit.setFormattedSubscription("Subscribed");
+            } else {
+                subreddit.setFormattedSubscription("Not subscribed");
+            }
+
+            if (subreddit.getDescriptionHtml() != null && !subreddit.getDescriptionHtml().isEmpty()) {
+                subreddit.setFormattedDescription(TextHelper.trimTrailingWhitespace(TextHelper.fromHtml(subreddit.getDescriptionHtml())));
+            } else {
+                subreddit.setFormattedDescription("No description");
+            }
+        }
+        return childrens;
+    }
+
     private void authenticateApp(final String subredditId, final PostsServiceCallback<List<Post>, String> callback) {
         Call<RedditToken> call = NetworkHelper.createAuthCall();
         call.enqueue(new Callback<RedditToken>() {

@@ -46,4 +46,11 @@ public interface RedditClient {
 
     @GET("api/morechildren")
     Call<ResponseBody> getMoreComments(@Query(value = "link_id") String parentId, @Query(value = "children") String childId, @Query(value = "api_type") String json);
+
+    @GET("subreddits/search")
+    Call<SubredditListing> searchSubreddits(@Query(value = "q") String searchQuery, @Query(value = "sort") String sortBy);
+
+    @GET("subreddits/search")
+    Call<SubredditListing> searchSubredditsNextPage(@Query(value = "q") String searchQuery, @Query(value = "sort") String sortBy, @Query(value = "after") String after);
+
 }

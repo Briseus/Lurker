@@ -26,6 +26,7 @@ import torille.fi.lurkforreddit.data.Subreddit;
 import torille.fi.lurkforreddit.retrofit.RedditAuthService;
 import torille.fi.lurkforreddit.retrofit.RedditClient;
 import torille.fi.lurkforreddit.retrofit.RedditToken;
+import torille.fi.lurkforreddit.search.SearchFragment;
 import torille.fi.lurkforreddit.subreddit.SubredditFragment;
 import torille.fi.lurkforreddit.utils.MediaHelper;
 import torille.fi.lurkforreddit.utils.NetworkHelper;
@@ -60,6 +61,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
         if (null == savedInstanceState) {
             initFrontpage();
         }
+
     }
 
     private void initFragment(Fragment subredditsFragment) {
@@ -168,6 +170,9 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
                 return true;
             case R.id.action_subreddits:
                 initFragment(SubredditsFragment.newInstance());
+                return true;
+            case R.id.action_search:
+                initFragment(SearchFragment.newInstance());
                 return true;
         }
         return false;

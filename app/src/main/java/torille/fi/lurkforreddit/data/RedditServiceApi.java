@@ -22,10 +22,12 @@ public interface RedditServiceApi {
     }
 
     interface CommentsServiceCallback<T> {
-
         void onLoaded(T comments);
-
         void onMoreLoaded(T comments, int position);
+    }
+
+    interface SearchServiceCallback<T> {
+        void onLoaded(T result, String after);
     }
 
     void getSubreddits(SubredditsServiceCallback<List<SubredditChildren>> callback);
@@ -37,4 +39,8 @@ public interface RedditServiceApi {
     void getPostComments(String permaLinkUrl, CommentsServiceCallback<List<CommentChild>> callback);
 
     void getMorePostComments(CommentChild parentComment, String linkId, int position, CommentsServiceCallback<List<CommentChild>> callback);
+
+    void getSearchResults(String query, SearchServiceCallback<List<SubredditChildren>> callback);
+
+    void getMoreSearchResults(String query, String after, SearchServiceCallback<List<SubredditChildren>> callback);
 }

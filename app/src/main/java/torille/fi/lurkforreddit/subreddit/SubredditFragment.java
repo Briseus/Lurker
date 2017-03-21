@@ -430,7 +430,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
 
         class PostViewHolder extends RecyclerView.ViewHolder {
-            final View view;
+
             final TextView title;
             final TextView domain;
             final Button score;
@@ -440,14 +440,13 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
             PostViewHolder(View postView) {
                 super(postView);
-                view = postView;
                 title = (TextView) postView.findViewById(R.id.post_title);
                 domain = (TextView) postView.findViewById(R.id.post_domain);
                 score = (Button) postView.findViewById(R.id.post_likes);
                 comments = (Button) postView.findViewById(R.id.post_messages);
                 openBrowser = (ImageButton) postView.findViewById(R.id.post_open_browser);
                 image = (SimpleDraweeView) postView.findViewById(R.id.post_image);
-                view.setOnClickListener(new View.OnClickListener() {
+                postView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         mClicklistener.onMediaClick(getItem(getAdapterPosition()));

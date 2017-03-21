@@ -62,7 +62,6 @@ public class RedditService {
                         .addQueryParameter("raw_json", "1")
                         .build();
 
-                // Request customization: add request headers
                 Request.Builder requestBuilder = original.newBuilder()
                         .url(url);
 
@@ -74,9 +73,6 @@ public class RedditService {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request original = chain.request();
-                /*
-                HttpUrl url = original.url().newBuilder().addQueryParameter("raw_json", "1").build();
-                original = original.newBuilder().url(url).build();*/
 
                 if (original.header("Authorization") != null) {
                     return chain.proceed(original);

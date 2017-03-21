@@ -18,13 +18,11 @@ public interface RedditRepository {
 
     interface LoadPostCommentsCallback {
         void onCommentsLoaded(List<CommentChild> commentChildren);
-
         void onMoreCommentsLoaded(List<CommentChild> comments, int position);
     }
 
-    interface GetSubredditsCallback {
-
-        void onSubredditsLoaded(SubredditChildren subreddit);
+    interface LoadCommentsCallback {
+        void onSearchLoaded(List<SubredditChildren> subredditChildrens, String after);
     }
 
     void getSubreddits(@NonNull LoadSubredditsCallback callback);
@@ -38,4 +36,8 @@ public interface RedditRepository {
     void getCommentsForPost(@NonNull String permaLinkUrl, @NonNull LoadPostCommentsCallback callback);
 
     void getMoreCommentsForPostAt(@NonNull CommentChild parentComment, @NonNull String linkId, int position, @NonNull LoadPostCommentsCallback callback);
+
+    void getSearchResults(@NonNull String query, @NonNull LoadCommentsCallback callback);
+
+    void getMoreSearchResults(@NonNull String query,@NonNull String after, @NonNull LoadCommentsCallback callback);
 }

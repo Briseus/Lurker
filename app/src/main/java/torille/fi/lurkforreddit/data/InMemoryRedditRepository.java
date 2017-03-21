@@ -89,4 +89,24 @@ public class InMemoryRedditRepository implements RedditRepository {
             }
         });
     }
+
+    @Override
+    public void getSearchResults(@NonNull String query, @NonNull final LoadCommentsCallback callback) {
+        mRedditServiceApi.getSearchResults(query, new RedditServiceApi.SearchServiceCallback<List<SubredditChildren>>() {
+            @Override
+            public void onLoaded(List<SubredditChildren> result, String after) {
+                callback.onSearchLoaded(result, after);
+            }
+        });
+    }
+
+    @Override
+    public void getMoreSearchResults(@NonNull String query, @NonNull String after, @NonNull final LoadCommentsCallback callback) {
+        mRedditServiceApi.getMoreSearchResults(query, after, new RedditServiceApi.SearchServiceCallback<List<SubredditChildren>>() {
+            @Override
+            public void onLoaded(List<SubredditChildren> result, String after) {
+                callback.onSearchLoaded(result, after);
+            }
+        });
+    }
 }

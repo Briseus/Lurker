@@ -29,6 +29,10 @@ public class Subreddit {
     @SerializedName("banner_img")
     @Nullable
     public String banner;
+    private transient CharSequence formattedTitle;
+    private transient String formattedSubscription;
+    private transient String formattedInfo;
+    private transient CharSequence formattedDescription;
 
     public Subreddit() {
     }
@@ -153,6 +157,38 @@ public class Subreddit {
         this.banner = banner;
     }
 
+    public CharSequence getFormattedTitle() {
+        return formattedTitle;
+    }
+
+    public void setFormattedTitle(CharSequence formattedTitle) {
+        this.formattedTitle = formattedTitle;
+    }
+
+    public String getFormattedSubscription() {
+        return formattedSubscription;
+    }
+
+    public void setFormattedSubscription(String formattedSubscription) {
+        this.formattedSubscription = formattedSubscription;
+    }
+
+    public String getFormattedInfo() {
+        return formattedInfo;
+    }
+
+    public void setFormattedInfo(String formattedInfo) {
+        this.formattedInfo = formattedInfo;
+    }
+
+    public CharSequence getFormattedDescription() {
+        return formattedDescription;
+    }
+
+    public void setFormattedDescription(CharSequence formattedDescription) {
+        this.formattedDescription = formattedDescription;
+    }
+
     @Override
     public String toString() {
         return "Subreddit{" +
@@ -162,6 +198,13 @@ public class Subreddit {
                 ", name='" + name + '\'' +
                 ", key_color='" + key_color + '\'' +
                 ", display_name='" + display_name + '\'' +
+                ", descriptionHtml='" + descriptionHtml + '\'' +
+                ", over18=" + over18 +
+                ", subscribers=" + subscribers +
+                ", subscribed=" + subscribed +
+                ", createdUtc=" + createdUtc +
+                ", icon='" + icon + '\'' +
+                ", banner='" + banner + '\'' +
                 '}';
     }
 }
