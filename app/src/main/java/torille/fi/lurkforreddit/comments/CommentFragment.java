@@ -133,7 +133,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
     /**
      * Listener for clicks on notes in the RecyclerView.
      */
-    CommentClickListener mClickListener = new CommentClickListener() {
+    final CommentClickListener mClickListener = new CommentClickListener() {
         @Override
         public void onClick(CommentChild parentComment, String linkId, int position) {
             mActionsListener.loadMoreCommentsAt(parentComment, linkId, position);
@@ -144,9 +144,9 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         private static final int COMMENT_ORIGINAL = -1;
         private static final int COMMENT_PROGRESSBAR = -2;
         private static final int COMMENT_LOAD_MORE = -3;
-        private List<CommentChild> mComments;
-        private Post mClickedPost;
-        private CommentClickListener mClickListener;
+        private final List<CommentChild> mComments;
+        private final Post mClickedPost;
+        private final CommentClickListener mClickListener;
 
         CommentRecyclerViewAdapter(Post clickedPost, List<CommentChild> commentChildren, CommentClickListener listener) {
             mClickedPost = clickedPost;

@@ -126,7 +126,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         mAdapter.clear();
     }
 
-    SearchClickListener searchClickListener = new SearchClickListener() {
+    final SearchClickListener searchClickListener = new SearchClickListener() {
         @Override
         public void onSearchClick(@NonNull Subreddit subreddit) {
             Intent intent = new Intent(getContext(), SubredditActivity.class);
@@ -139,8 +139,8 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         private final static int VIEW_ITEM = 1;
         private final static int VIEW_PROGRESS = 0;
         private final List<SubredditChildren> mResults;
-        private SearchClickListener mClickListener;
-        private Handler mHandler = new Handler();
+        private final SearchClickListener mClickListener;
+        private final Handler mHandler = new Handler();
 
         SearchViewAdapter(List<SubredditChildren> results, SearchClickListener clickListener) {
             this.mResults = results;

@@ -1,8 +1,6 @@
 package torille.fi.lurkforreddit.data;
 
 import android.support.annotation.Nullable;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.Spanned;
 
 import com.google.gson.annotations.SerializedName;
@@ -15,48 +13,48 @@ import org.parceler.ParcelConstructor;
 @org.parceler.Parcel
 public class PostDetails {
 
-    public String subreddit;
-    public String selftext;
+    String subreddit;
+    String selftext;
     @Nullable
     @SerializedName("selftext_html")
-    public String selftextHtml;
-    public int likes;
-    public String author;
-    public String name;
-    public int score;
-    public String thumbnail;
+    String selftextHtml;
+    int likes;
+    String author;
+    String name;
+    int score;
+    String thumbnail;
     @SerializedName("subreddit_id")
-    public String subredditId;
-    public String url;
-    public String title;
+    String subredditId;
+    String url;
+    String title;
     @Nullable
     @SerializedName("post_hint")
-    public String postHint;
-    public String domain;
-    public String id;
+    String postHint;
+    String domain;
+    String id;
     @SerializedName("is_self")
     public Boolean isSelf;
     @SerializedName("created")
-    public long created;
+    long created;
     @SerializedName("created_utc")
-    public long createdUtc;
-    public boolean stickied;
+    long createdUtc;
+    boolean stickied;
     @Nullable
-    public String distinguished;
-    public String permalink;
+    String distinguished;
+    String permalink;
     @SerializedName("num_comments")
-    public int numberOfComments;
+    int numberOfComments;
     @Nullable
     @SerializedName("preview")
-    public ImagePreview images;
+    ImagePreview images;
     @Nullable
-    public String previewImage;
+    String previewImage;
     @Nullable
-    public String previewText;
+    String previewText;
     @Nullable
-    public String previewScore;
+    String previewScore;
     @Nullable
-    transient Spanned previewTitle;
+    private transient Spanned previewTitle;
 
     public PostDetails() {
     }
@@ -90,30 +88,6 @@ public class PostDetails {
         this.previewScore = previewScore;
     }
 
-    public int getNumberOfComments() {
-        return numberOfComments;
-    }
-
-    public void setNumberOfComments(int numberOfComments) {
-        this.numberOfComments = numberOfComments;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public long getCreated() {
-        return created;
-    }
-
-    public void setCreated(long created) {
-        this.created = created;
-    }
-
     public String getSubreddit() {
         return subreddit;
     }
@@ -128,6 +102,15 @@ public class PostDetails {
 
     public void setSelftext(String selftext) {
         this.selftext = selftext;
+    }
+
+    @Nullable
+    public String getSelftextHtml() {
+        return selftextHtml;
+    }
+
+    public void setSelftextHtml(@Nullable String selftextHtml) {
+        this.selftextHtml = selftextHtml;
     }
 
     public int getLikes() {
@@ -194,19 +177,12 @@ public class PostDetails {
         this.title = title;
     }
 
-    public Boolean getSelf() {
-        return isSelf;
-    }
-
-    public void setSelf(Boolean self) {
-        isSelf = self;
-    }
-
+    @Nullable
     public String getPostHint() {
         return postHint;
     }
 
-    public void setPostHint(String postHint) {
+    public void setPostHint(@Nullable String postHint) {
         this.postHint = postHint;
     }
 
@@ -218,44 +194,28 @@ public class PostDetails {
         this.domain = domain;
     }
 
-    public String getPermalink() {
-        return permalink;
+    public String getId() {
+        return id;
     }
 
-    public void setPermalink(String permalink) {
-        this.permalink = permalink;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public ImagePreview getImages() {
-        return images;
+    public Boolean getSelf() {
+        return isSelf;
     }
 
-    public void setImages(ImagePreview images) {
-        this.images = images;
+    public void setSelf(Boolean self) {
+        isSelf = self;
     }
 
-    public String getSelftextHtml() {
-        return selftextHtml;
+    public long getCreated() {
+        return created;
     }
 
-    public void setSelftextHtml(String selftextHtml) {
-        this.selftextHtml = selftextHtml;
-    }
-
-    public boolean isStickied() {
-        return stickied;
-    }
-
-    public void setStickied(boolean stickied) {
-        this.stickied = stickied;
-    }
-
-    public String getDistinguished() {
-        return distinguished;
-    }
-
-    public void setDistinguished(String distinguished) {
-        this.distinguished = distinguished;
+    public void setCreated(long created) {
+        this.created = created;
     }
 
     public long getCreatedUtc() {
@@ -266,27 +226,72 @@ public class PostDetails {
         this.createdUtc = createdUtc;
     }
 
+    public boolean isStickied() {
+        return stickied;
+    }
+
+    public void setStickied(boolean stickied) {
+        this.stickied = stickied;
+    }
+
+    @Nullable
+    public String getDistinguished() {
+        return distinguished;
+    }
+
+    public void setDistinguished(@Nullable String distinguished) {
+        this.distinguished = distinguished;
+    }
+
+    public String getPermalink() {
+        return permalink;
+    }
+
+    public void setPermalink(String permalink) {
+        this.permalink = permalink;
+    }
+
+    public int getNumberOfComments() {
+        return numberOfComments;
+    }
+
+    public void setNumberOfComments(int numberOfComments) {
+        this.numberOfComments = numberOfComments;
+    }
+
+    @Nullable
+    public ImagePreview getImages() {
+        return images;
+    }
+
+    public void setImages(@Nullable ImagePreview images) {
+        this.images = images;
+    }
+
+    @Nullable
     public String getPreviewImage() {
         return previewImage;
     }
 
-    public void setPreviewImage(String previewImage) {
+    public void setPreviewImage(@Nullable String previewImage) {
         this.previewImage = previewImage;
     }
 
+    @Nullable
     public String getPreviewText() {
         return previewText;
     }
 
-    public void setPreviewText(String previewText) {
+    public void setPreviewText(@Nullable String previewText) {
         this.previewText = previewText;
     }
 
+    @Nullable
     public String getPreviewScore() {
         return previewScore;
     }
 
-    public void setPreviewScore(String previewScore) {
+    public void setPreviewScore(@Nullable String previewScore) {
         this.previewScore = previewScore;
     }
 

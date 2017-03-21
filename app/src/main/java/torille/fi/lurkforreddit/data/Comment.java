@@ -10,52 +10,52 @@ import java.util.List;
 @Parcel
 public class Comment {
     @SerializedName("subreddit_id")
-    public String subredditId;
+    String subredditId;
     @SerializedName("link_id")
-    public String linkId;
+    String linkId;
     @SerializedName("replies")
-    public  CommentListing replies;
+     CommentListing replies;
     @SerializedName("saved")
-    public boolean saved;
+    boolean saved;
     @SerializedName("id")
-    public String id;
+    String id;
     @SerializedName("gilded")
-    public int gilded;
+    int gilded;
     @SerializedName("archived")
-    public boolean archived;
+    boolean archived;
     @SerializedName("author")
-    public String author;
+    String author;
     @SerializedName("parent_id")
-    public String parentId;
+    String parentId;
     @SerializedName("score")
-    public int score;
+    int score;
     @SerializedName("controversiality")
-    public int controversiality;
+    int controversiality;
     @SerializedName("body")
-    public String body;
+    String body;
     @SerializedName("downs")
-    public int downs;
+    int downs;
     @SerializedName("body_html")
-    public String bodyHtml;
+    String bodyHtml;
     @SerializedName("stickied")
-    public boolean stickied;
+    boolean stickied;
     @SerializedName("subreddit")
-    public String subreddit;
+    String subreddit;
     @SerializedName("score_hidden")
-    public boolean scoreHidden;
+    boolean scoreHidden;
     @SerializedName("name")
-    public String name;
+    String name;
     @SerializedName("created")
-    public long created;
+    long created;
     @SerializedName("author_flair_text")
-    public String authorFlairText;
+    String authorFlairText;
     @SerializedName("created_utc")
-    public long createdUtc;
+    long createdUtc;
     @SerializedName("ups")
-    public int ups;
-    public int count;
+    int ups;
+    int count;
     @SerializedName("children")
-    public List<String> children;
+    List<String> children;
     private transient CharSequence formattedComment;
     private transient CharSequence formatAuthor;
     private transient String formatTime;
@@ -139,11 +139,9 @@ public class Comment {
         this.subredditId = subredditId;
     }
 
-
     public String getLinkId() {
         return linkId;
     }
-
 
     public void setLinkId(String linkId) {
         this.linkId = linkId;
@@ -153,45 +151,37 @@ public class Comment {
         return replies;
     }
 
-
     public void setReplies(CommentListing replies) {
         this.replies = replies;
     }
 
-    public boolean getSaved() {
+    public boolean isSaved() {
         return saved;
     }
-
 
     public void setSaved(boolean saved) {
         this.saved = saved;
     }
 
-
     public String getId() {
         return id;
     }
-
 
     public void setId(String id) {
         this.id = id;
     }
 
-
     public int getGilded() {
         return gilded;
     }
-
 
     public void setGilded(int gilded) {
         this.gilded = gilded;
     }
 
-
-    public boolean getArchived() {
+    public boolean isArchived() {
         return archived;
     }
-
 
     public void setArchived(boolean archived) {
         this.archived = archived;
@@ -201,26 +191,21 @@ public class Comment {
         return author;
     }
 
-
     public void setAuthor(String author) {
         this.author = author;
     }
-
 
     public String getParentId() {
         return parentId;
     }
 
-
     public void setParentId(String parentId) {
         this.parentId = parentId;
     }
 
-
     public int getScore() {
         return score;
     }
-
 
     public void setScore(int score) {
         this.score = score;
@@ -230,16 +215,13 @@ public class Comment {
         return controversiality;
     }
 
-
     public void setControversiality(int controversiality) {
         this.controversiality = controversiality;
     }
 
-
     public String getBody() {
         return body;
     }
-
 
     public void setBody(String body) {
         this.body = body;
@@ -249,23 +231,19 @@ public class Comment {
         return downs;
     }
 
-
     public void setDowns(int downs) {
         this.downs = downs;
     }
-
 
     public String getBodyHtml() {
         return bodyHtml;
     }
 
-
     public void setBodyHtml(String bodyHtml) {
         this.bodyHtml = bodyHtml;
     }
 
-
-    public boolean getStickied() {
+    public boolean isStickied() {
         return stickied;
     }
 
@@ -277,66 +255,53 @@ public class Comment {
         return subreddit;
     }
 
-
     public void setSubreddit(String subreddit) {
         this.subreddit = subreddit;
     }
 
-
-    public boolean getScoreHidden() {
+    public boolean isScoreHidden() {
         return scoreHidden;
     }
-
 
     public void setScoreHidden(boolean scoreHidden) {
         this.scoreHidden = scoreHidden;
     }
 
-
     public String getName() {
         return name;
     }
-
 
     public void setName(String name) {
         this.name = name;
     }
 
-
     public long getCreated() {
         return created;
     }
-
 
     public void setCreated(long created) {
         this.created = created;
     }
 
-
     public String getAuthorFlairText() {
         return authorFlairText;
     }
-
 
     public void setAuthorFlairText(String authorFlairText) {
         this.authorFlairText = authorFlairText;
     }
 
-
     public long getCreatedUtc() {
         return createdUtc;
     }
-
 
     public void setCreatedUtc(long createdUtc) {
         this.createdUtc = createdUtc;
     }
 
-
     public int getUps() {
         return ups;
     }
-
 
     public void setUps(int ups) {
         this.ups = ups;
@@ -362,6 +327,10 @@ public class Comment {
         return formattedComment;
     }
 
+    public void setFormattedComment(CharSequence formattedComment) {
+        this.formattedComment = formattedComment;
+    }
+
     public CharSequence getFormatAuthor() {
         return formatAuthor;
     }
@@ -377,11 +346,6 @@ public class Comment {
     public void setFormatTime(String formatTime) {
         this.formatTime = formatTime;
     }
-
-    public void setFormattedComment(CharSequence formattedComment) {
-        this.formattedComment = formattedComment;
-    }
-
 
     @Override
     public String toString() {

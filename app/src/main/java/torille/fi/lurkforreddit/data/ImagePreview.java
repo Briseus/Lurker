@@ -16,14 +16,14 @@ import java.util.List;
 public class ImagePreview {
 
     @SerializedName("images")
-    public List<Image> images = new ArrayList<>();
+    List<Image> images = new ArrayList<>();
 
     public List<Image> getImages() {
         return images;
     }
 
     @ParcelConstructor
-    public ImagePreview(List<Image> images) {
+    ImagePreview(List<Image> images) {
         this.images = images;
     }
 

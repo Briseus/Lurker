@@ -13,13 +13,13 @@ import org.parceler.Parcel;
 public class ImageResolution {
 
     @SerializedName("url")
-    public String url;
+    String url;
     @SerializedName("width")
-    public Integer width;
+    int width;
     @SerializedName("height")
-    public Integer height;
+    int height;
 
-    public ImageResolution() {
+    ImageResolution() {
     }
 
     /**
@@ -39,28 +39,28 @@ public class ImageResolution {
     /**
      * @return The width
      */
-    public Integer getWidth() {
+    public int getWidth() {
         return width;
     }
 
     /**
      * @param width The width
      */
-    public void setWidth(Integer width) {
+    public void setWidth(int width) {
         this.width = width;
     }
 
     /**
      * @return The height
      */
-    public Integer getHeight() {
+    public int getHeight() {
         return height;
     }
 
     /**
      * @param height The height
      */
-    public void setHeight(Integer height) {
+    public void setHeight(int height) {
         this.height = height;
     }
 

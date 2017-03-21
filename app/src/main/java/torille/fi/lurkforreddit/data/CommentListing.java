@@ -13,9 +13,9 @@ import org.parceler.ParcelConstructor;
 public class CommentListing {
 
     @SerializedName("kind")
-    public String kind;
+    String kind;
     @SerializedName("data")
-    public CommentData commentData;
+    CommentData commentData;
 
     @ParcelConstructor
     public CommentListing(String kind, CommentData commentData) {

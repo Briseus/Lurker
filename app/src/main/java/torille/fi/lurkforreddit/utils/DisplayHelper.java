@@ -2,7 +2,6 @@ package torille.fi.lurkforreddit.utils;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import torille.fi.lurkforreddit.data.PostDetails;
 

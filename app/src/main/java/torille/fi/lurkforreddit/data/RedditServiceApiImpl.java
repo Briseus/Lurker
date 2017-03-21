@@ -16,7 +16,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import torille.fi.lurkforreddit.retrofit.RedditClient;
 import torille.fi.lurkforreddit.retrofit.RedditService;
 import torille.fi.lurkforreddit.retrofit.RedditToken;
 import torille.fi.lurkforreddit.utils.CommentsStreamingParser;

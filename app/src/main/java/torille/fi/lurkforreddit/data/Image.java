@@ -16,14 +16,14 @@ import java.util.List;
 public class Image {
 
     @SerializedName("source")
-    public ImageSource source;
+    ImageSource source;
     @SerializedName("resolutions")
     public List<ImageResolution> resolutions = new ArrayList<>();
     @SerializedName("id")
-    public String id;
+    String id;
 
     @ParcelConstructor
-    public Image(ImageSource source, List<ImageResolution> resolutions, String id) {
+    Image(ImageSource source, List<ImageResolution> resolutions, String id) {
         this.source = source;
         this.resolutions = resolutions;
         this.id = id;

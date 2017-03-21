@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Model containing all response listings and next/last page
  */
-public class PostData {
+class PostData {
     private String modhash;
     @SerializedName("children")
     private List<Post> Posts;

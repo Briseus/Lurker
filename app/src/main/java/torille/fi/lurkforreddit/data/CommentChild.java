@@ -13,11 +13,11 @@ import org.parceler.ParcelConstructor;
 @Parcel
 public class CommentChild {
 
-    public transient int type;
+    private transient int type;
     @SerializedName("kind")
-    public String kind;
+    String kind;
     @SerializedName("data")
-    public Comment data;
+    Comment data;
 
     public CommentChild() {
     }

@@ -196,7 +196,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     /**
      * Listeners for clicks in the Recyclerview
      */
-    postClickListener mClickListener = new postClickListener() {
+    final postClickListener mClickListener = new postClickListener() {
         @Override
         public void onButtonClick(String url) {
             mActionsListener.openCustomTabs(url);
@@ -288,10 +288,10 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         private final static int VIEW_ITEM = 1;
         private final static int VIEW_PROGRESS = 0;
 
-        private List<Post> mPosts;
+        private final List<Post> mPosts;
         private final postClickListener mClicklistener;
         private final int mDefaultAccentColor;
-        private ImagePipeline imagePipeline;
+        private final ImagePipeline imagePipeline;
 
         PostsAdapter(List<Post> posts, postClickListener listener, int color, ImagePipeline pipeline) {
             mPosts = posts;

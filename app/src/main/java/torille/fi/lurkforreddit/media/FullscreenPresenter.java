@@ -2,7 +2,6 @@ package torille.fi.lurkforreddit.media;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
 import torille.fi.lurkforreddit.data.Post;
 import torille.fi.lurkforreddit.utils.TextHelper;
@@ -13,7 +12,7 @@ import torille.fi.lurkforreddit.utils.TextHelper;
 
 public class FullscreenPresenter implements FullscreenContract.UserActionsListener {
 
-    private FullscreenContract.View mFullscreenView;
+    private final FullscreenContract.View mFullscreenView;
 
     public FullscreenPresenter(@NonNull FullscreenContract.View fullscreenView) {
         mFullscreenView = fullscreenView;

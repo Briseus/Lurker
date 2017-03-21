@@ -17,13 +17,13 @@ import java.util.List;
 public class CommentData {
 
     @SerializedName("modhash")
-    public String modhash;
+    String modhash;
     @SerializedName("children")
-    public List<CommentChild> commentChildren = new ArrayList<>();
+    List<CommentChild> commentChildren = new ArrayList<>();
     @SerializedName("after")
-    public String after;
+    String after;
     @SerializedName("before")
-    public String before;
+    String before;
 
     @ParcelConstructor
     public CommentData(String modhash, List<CommentChild> commentChildren, String after, String before) {

@@ -25,7 +25,7 @@ public class RedditService {
 
     private static final String API_BASE_URL = "https://oauth.reddit.com/";
     private static RedditService instance;
-    private RedditClient redditClient;
+    private final RedditClient redditClient;
     private static String TOKEN;
 
     private final static OkHttpClient okHttpClient = new OkHttpClient();

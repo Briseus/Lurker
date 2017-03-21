@@ -41,7 +41,7 @@ public class TextHelper {
         }
 
         String author = "";
-        if (commentChild.getData().getAuthor() != null && commentChild.getData().getStickied()) {
+        if (commentChild.getData().getAuthor() != null && commentChild.getData().isStickied()) {
             author = "<font color='#64FFDA'> Sticky post<font> &nbsp &nbsp";
         } else if (commentChild.getData().getAuthor() != null) {
             author = commentChild.getData().getAuthor();

@@ -10,7 +10,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.List;
 
-import retrofit2.http.POST;
 import torille.fi.lurkforreddit.data.Post;
 import torille.fi.lurkforreddit.data.PostDetails;
 import torille.fi.lurkforreddit.data.RedditRepository;

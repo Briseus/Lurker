@@ -10,16 +10,16 @@ import org.parceler.Parcel;
  * Model containg the source image
  */
 @Parcel
-public class ImageSource {
+class ImageSource {
 
     @SerializedName("url")
-    public String url;
+    String url;
     @SerializedName("width")
-    public Integer width;
+    int width;
     @SerializedName("height")
-    public Integer height;
+    int height;
 
-    public ImageSource() {
+    ImageSource() {
     }
 
     public String getUrl() {
@@ -32,22 +32,22 @@ public class ImageSource {
     }
 
 
-    public Integer getWidth() {
+    public int getWidth() {
         return width;
     }
 
 
-    public void setWidth(Integer width) {
+    public void setWidth(int width) {
         this.width = width;
     }
 
 
-    public Integer getHeight() {
+    public int getHeight() {
         return height;
     }
 
 
-    public void setHeight(Integer height) {
+    public void setHeight(int height) {
         this.height = height;
     }
 

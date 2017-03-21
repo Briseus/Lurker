@@ -1,18 +1,13 @@
 package torille.fi.lurkforreddit.media;
 
-import android.annotation.SuppressLint;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
 
 import org.parceler.Parcels;
 

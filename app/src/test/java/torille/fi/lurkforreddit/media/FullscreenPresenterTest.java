@@ -6,7 +6,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import torille.fi.lurkforreddit.data.Post;
-import torille.fi.lurkforreddit.data.PostDetails;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;

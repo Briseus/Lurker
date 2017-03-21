@@ -13,8 +13,8 @@ import torille.fi.lurkforreddit.data.SubredditChildren;
 
 public class SearchPresenter implements SearchContract.UserActionsListener {
 
-    private RedditRepository mRedditRepository;
-    private SearchContract.View mSearchView;
+    private final RedditRepository mRedditRepository;
+    private final SearchContract.View mSearchView;
     private String searchAfter;
     private String searchQuery;
 

@@ -10,9 +10,9 @@ import org.parceler.ParcelConstructor;
 @org.parceler.Parcel
 public class Post {
 
-    public String kind;
+    String kind;
     @SerializedName("data")
-    public PostDetails postDetails = new PostDetails();
+    PostDetails postDetails = new PostDetails();
 
     public Post() {
     }

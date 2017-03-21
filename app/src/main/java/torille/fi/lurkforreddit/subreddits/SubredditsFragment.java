@@ -85,7 +85,7 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     /**
      * Listener for clicks on notes in the RecyclerView.
      */
-    SubredditItemListener mItemListener = new SubredditItemListener() {
+    final SubredditItemListener mItemListener = new SubredditItemListener() {
         @Override
         public void onSubredditClick(Subreddit subreddit) {
             mActionsListener.openSubreddit(subreddit);
@@ -124,7 +124,7 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
         private List<SubredditChildren> mSubreddits;
         private SubredditItemListener mItemListener;
-        private int mDefaultColor;
+        private final int mDefaultColor;
 
         SubredditsAdapter(List<SubredditChildren> subreddits, SubredditItemListener itemListener, int color) {
             setList(subreddits);

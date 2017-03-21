@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorDarkBackground"
     android:orientation="vertical"
     tools:context=".subreddit.SubredditActivity">
 
@@ -42,7 +41,7 @@
         android:id="@+id/contentFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
+        android:background="@color/colorDarkBackground"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:behavior_overlapTop="64dp">
     </FrameLayout>
