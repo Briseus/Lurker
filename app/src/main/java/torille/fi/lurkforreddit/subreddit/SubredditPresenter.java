@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.Post;
+import torille.fi.lurkforreddit.data.models.Post;
 import torille.fi.lurkforreddit.data.RedditRepository;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
 import torille.fi.lurkforreddit.utils.MediaHelper;

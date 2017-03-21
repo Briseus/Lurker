@@ -3,7 +3,7 @@ package torille.fi.lurkforreddit.utils;
 import android.content.Context;
 import android.util.DisplayMetrics;
 
-import torille.fi.lurkforreddit.data.PostDetails;
+import torille.fi.lurkforreddit.data.models.PostDetails;
 
 /**
  * Helper to get dpi and best picture compared to width

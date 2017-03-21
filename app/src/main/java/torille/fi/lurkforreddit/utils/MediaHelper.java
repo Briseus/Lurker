@@ -6,7 +6,7 @@ import android.support.customtabs.CustomTabsSession;
 import android.support.v4.content.ContextCompat;
 
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.Post;
+import torille.fi.lurkforreddit.data.models.Post;
 
 /**
  * Helper class for parsing urls and media

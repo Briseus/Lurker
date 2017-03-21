@@ -28,9 +28,9 @@ import java.util.List;
 
 import torille.fi.lurkforreddit.Injection;
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.Comment;
-import torille.fi.lurkforreddit.data.CommentChild;
-import torille.fi.lurkforreddit.data.Post;
+import torille.fi.lurkforreddit.data.models.Comment;
+import torille.fi.lurkforreddit.data.models.CommentChild;
+import torille.fi.lurkforreddit.data.models.Post;
 import torille.fi.lurkforreddit.utils.TextHelper;
 
 /**

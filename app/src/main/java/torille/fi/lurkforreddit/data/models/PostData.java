@@ -1,4 +1,4 @@
-package torille.fi.lurkforreddit.data;
+package torille.fi.lurkforreddit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Model containing all response listings and next/last page
  */
-class PostData {
+public class PostData {
     private String modhash;
     @SerializedName("children")
     private List<Post> Posts;

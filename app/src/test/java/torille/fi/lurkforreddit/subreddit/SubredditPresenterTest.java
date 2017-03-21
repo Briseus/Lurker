@@ -10,10 +10,10 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.Post;
-import torille.fi.lurkforreddit.data.PostDetails;
+import torille.fi.lurkforreddit.data.models.Post;
+import torille.fi.lurkforreddit.data.models.PostDetails;
 import torille.fi.lurkforreddit.data.RedditRepository;
-import torille.fi.lurkforreddit.data.Subreddit;
+import torille.fi.lurkforreddit.data.models.Subreddit;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;

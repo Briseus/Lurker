@@ -32,7 +32,7 @@ import java.io.IOException;
 
 import me.relex.photodraweeview.PhotoDraweeView;
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.Post;
+import torille.fi.lurkforreddit.data.models.Post;
 
 import static android.view.View.GONE;
 

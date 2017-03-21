@@ -10,7 +10,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 import torille.fi.lurkforreddit.retrofit.RedditAuthService;
 import torille.fi.lurkforreddit.retrofit.RedditClient;
-import torille.fi.lurkforreddit.retrofit.RedditToken;
+import torille.fi.lurkforreddit.data.models.RedditToken;
 
 import static java.util.UUID.randomUUID;
 

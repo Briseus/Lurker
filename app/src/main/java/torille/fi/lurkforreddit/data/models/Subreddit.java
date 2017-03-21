@@ -1,4 +1,4 @@
-package torille.fi.lurkforreddit.data;
+package torille.fi.lurkforreddit.data.models;
 
 import android.support.annotation.Nullable;
 

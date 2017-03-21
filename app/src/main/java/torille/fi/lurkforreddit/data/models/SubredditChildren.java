@@ -1,4 +1,4 @@
-package torille.fi.lurkforreddit.data;
+package torille.fi.lurkforreddit.data.models;
 
 import com.google.gson.annotations.SerializedName;
 

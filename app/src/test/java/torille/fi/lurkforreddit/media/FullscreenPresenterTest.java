@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import torille.fi.lurkforreddit.data.Post;
+import torille.fi.lurkforreddit.data.models.Post;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;

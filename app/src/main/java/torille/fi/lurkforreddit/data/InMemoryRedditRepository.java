@@ -5,6 +5,10 @@ import android.support.annotation.VisibleForTesting;
 
 import java.util.List;
 
+import torille.fi.lurkforreddit.data.models.CommentChild;
+import torille.fi.lurkforreddit.data.models.Post;
+import torille.fi.lurkforreddit.data.models.SubredditChildren;
+
 /**
  * In memory cache
  */

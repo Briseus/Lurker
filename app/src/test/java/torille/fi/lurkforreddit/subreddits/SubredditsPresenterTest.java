@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import torille.fi.lurkforreddit.data.RedditRepository;
-import torille.fi.lurkforreddit.data.Subreddit;
-import torille.fi.lurkforreddit.data.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.Subreddit;
+import torille.fi.lurkforreddit.data.models.SubredditChildren;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;

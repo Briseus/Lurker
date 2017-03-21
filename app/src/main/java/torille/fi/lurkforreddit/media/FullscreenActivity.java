@@ -12,7 +12,7 @@ import android.view.MenuItem;
 import org.parceler.Parcels;
 
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.Post;
+import torille.fi.lurkforreddit.data.models.Post;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.

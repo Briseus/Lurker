@@ -18,7 +18,7 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import org.parceler.Parcels;
 
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.Subreddit;
+import torille.fi.lurkforreddit.data.models.Subreddit;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
 
 public class SubredditActivity extends AppCompatActivity {

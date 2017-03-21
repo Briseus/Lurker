@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.CommentChild;
+import torille.fi.lurkforreddit.data.models.CommentChild;
 import torille.fi.lurkforreddit.data.RedditRepository;
 
 /**

@@ -4,6 +4,10 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
+import torille.fi.lurkforreddit.data.models.CommentChild;
+import torille.fi.lurkforreddit.data.models.Post;
+import torille.fi.lurkforreddit.data.models.SubredditChildren;
+
 /**
  * Main entry point for accessing data.
  */

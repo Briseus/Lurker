@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import java.util.List;
 
 import torille.fi.lurkforreddit.data.RedditRepository;
-import torille.fi.lurkforreddit.data.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.SubredditChildren;
 
 /**
  * Created by eva on 3/20/17.

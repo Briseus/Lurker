@@ -64,3 +64,6 @@ gen-external-apklibs
 
 #Config
 app/src/main/res/values/values.xml
+
+#Keystore
+keystore.properties

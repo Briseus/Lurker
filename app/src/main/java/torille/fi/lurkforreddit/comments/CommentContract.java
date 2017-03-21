@@ -2,7 +2,7 @@ package torille.fi.lurkforreddit.comments;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.CommentChild;
+import torille.fi.lurkforreddit.data.models.CommentChild;
 
 /**
  * Created by eva on 2/13/17.

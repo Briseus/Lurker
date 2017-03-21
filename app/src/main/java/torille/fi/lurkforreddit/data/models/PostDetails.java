@@ -1,4 +1,4 @@
-package torille.fi.lurkforreddit.data;
+package torille.fi.lurkforreddit.data.models;
 
 import android.support.annotation.Nullable;
 import android.text.Spanned;
@@ -6,6 +6,8 @@ import android.text.Spanned;
 import com.google.gson.annotations.SerializedName;
 
 import org.parceler.ParcelConstructor;
+
+import torille.fi.lurkforreddit.data.models.ImagePreview;
 
 /**
  * Model containing the details of each post

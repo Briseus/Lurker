@@ -2,8 +2,8 @@ package torille.fi.lurkforreddit.subreddits;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.Subreddit;
-import torille.fi.lurkforreddit.data.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.Subreddit;
+import torille.fi.lurkforreddit.data.models.SubredditChildren;
 
 /**
  * Created by eva on 2/8/17.

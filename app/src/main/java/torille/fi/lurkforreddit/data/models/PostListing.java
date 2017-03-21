@@ -1,4 +1,4 @@
-package torille.fi.lurkforreddit.data;
+package torille.fi.lurkforreddit.data.models;
 
 /**
  * Root object for Reddit posts
@@ -6,8 +6,8 @@ package torille.fi.lurkforreddit.data;
 
 public class PostListing {
 
-    private String kind;
-    private PostData data;
+    String kind;
+    PostData data;
 
     public PostListing() {
     }

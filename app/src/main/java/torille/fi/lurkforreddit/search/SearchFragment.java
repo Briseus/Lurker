@@ -25,8 +25,8 @@ import java.util.List;
 
 import torille.fi.lurkforreddit.Injection;
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.Subreddit;
-import torille.fi.lurkforreddit.data.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.Subreddit;
+import torille.fi.lurkforreddit.data.models.SubredditChildren;
 import torille.fi.lurkforreddit.subreddit.SubredditActivity;
 
 /**

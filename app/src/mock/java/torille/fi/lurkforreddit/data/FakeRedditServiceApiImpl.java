@@ -42,6 +42,16 @@ public class FakeRedditServiceApiImpl implements RedditServiceApi {
 
     }
 
+    @Override
+    public void getSearchResults(String query, SearchServiceCallback<List<SubredditChildren>> callback) {
+
+    }
+
+    @Override
+    public void getMoreSearchResults(String query, String after, SearchServiceCallback<List<SubredditChildren>> callback) {
+
+    }
+
     @VisibleForTesting
     public static void addPosts(Post... posts) {
         for (Post post: posts) {

@@ -3,7 +3,7 @@ package torille.fi.lurkforreddit.media;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
-import torille.fi.lurkforreddit.data.Post;
+import torille.fi.lurkforreddit.data.models.Post;
 import torille.fi.lurkforreddit.utils.TextHelper;
 
 /**

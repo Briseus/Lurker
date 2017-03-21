@@ -1,4 +1,6 @@
-package torille.fi.lurkforreddit.retrofit;
+package torille.fi.lurkforreddit.data.models;
+
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Model containing Reddit API auth token
@@ -6,10 +8,15 @@ package torille.fi.lurkforreddit.retrofit;
 
 
 public class RedditToken {
+    @SerializedName("access_token")
     private String access_token;
+    @SerializedName("token_type")
     private String token_type;
+    @SerializedName("scope")
     private String scope;
+    @SerializedName("refresh_token")
     private String refresh_token;
+    @SerializedName("expires_in")
     private long expires_in;
 
     public String getRefresh_token() {

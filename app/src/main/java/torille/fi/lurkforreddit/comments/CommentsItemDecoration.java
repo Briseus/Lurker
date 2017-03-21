@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import torille.fi.lurkforreddit.data.CommentChild;
+import torille.fi.lurkforreddit.data.models.CommentChild;
 
 /**
  * Item decoration for {@link CommentChild} in {@link torille.fi.lurkforreddit.comments.CommentFragment.CommentRecyclerViewAdapter}

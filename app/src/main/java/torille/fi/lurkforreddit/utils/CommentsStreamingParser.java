@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.Comment;
-import torille.fi.lurkforreddit.data.CommentChild;
-import torille.fi.lurkforreddit.data.CommentData;
-import torille.fi.lurkforreddit.data.CommentListing;
+import torille.fi.lurkforreddit.data.models.Comment;
+import torille.fi.lurkforreddit.data.models.CommentChild;
+import torille.fi.lurkforreddit.data.models.CommentData;
+import torille.fi.lurkforreddit.data.models.CommentListing;
 
 /**
  * Utility classes to stream parse {@link CommentListing} Json and nested models

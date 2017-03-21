@@ -11,7 +11,7 @@ import android.support.v7.widget.Toolbar;
 import org.parceler.Parcels;
 
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.Post;
+import torille.fi.lurkforreddit.data.models.Post;
 
 /**
  * Created by eva on 2/13/17.

@@ -2,6 +2,10 @@ package torille.fi.lurkforreddit.data;
 
 import java.util.List;
 
+import torille.fi.lurkforreddit.data.models.CommentChild;
+import torille.fi.lurkforreddit.data.models.Post;
+import torille.fi.lurkforreddit.data.models.SubredditChildren;
+
 /**
  * Defines an interface to the service API that is used by this application. All data request should
  * be piped through this interface.

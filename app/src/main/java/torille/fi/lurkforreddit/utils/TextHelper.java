@@ -7,7 +7,7 @@ import android.text.format.DateUtils;
 import java.util.LinkedList;
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.CommentChild;
+import torille.fi.lurkforreddit.data.models.CommentChild;
 
 /**
  * Contains utility classes for parsing text

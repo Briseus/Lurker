@@ -8,8 +8,9 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-import torille.fi.lurkforreddit.data.PostListing;
-import torille.fi.lurkforreddit.data.SubredditListing;
+import torille.fi.lurkforreddit.data.models.PostListing;
+import torille.fi.lurkforreddit.data.models.RedditToken;
+import torille.fi.lurkforreddit.data.models.SubredditListing;
 
 /**
  * Interface that has all the Retrofit calls
