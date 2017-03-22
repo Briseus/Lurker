@@ -19,11 +19,11 @@ import retrofit2.Response;
 import torille.fi.lurkforreddit.data.models.CommentChild;
 import torille.fi.lurkforreddit.data.models.Post;
 import torille.fi.lurkforreddit.data.models.PostListing;
+import torille.fi.lurkforreddit.data.models.RedditToken;
 import torille.fi.lurkforreddit.data.models.Subreddit;
 import torille.fi.lurkforreddit.data.models.SubredditChildren;
 import torille.fi.lurkforreddit.data.models.SubredditListing;
 import torille.fi.lurkforreddit.retrofit.RedditService;
-import torille.fi.lurkforreddit.data.models.RedditToken;
 import torille.fi.lurkforreddit.utils.CommentsStreamingParser;
 import torille.fi.lurkforreddit.utils.DisplayHelper;
 import torille.fi.lurkforreddit.utils.NetworkHelper;
@@ -54,9 +54,8 @@ public class RedditServiceApiImpl implements RedditServiceApi {
             public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
 
                 if (response.isSuccessful() && response.body().getData().getChildren() != null) {
-                    Log.d("Subreddits", response.body().toString());
                     List<SubredditChildren> subreddits = response.body().getData().getChildren();
-                    Log.d("Subreddits", "Got " + subreddits.size() + " Subreddits");
+
                     // sort subreddits by name before callback
                     Collections.sort(subreddits, new Comparator<SubredditChildren>() {
                         @Override
@@ -341,8 +340,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
         call.enqueue(new Callback<RedditToken>() {
             @Override
             public void onResponse(Call<RedditToken> call, Response<RedditToken> response) {
-                if (response.isSuccessful()) {
-                    Log.d("Jee", "Got new token " + response.body().getAccess_token());
+                if (response.isSuccessful() && response.body().getAccess_token() != null) {
                     SharedPreferencesHelper.setToken(response.body().getAccess_token());
                     getSubredditPosts(subredditId, callback);
                 }
