@@ -11,18 +11,14 @@ import torille.fi.lurkforreddit.data.models.SubredditChildren;
  * be piped through this interface.
  */
 
-public interface RedditServiceApi {
+interface RedditServiceApi {
 
     interface SubredditsServiceCallback<T> {
-
         void onLoaded(T subreddits);
-
     }
 
     interface PostsServiceCallback<T, String> {
-
         void onLoaded(T subreddits, String nextpage);
-
     }
 
     interface CommentsServiceCallback<T> {

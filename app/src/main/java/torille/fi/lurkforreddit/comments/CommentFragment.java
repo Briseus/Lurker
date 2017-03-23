@@ -79,12 +79,6 @@ public class CommentFragment extends Fragment implements CommentContract.View {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         loadIfEmpty();

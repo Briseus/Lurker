@@ -14,7 +14,7 @@ import torille.fi.lurkforreddit.data.models.CommentChild;
  * of the comment
  */
 
-public class CommentsItemDecoration extends RecyclerView.ItemDecoration {
+class CommentsItemDecoration extends RecyclerView.ItemDecoration {
 
     private final Drawable mDivider;
 

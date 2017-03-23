@@ -55,7 +55,6 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
                 if (response.isSuccessful() && response.body().getData().getChildren() != null) {
                     List<SubredditChildren> subreddits = response.body().getData().getChildren();
-
                     // sort subreddits by name before callback
                     Collections.sort(subreddits, new Comparator<SubredditChildren>() {
                         @Override
@@ -225,20 +224,22 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                         InputStreamReader in = new InputStreamReader(response.body().source().inputStream(), "UTF-8");
                         JsonReader reader = new JsonReader(in);
                         List<CommentChild> additionalComments = CommentsStreamingParser.readMoreComments(reader);
+
                         reader.close();
                         in.close();
                         response.body().close();
+
                         for (int i = 0; i < additionalComments.size(); i++) {
+                            CommentChild commentChild = additionalComments.get(i);
                             /*
                             If type is "continue this thread ->"
                              */
-                            if (additionalComments.get(i).getData().getId().equals("_")) {
-                                additionalComments.get(i).setKind("more");
-                                additionalComments.get(i).setType(parentComment.getType());
+                            if (commentChild.getData().getId().equals("_") || commentChild.getData().getChildren() != null) {
+                                commentChild.setKind("more");
                             } else {
-                                additionalComments.get(i).setKind("t3");
-                                additionalComments.get(i).setType(parentComment.getType());
+                                commentChild.setKind("t3");
                             }
+                            commentChild.setType(parentComment.getType());
                             TextHelper.formatCommentData(additionalComments.get(i));
 
                         }
@@ -265,7 +266,8 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     }
 
     @Override
-    public void getSearchResults(String query, final SearchServiceCallback<List<SubredditChildren>> callback) {
+    public void getSearchResults(String query,
+                                 final SearchServiceCallback<List<SubredditChildren>> callback) {
         String token = SharedPreferencesHelper.getToken();
         Call<SubredditListing> call = RedditService.getInstance(token).searchSubreddits(query, "relevance");
         call.enqueue(new Callback<SubredditListing>() {
@@ -286,7 +288,8 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     }
 
     @Override
-    public void getMoreSearchResults(String query, String after, final SearchServiceCallback<List<SubredditChildren>> callback) {
+    public void getMoreSearchResults(String query, String after,
+                                     final SearchServiceCallback<List<SubredditChildren>> callback) {
         String token = SharedPreferencesHelper.getToken();
         Call<SubredditListing> call = RedditService.getInstance(token).searchSubredditsNextPage(query, "relevance", after);
         call.enqueue(new Callback<SubredditListing>() {
@@ -307,7 +310,8 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
     }
 
-    private static List<SubredditChildren> formatSubreddits(List<SubredditChildren> childrens) {
+    private static List<SubredditChildren> formatSubreddits
+            (List<SubredditChildren> childrens) {
         for (SubredditChildren result : childrens) {
             Subreddit subreddit = result.getSubreddit();
 

@@ -42,7 +42,7 @@ import static android.view.View.GONE;
 
 public class FullscreenFragment extends Fragment implements FullscreenContract.View, MediaController.MediaPlayerControl {
 
-    public static final String EXTRA_POST = "post";
+    private static final String EXTRA_POST = "post";
 
     private PhotoDraweeView mImageView;
     private SurfaceView mVideoView;

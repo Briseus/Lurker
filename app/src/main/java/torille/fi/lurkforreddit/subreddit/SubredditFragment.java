@@ -176,7 +176,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         mCustomTabActivityHelper.unbindCustomTabsService(getActivity());
     }
 
-    public String getSubredditUrl() {
+    private String getSubredditUrl() {
         Subreddit subreddit = Parcels.unwrap(getArguments().getParcelable(ARGUMENT_SUBREDDIT));
         if (subreddit != null && subreddit.getUrl() != null) {
             return subreddit.getUrl();
@@ -186,7 +186,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         }
     }
 
-    public void loadIfEmpty() {
+    private void loadIfEmpty() {
         if (mListAdapter.getItemCount() == 0) {
             mActionsListener.loadPosts(getSubredditUrl());
         }
