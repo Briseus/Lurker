@@ -38,7 +38,7 @@ public class SubredditPresenter implements SubredditContract.UserActionsListener
 
     @Override
     public void openMedia(@NonNull Post post) {
-        if (MediaHelper.isContentMedia(post) || MediaHelper.checkDomainForMedia(post)) {
+        if (MediaHelper.isContentMedia(post.getPostDetails().getUrl()) || MediaHelper.checkDomainForMedia(post.getPostDetails().getDomain())) {
             mSubredditsView.showMedia(post);
         } else if (MediaHelper.launchCustomActivity(post)) {
             mSubredditsView.launchCustomActivity(post);

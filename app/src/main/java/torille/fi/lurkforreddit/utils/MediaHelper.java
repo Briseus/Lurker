@@ -16,8 +16,8 @@ final public class MediaHelper {
 
     private MediaHelper() {}
 
-    public static boolean isContentMedia(final Post post) {
-        switch (TextHelper.getLastFourChars(post.getPostDetails().getUrl())) {
+    public static boolean isContentMedia(final String url) {
+        switch (TextHelper.getLastFourChars(url)) {
             case ".jpg":
             case ".png":
             case "jpeg":
@@ -30,8 +30,8 @@ final public class MediaHelper {
         }
     }
 
-    public static boolean checkDomainForMedia(Post post) {
-        switch (post.getPostDetails().getDomain()) {
+    public static boolean checkDomainForMedia(String domain) {
+        switch (domain) {
             case "gfycat.com":
             case "i.reddituploads.com":
                 return true;

@@ -21,7 +21,7 @@ import torille.fi.lurkforreddit.data.models.Post;
 public class FullscreenActivity extends AppCompatActivity {
 
     public static final String EXTRA_POST = "post";
-
+    public static final String EXTRA_URL = "url";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +35,11 @@ public class FullscreenActivity extends AppCompatActivity {
 
         if (null == savedInstanceState) {
             Post post = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_POST));
-            Log.d("Fullscreen", "activity got " + post.toString());
-            initFragment(FullscreenFragment.newInstance(post));
+            if (post != null) {
+                Log.d("Fullscreen", "activity got " + post.toString());
+                initFragment(FullscreenFragment.newInstance(post));
+            }
+
         }
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away

@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -270,7 +271,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             final TextView mSelftext;
             final TextView mTitle;
             final SimpleDraweeView mImage;
-            final TextView mScoreButton;
+            final Button mScoreButton;
 
             PostViewHolder(View view) {
                 super(view);
@@ -278,16 +279,18 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 mSelftext = (TextView) view.findViewById(R.id.comment_post_selftext);
                 mTitle = (TextView) view.findViewById(R.id.comment_post_title);
                 mImage = (SimpleDraweeView) view.findViewById(R.id.comment_post_image);
-                mScoreButton = (TextView) view.findViewById(R.id.comment_post_score);
+                mScoreButton = (Button) view.findViewById(R.id.comment_post_score);
+                mSelftext.setMovementMethod(LinkMovementMethod.getInstance());
+                mSelftext.setLinksClickable(true);
             }
 
             void bind() {
                 String time = (String) DateUtils.getRelativeTimeSpanString(mClickedPost.getPostDetails().getCreatedUtc() * 1000);
                 String author = "Submitted " + time + " by " + mClickedPost.getPostDetails().getAuthor();
                 mAuthor.setText(author);
-                mScoreButton.setText(String.valueOf(mClickedPost.getPostDetails().getScore()));
+                mScoreButton.setText(mClickedPost.getPostDetails().getPreviewScore());
                 mTitle.setText(mClickedPost.getPostDetails().getTitle());
-                if (mClickedPost.getPostDetails().getPreviewImage().isEmpty()) {
+                if (mClickedPost.getPostDetails().getPreviewImage() != null && mClickedPost.getPostDetails().getPreviewImage().isEmpty()) {
                     mImage.setVisibility(View.GONE);
                 } else {
                     DraweeController controller = Fresco.newDraweeControllerBuilder()
@@ -313,6 +316,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             CommentViewHolder(View view) {
                 super(view);
                 mCommentText = (TextView) view.findViewById(R.id.comment_text);
+                mCommentText.setTransformationMethod(new CustomLinkTransformationMethod());
                 mCommentText.setMovementMethod(LinkMovementMethod.getInstance());
                 mCommentText.setLinksClickable(true);
                 mCommentScore = (TextView) view.findViewById(R.id.comment_post_score);

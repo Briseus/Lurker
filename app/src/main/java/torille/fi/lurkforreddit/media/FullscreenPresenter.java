@@ -19,18 +19,24 @@ public class FullscreenPresenter implements FullscreenContract.UserActionsListen
     }
 
     public void checkDomain(@NonNull Post post) {
-        switch (post.getPostDetails().getDomain()) {
-            case "gfycat.com":
-                final String[] gfy = post.getPostDetails().getUrl().split("g", 2);
-                final String gfyUri = "https://thumbs.g" + gfy[1] + "-mobile.mp4";
-                mFullscreenView.showGfycatVideo(gfyUri);
-                break;
-            case "i.imgur.com":
-            case "imgur.com":
-            default:
-                checkType(post.getPostDetails().getUrl());
-                break;
+        String domain = post.getPostDetails().getDomain();
+        if (domain != null && !domain.isEmpty()) {
+            switch (domain) {
+                case "gfycat.com":
+                    final String[] gfy = post.getPostDetails().getUrl().split("g", 2);
+                    final String gfyUri = "https://thumbs.g" + gfy[1] + "-mobile.mp4";
+                    mFullscreenView.showGfycatVideo(gfyUri);
+                    break;
+                case "i.imgur.com":
+                case "imgur.com":
+                default:
+                    checkType(post.getPostDetails().getUrl());
+                    break;
+            }
+        } else {
+            checkType(post.getPostDetails().getUrl());
         }
+
     }
 
     @VisibleForTesting

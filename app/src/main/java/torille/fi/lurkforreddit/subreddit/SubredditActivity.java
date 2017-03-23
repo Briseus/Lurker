@@ -5,11 +5,11 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -83,19 +83,20 @@ public class SubredditActivity extends AppCompatActivity {
 
     private void loadBannerImage(Subreddit subreddit) {
         SimpleDraweeView banner = (SimpleDraweeView) findViewById(R.id.banner);
-        CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsingToolbar);
         boolean hasBannerSource = (subreddit.getBanner() != null && !subreddit.getBanner().isEmpty());
         boolean hasCustomColor = (subreddit.getKey_color() != null && !subreddit.getKey_color().isEmpty());
+        int color;
 
         if (hasBannerSource) {
             banner.setImageURI(subreddit.getBanner());
         }
 
         if (hasCustomColor) {
-            int color = Color.parseColor(subreddit.getKey_color());
-            banner.setBackgroundColor(color);
-            collapsingToolbarLayout.setContentScrimColor(color);
+            color = Color.parseColor(subreddit.getKey_color());
+        } else {
+            color = ContextCompat.getColor(this, R.color.colorAccent);
         }
+        banner.setBackgroundColor(color);
 
 
     }
