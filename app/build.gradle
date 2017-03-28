@@ -37,7 +37,12 @@ android {
         release {
             minifyEnabled true
             zipAlignEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFile 'proguard-fresco.pro'
+            proguardFile 'proguard-gson.pro'
+            proguardFile 'proguard-retrofit.pro'
+            proguardFile 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt')
+            testProguardFile 'proguard-test.pro'
         }
         debug {
             // Run code coverage reports by default on debug builds.

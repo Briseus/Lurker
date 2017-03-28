@@ -15,6 +15,7 @@ import okhttp3.Route;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import torille.fi.lurkforreddit.BuildConfig;
 import torille.fi.lurkforreddit.utils.NetworkHelper;
 
 /**
@@ -33,7 +34,12 @@ public class RedditService {
     private RedditService() {
 
         final HttpLoggingInterceptor logger = new HttpLoggingInterceptor();
-        logger.setLevel(HttpLoggingInterceptor.Level.HEADERS);
+        if(BuildConfig.DEBUG) {
+            logger.setLevel(HttpLoggingInterceptor.Level.HEADERS);
+        } else {
+            logger.setLevel(HttpLoggingInterceptor.Level.NONE);
+        }
+
 
         final Authenticator authenticator = new Authenticator() {
             @Override

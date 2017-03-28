@@ -25,7 +25,7 @@ import torille.fi.lurkforreddit.utils.MediaHelper;
  */
 
 public class CustomUrlSpan extends URLSpan {
-
+    private static final String TAG = "CustomUrlSpan";
     public CustomUrlSpan(String url) {
         super(url);
     }
@@ -37,7 +37,7 @@ public class CustomUrlSpan extends URLSpan {
     @Override
     public void onClick(View widget) {
         String url = getURL();
-        Log.d("Test", "got url " + url);
+        Log.d(TAG, "got url " + url);
         Intent intent;
         if (MediaHelper.isContentMedia(url)) {
             Post post = new Post("t5", new PostDetails());
@@ -49,7 +49,7 @@ public class CustomUrlSpan extends URLSpan {
             Uri redditUri = Uri.parse("https://www.reddit.com" + url);
             intent = new Intent(widget.getContext(), SubredditActivity.class);
             intent.setData(redditUri);
-            Log.d("Test", "Gon launch " + redditUri);
+            Log.d(TAG, "Gon launch " + redditUri);
             widget.getContext().startActivity(intent);
         } else {
             super.onClick(widget);
@@ -59,7 +59,7 @@ public class CustomUrlSpan extends URLSpan {
     }
 
     private boolean checkForReddit(String redditUrl) {
-        Log.d("Test", "Checking url " + redditUrl);
+        Log.d(TAG, "Checking url " + redditUrl);
         Pattern p = Pattern.compile("(\\/r\\/.*)");
         Matcher m = p.matcher(redditUrl);
         return m.matches();
