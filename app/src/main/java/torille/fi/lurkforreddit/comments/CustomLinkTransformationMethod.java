@@ -1,9 +1,12 @@
 package torille.fi.lurkforreddit.comments;
 
 import android.graphics.Rect;
+import android.support.v4.text.util.LinkifyCompat;
 import android.text.Spannable;
 import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.text.method.TransformationMethod;
+import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.view.View;
@@ -18,7 +21,7 @@ public class CustomLinkTransformationMethod implements TransformationMethod {
     public CharSequence getTransformation(CharSequence source, View view) {
         if (view instanceof TextView) {
             TextView textView = (TextView) view;
-            Linkify.addLinks(textView, Linkify.WEB_URLS);
+            //LinkifyCompat.addLinks(textView, Linkify.WEB_URLS);
             if (textView.getText() == null || !(textView.getText() instanceof Spannable)) {
                 return source;
             }
@@ -28,9 +31,10 @@ public class CustomLinkTransformationMethod implements TransformationMethod {
                 URLSpan oldSpan = spans[i];
                 int start = text.getSpanStart(oldSpan);
                 int end = text.getSpanEnd(oldSpan);
+                int flags = text.getSpanFlags(oldSpan);
                 String url = oldSpan.getURL();
                 text.removeSpan(oldSpan);
-                text.setSpan(new CustomUrlSpan(url), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                text.setSpan(new CustomUrlSpan(url), start, end, flags);
             }
             return text;
         }

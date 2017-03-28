@@ -316,9 +316,10 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             CommentViewHolder(View view) {
                 super(view);
                 mCommentText = (TextView) view.findViewById(R.id.comment_text);
+                mCommentText.setLinksClickable(true);
                 mCommentText.setTransformationMethod(new CustomLinkTransformationMethod());
                 mCommentText.setMovementMethod(LinkMovementMethod.getInstance());
-                mCommentText.setLinksClickable(true);
+
                 mCommentScore = (TextView) view.findViewById(R.id.comment_post_score);
                 mCommentAuthor = (TextView) view.findViewById(R.id.comment_author);
             }
