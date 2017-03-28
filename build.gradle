@@ -31,10 +31,10 @@ ext {
     buildToolsVersion = '25.0.2'
 
     // App dependencies
-    supportLibraryVersion = '25.3.0'
+    supportLibraryVersion = '25.3.1'
     constraintVersion = '1.0.2'
     retrofitVersion = '2.2.0'
-    okHttpVersion = '3.5.0'
+    okHttpVersion = '3.6.0'
     junitVersion = '4.12'
     mockitoVersion = '1.10.19'
     powerMockito = '1.6.2'
@@ -43,5 +43,5 @@ ext {
     rulesVersion = '0.5'
     espressoVersion = '2.2.2'
     parcelerVersion = '1.1.6'
-    frescoVersion = '1.1.0'
+    frescoVersion = '1.2.0'
 }
