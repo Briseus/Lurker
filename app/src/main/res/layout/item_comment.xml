@@ -19,6 +19,7 @@
         android:text="Author"
         android:textAlignment="viewStart"
         android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
+        android:textColor="?android:attr/textColorHintInverse"
         android:textSize="12sp"
         android:visibility="visible" />
 

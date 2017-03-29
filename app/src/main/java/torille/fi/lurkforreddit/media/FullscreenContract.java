@@ -11,7 +11,7 @@ import torille.fi.lurkforreddit.data.models.Post;
 public interface FullscreenContract {
 
     interface View {
-        void showImage(String url);
+        void showImage(String url, String previewImageUrl);
 
         void showVideo(String url);
 

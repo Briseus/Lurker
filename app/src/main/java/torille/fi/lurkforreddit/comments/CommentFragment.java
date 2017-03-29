@@ -280,6 +280,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 mTitle = (TextView) view.findViewById(R.id.comment_post_title);
                 mImage = (SimpleDraweeView) view.findViewById(R.id.comment_post_image);
                 mScoreButton = (Button) view.findViewById(R.id.comment_post_score);
+                mSelftext.setTransformationMethod(new CustomLinkTransformationMethod());
                 mSelftext.setMovementMethod(LinkMovementMethod.getInstance());
                 mSelftext.setLinksClickable(true);
             }
@@ -328,7 +329,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 this.mComment = commentChild;
                 mCommentText.setText(mComment.getData().getFormattedComment());
                 mCommentAuthor.setText(mComment.getData().getFormatAuthor());
-                mCommentScore.setText(String.valueOf(mComment.getData().getScore()));
+                mCommentScore.setText(mComment.getData().getFormatScore());
             }
 
 

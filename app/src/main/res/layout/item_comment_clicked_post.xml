@@ -24,14 +24,14 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:text="The super awesome pun of an title for this awesome post"
         android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse"
         android:textSize="18sp"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toRightOf="@+id/comment_post_score"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/comment_post_image"
-        app:layout_constraintHorizontal_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/comment_post_image" />
 
     <TextView
         android:id="@+id/comment_post_selftext"
@@ -40,13 +40,13 @@
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="sans-serif"
         android:text="Here is an example of a selftext thats is found in some reddit posts"
         android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@+id/comment_post_author" />
 
     <TextView
@@ -57,8 +57,8 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:paddingBottom="8dp"
         android:text="author"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toRightOf="@+id/comment_post_score"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/comment_post_title" />
@@ -70,10 +70,10 @@
         android:layout_height="40dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
-        android:textColor="@android:color/black"
         android:background="@drawable/circle"
         android:text="13377"
         android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
+        android:textColor="@android:color/black"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/comment_post_image" />
 

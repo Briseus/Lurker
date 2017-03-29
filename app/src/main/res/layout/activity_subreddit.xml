@@ -33,7 +33,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@null"
-            app:layout_collapseMode="pin" />
+            app:layout_collapseMode="pin"
+            />
 
     </android.support.design.widget.CollapsingToolbarLayout>
 

@@ -124,12 +124,22 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     }
 
     @Override
-    public void showImage(String url) {
+    public void showImage(String url, String previewImageUrl) {
         mProgressBar.setVisibility(View.INVISIBLE);
         mImageView.setVisibility(View.VISIBLE);
 
         GenericDraweeHierarchy hierarchy = mImageView.getHierarchy();
         hierarchy.setProgressBarImage(mProgressBar.getProgressDrawable());
+
+        if (previewImageUrl == null) {
+            previewImageUrl = "";
+        }
+
+            ImageRequest lowResRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(previewImageUrl))
+                    .setProgressiveRenderingEnabled(true)
+                    .build();
+
+
 
         ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
                 .setProgressiveRenderingEnabled(true)
@@ -139,6 +149,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                 .setAutoPlayAnimations(true)
                 .setUri(url)
                 .setImageRequest(request)
+                .setLowResImageRequest(lowResRequest)
                 .setOldController(mImageView.getController())
                 .setControllerListener(new BaseControllerListener<ImageInfo>() {
                     @Override

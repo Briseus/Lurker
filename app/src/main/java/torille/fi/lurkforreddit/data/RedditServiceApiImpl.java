@@ -133,7 +133,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
         for (Post post : posts) {
 
-            post.getPostDetails().setPreviewScore(formatScore(post.getPostDetails().getScore()));
+            post.getPostDetails().setPreviewScore(TextHelper.formatScore(post.getPostDetails().getScore()));
 
             if (post.getPostDetails().isStickied()) {
                 post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle() + "<font color='#64FFDA'> Stickied </font>"));
@@ -158,21 +158,6 @@ public class RedditServiceApiImpl implements RedditServiceApi {
         }
 
         return posts;
-    }
-
-    private static String formatScore(int score) {
-        final String value = String.valueOf(score);
-        if (score < 1000) {
-            return value;
-        } else if (score < 10000) {
-            return value.charAt(0) + "." + value.charAt(1) + "k";
-        } else if (score < 100000) {
-            return value.charAt(0) + value.charAt(1) + "k";
-        } else if (score < 10000000) {
-            return value.charAt(0) + value.charAt(1) + value.charAt(2) + "k";
-        } else {
-            return value;
-        }
     }
 
     @Override
@@ -240,7 +225,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                                 commentChild.setKind("t3");
                             }
                             commentChild.setType(parentComment.getType());
-                            TextHelper.formatCommentData(additionalComments.get(i));
+                            commentChild.setData(TextHelper.formatCommentData(commentChild.getData()));
 
                         }
                         for (int i = 0; i < additionalComments.size(); i++) {

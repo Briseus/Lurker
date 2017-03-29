@@ -4,9 +4,11 @@ import android.text.Html;
 import android.text.Spanned;
 import android.text.format.DateUtils;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import torille.fi.lurkforreddit.data.models.Comment;
 import torille.fi.lurkforreddit.data.models.CommentChild;
 
 /**
@@ -29,41 +31,57 @@ public class TextHelper {
         }
     }
 
-    public static List<CommentChild> flatten(List<?> list) {
-        List<CommentChild> ret = new LinkedList<>();
-        flattenHelper(list, ret, 0);
+    public static String formatScore(int score) {
+        final String value = String.valueOf(score);
+        if (score < 1000) {
+            return value;
+        } else if (score < 10000) {
+            return value.charAt(0) + "." + value.charAt(1) + "k";
+        } else if (score < 100000) {
+            return value.charAt(0) + value.charAt(1) + "k";
+        } else if (score < 10000000) {
+            return value.charAt(0) + value.charAt(1) + value.charAt(2) + "k";
+        } else {
+            return value;
+        }
+    }
+
+    public static List<CommentChild> flatten(List<CommentChild> list) {
+        List<CommentChild> ret = new ArrayList<>();
+        ret = flattenHelper(list, ret, 0);
         return ret;
     }
 
-    public static CommentChild formatCommentData(CommentChild commentChild) {
-        if (commentChild.getData().getBodyHtml() != null) {
-            commentChild.getData().setFormattedComment(trimTrailingWhitespace(fromHtml((commentChild.getData().getBodyHtml()))));
+    public static Comment formatCommentData(Comment comment) {
+        if (comment.getBodyHtml() != null) {
+            comment.setFormattedComment(trimTrailingWhitespace(fromHtml((comment.getBodyHtml()))));
         }
 
         String author = "";
-        if (commentChild.getData().getAuthor() != null && commentChild.getData().isStickied()) {
+        if (comment.getAuthor() != null && comment.isStickied()) {
             author = "<font color='#64FFDA'> Sticky post<font> &nbsp &nbsp";
-        } else if (commentChild.getData().getAuthor() != null) {
-            author = commentChild.getData().getAuthor();
+        } else if (comment.getAuthor() != null) {
+            author = comment.getAuthor();
         }
-        commentChild.getData().setFormatAuthor(fromHtml(author + " " + DateUtils.getRelativeTimeSpanString(commentChild.getData().getCreatedUtc() * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)));
 
-        return commentChild;
+        comment.setFormatAuthor(fromHtml(author + " " + DateUtils.getRelativeTimeSpanString(comment.getCreatedUtc() * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)));
+
+        comment.setFormatScore(formatScore(comment.getScore()));
+        return comment;
     }
 
-    private static void flattenHelper(List<?> nestedList, List<CommentChild> flatList, int level) {
-        for (Object item : nestedList) {
-            if (item instanceof List<?>) {
-                flattenHelper((List<?>) item, flatList, level + 1);
-            } else if (item instanceof CommentChild) {
-                item = formatCommentData(((CommentChild) item));
-                ((CommentChild) item).setType(level);
-                flatList.add((CommentChild) item);
-                if (((CommentChild) item).getData().getReplies() != null) {
-                    flattenHelper(((CommentChild) item).getData().getReplies().getCommentData().getCommentChildren(), flatList, level + 1);
-                }
+    private static List<CommentChild> flattenHelper(List<CommentChild> nestedList, List<CommentChild> flatList, int level) {
+        for (int i = 0; i < nestedList.size(); i++) {
+            CommentChild commentChild = nestedList.get(i);
+            commentChild.setType(level);
+            commentChild.setData(formatCommentData(commentChild.getData()));
+            flatList.add(commentChild);
+            if (commentChild.getData().getReplies() != null) {
+                List<CommentChild> replyList = flattenHelper(commentChild.getData().getReplies().getCommentData().getCommentChildren(), flatList, level + 1);
+                commentChild.getData().getReplies().getCommentData().setCommentChildren(replyList);
             }
         }
+        return flatList;
     }
 
     /**

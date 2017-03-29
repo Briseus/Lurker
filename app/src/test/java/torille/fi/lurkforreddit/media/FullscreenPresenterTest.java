@@ -51,7 +51,7 @@ public class FullscreenPresenterTest {
     @Test
     public void loadImageIntoView() {
         mFullscreenPresenter.checkDomain(mImagePost);
-        verify(mFullscreenView).showImage(anyString());
+        verify(mFullscreenView).showImage(anyString(), previewImageUrl);
     }
 
     @Test

@@ -59,6 +59,7 @@ public class Comment {
     private transient CharSequence formattedComment;
     private transient CharSequence formatAuthor;
     private transient String formatTime;
+    private transient String formatScore;
 
     public Comment() {
     }
@@ -345,6 +346,14 @@ public class Comment {
 
     public void setFormatTime(String formatTime) {
         this.formatTime = formatTime;
+    }
+
+    public String getFormatScore() {
+        return formatScore;
+    }
+
+    public void setFormatScore(String formatScore) {
+        this.formatScore = formatScore;
     }
 
     @Override

@@ -30,17 +30,17 @@ public class FullscreenPresenter implements FullscreenContract.UserActionsListen
                 case "i.imgur.com":
                 case "imgur.com":
                 default:
-                    checkType(post.getPostDetails().getUrl());
+                    checkType(post.getPostDetails().getUrl(), post.getPostDetails().getPreviewImage());
                     break;
             }
         } else {
-            checkType(post.getPostDetails().getUrl());
+            checkType(post.getPostDetails().getUrl(), post.getPostDetails().getPreviewImage());
         }
 
     }
 
     @VisibleForTesting
-    void checkType(String urlString) {
+    void checkType(String urlString, String previewImageUrl) {
 
         switch (TextHelper.getLastFourChars(urlString)) {
             case ".gif":
@@ -48,7 +48,7 @@ public class FullscreenPresenter implements FullscreenContract.UserActionsListen
             case ".png":
             case ".jpg":
             case "jpeg": {
-                mFullscreenView.showImage(urlString);
+                mFullscreenView.showImage(urlString, previewImageUrl);
                 break;
             }
             case "gifv": {
@@ -60,7 +60,7 @@ public class FullscreenPresenter implements FullscreenContract.UserActionsListen
                 break;
             }
             default:
-                mFullscreenView.showImage(urlString + ".jpg");
+                mFullscreenView.showImage(urlString + ".jpg", previewImageUrl);
                 break;
         }
     }
