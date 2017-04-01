@@ -164,7 +164,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                             .inflate(R.layout.item_progressbar, parent, false));
                 default:
                     return new CommentViewHolder(LayoutInflater.from(parent.getContext())
-                            .inflate(R.layout.item_comment, parent, false));
+                            .inflate(R.layout.item_comment_constraint, parent, false));
             }
         }
 
