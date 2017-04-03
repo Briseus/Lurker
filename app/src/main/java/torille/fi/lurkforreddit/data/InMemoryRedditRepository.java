@@ -41,7 +41,7 @@ public class InMemoryRedditRepository implements RedditRepository {
 
     @Override
     public void getSubredditPosts(@NonNull String subredditId, @NonNull final LoadSubredditPostsCallback callback) {
-        mRedditServiceApi.getSubredditPosts(subredditId, new RedditServiceApi.PostsServiceCallback<List<Post>, String>() {
+        mRedditServiceApi.getSubredditPosts(subredditId, new RedditServiceApi.PostsServiceCallback<List<Post>>() {
             @Override
             public void onLoaded(List<Post> posts, String nextpage) {
                 callback.onPostsLoaded(posts, nextpage);
@@ -51,7 +51,7 @@ public class InMemoryRedditRepository implements RedditRepository {
 
     @Override
     public void getMoreSubredditPosts(@NonNull String subredditUrl, @NonNull String nextpageId, @NonNull final LoadSubredditPostsCallback callback) {
-        mRedditServiceApi.getMorePosts(subredditUrl, nextpageId, new RedditServiceApi.PostsServiceCallback<List<Post>, String>() {
+        mRedditServiceApi.getMorePosts(subredditUrl, nextpageId, new RedditServiceApi.PostsServiceCallback<List<Post>>() {
             @Override
             public void onLoaded(List<Post> posts, String nextpage) {
                 callback.onPostsLoaded(posts, nextpage);

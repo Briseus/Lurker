@@ -1,5 +1,6 @@
 package torille.fi.lurkforreddit.data;
 
+import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -77,7 +78,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     }
 
     @Override
-    public void getSubredditPosts(String subredditId, final PostsServiceCallback<List<Post>, String> callback) {
+    public void getSubredditPosts(String subredditId, final PostsServiceCallback<List<Post>> callback) {
         String token = SharedPreferencesHelper.getToken();
         if (token == null) {
             authenticateApp(subredditId, callback);
@@ -108,7 +109,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     }
 
     @Override
-    public void getMorePosts(String subredditUrl, String nextpageId, final PostsServiceCallback<List<Post>, String> callback) {
+    public void getMorePosts(String subredditUrl, String nextpageId, final PostsServiceCallback<List<Post>> callback) {
         String token = SharedPreferencesHelper.getToken();
         Call<PostListing> call = RedditService.getInstance(token).getSubredditNextPage(subredditUrl, nextpageId);
         call.enqueue(new Callback<PostListing>() {
@@ -139,6 +140,13 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                 post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle() + "<font color='#64FFDA'> Stickied </font>"));
             } else {
                 post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle()));
+            }
+            // sometimes formatting title can result in empty if it has <----- at start
+            // etc
+            if (post.getPostDetails().getPreviewTitle() != null &&
+                    post.getPostDetails().getPreviewTitle().length() == 0) {
+                SpannableString titleWithoutFormatting = SpannableString.valueOf(post.getPostDetails().getTitle());
+                post.getPostDetails().setPreviewTitle(titleWithoutFormatting);
             }
             switch (post.getPostDetails().getThumbnail()) {
                 case "default":
@@ -324,7 +332,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
         return childrens;
     }
 
-    private void authenticateApp(final String subredditId, final PostsServiceCallback<List<Post>, String> callback) {
+    private void authenticateApp(final String subredditId, final PostsServiceCallback<List<Post>> callback) {
         Call<RedditToken> call = NetworkHelper.createAuthCall();
         call.enqueue(new Callback<RedditToken>() {
             @Override

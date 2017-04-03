@@ -5,7 +5,6 @@ import android.text.Spanned;
 import android.text.format.DateUtils;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import torille.fi.lurkforreddit.data.models.Comment;
@@ -16,7 +15,8 @@ import torille.fi.lurkforreddit.data.models.CommentChild;
  */
 
 public class TextHelper {
-    private TextHelper() {}
+    private TextHelper() {
+    }
 
     public static String getLastFourChars(String url) {
         return url.substring(url.length() - 4);
@@ -53,6 +53,7 @@ public class TextHelper {
     }
 
     public static Comment formatCommentData(Comment comment) {
+
         if (comment.getBodyHtml() != null) {
             comment.setFormattedComment(trimTrailingWhitespace(fromHtml((comment.getBodyHtml()))));
         }

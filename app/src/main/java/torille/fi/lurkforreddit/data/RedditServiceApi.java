@@ -17,12 +17,13 @@ interface RedditServiceApi {
         void onLoaded(T subreddits);
     }
 
-    interface PostsServiceCallback<T, String> {
+    interface PostsServiceCallback<T> {
         void onLoaded(T subreddits, String nextpage);
     }
 
     interface CommentsServiceCallback<T> {
         void onLoaded(T comments);
+
         void onMoreLoaded(T comments, int position);
     }
 
@@ -32,9 +33,9 @@ interface RedditServiceApi {
 
     void getSubreddits(SubredditsServiceCallback<List<SubredditChildren>> callback);
 
-    void getSubredditPosts(String subredditId, PostsServiceCallback<List<Post>, String> callback);
+    void getSubredditPosts(String subredditId, PostsServiceCallback<List<Post>> callback);
 
-    void getMorePosts(String subredditId, String nextpage, PostsServiceCallback<List<Post>, String> callback);
+    void getMorePosts(String subredditId, String nextpage, PostsServiceCallback<List<Post>> callback);
 
     void getPostComments(String permaLinkUrl, CommentsServiceCallback<List<CommentChild>> callback);
 

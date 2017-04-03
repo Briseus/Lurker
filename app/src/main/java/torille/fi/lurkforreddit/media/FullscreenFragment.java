@@ -135,11 +135,9 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
             previewImageUrl = "";
         }
 
-            ImageRequest lowResRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(previewImageUrl))
-                    .setProgressiveRenderingEnabled(true)
-                    .build();
-
-
+        ImageRequest lowResRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(previewImageUrl))
+                .setProgressiveRenderingEnabled(true)
+                .build();
 
         ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
                 .setProgressiveRenderingEnabled(true)

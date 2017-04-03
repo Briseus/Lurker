@@ -308,11 +308,10 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             }
         }
 
-        class CommentViewHolder extends RecyclerView.ViewHolder {
+        class CommentViewHolder extends CommentNormalViewHolder {
             final TextView mCommentText;
             final TextView mCommentScore;
             final TextView mCommentAuthor;
-            CommentChild mComment;
 
             CommentViewHolder(View view) {
                 super(view);
@@ -320,13 +319,12 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 mCommentText.setLinksClickable(true);
                 mCommentText.setTransformationMethod(new CustomLinkTransformationMethod());
                 mCommentText.setMovementMethod(LinkMovementMethod.getInstance());
-
                 mCommentScore = (TextView) view.findViewById(R.id.comment_post_score);
                 mCommentAuthor = (TextView) view.findViewById(R.id.comment_author);
             }
 
             void bind(CommentChild commentChild) {
-                this.mComment = commentChild;
+                mComment = commentChild;
                 mCommentText.setText(mComment.getData().getFormattedComment());
                 mCommentAuthor.setText(mComment.getData().getFormatAuthor());
                 mCommentScore.setText(mComment.getData().getFormatScore());
@@ -335,9 +333,17 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
         }
 
-        class CommentLoadMoreViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-            final TextView mClickMore;
+        class CommentNormalViewHolder extends RecyclerView.ViewHolder {
             CommentChild mComment;
+
+            CommentNormalViewHolder(View itemView) {
+                super(itemView);
+            }
+
+        }
+
+        class CommentLoadMoreViewHolder extends CommentNormalViewHolder implements View.OnClickListener {
+            final TextView mClickMore;
 
             CommentLoadMoreViewHolder(View view) {
                 super(view);
@@ -346,13 +352,12 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             }
 
             void bind(CommentChild commentChild) {
-                this.mComment = commentChild;
-                Comment comment = mComment.getData();
+                mComment = commentChild;
                 String text;
-                if (comment.getId().equals("_")) {
+                if (mComment.getData().getId().equals("_")) {
                     text = "Continue this thread ->";
                 } else {
-                    text = "Load more comments (" + commentChild.getData().getCount() + ")";
+                    text = "Load more comments (" + mComment.getData().getCount() + ")";
                 }
                 mClickMore.setText(text);
             }
@@ -368,9 +373,8 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
         }
 
-        class ProgressViewHolder extends RecyclerView.ViewHolder {
+        class ProgressViewHolder extends CommentNormalViewHolder {
             final ProgressBar progressBar;
-            CommentChild mComment;
 
             ProgressViewHolder(View view) {
                 super(view);
@@ -378,7 +382,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             }
 
             void bind(CommentChild commentChild) {
-                this.mComment = commentChild;
+                mComment = commentChild;
             }
         }
     }

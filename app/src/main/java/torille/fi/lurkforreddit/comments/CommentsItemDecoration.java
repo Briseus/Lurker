@@ -18,15 +18,14 @@ class CommentsItemDecoration extends RecyclerView.ItemDecoration {
 
     private final Drawable mDivider;
 
-    public CommentsItemDecoration(Drawable divider) {
+    CommentsItemDecoration(Drawable divider) {
         this.mDivider = divider;
     }
 
     @Override
     public void onDrawOver(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
 
-        final int childCount = parent.getChildCount();
-        for (int i = 0; i < childCount; i++) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
             final View child = parent.getChildAt(i);
             if (parent.getChildViewHolder(child) instanceof CommentFragment.CommentRecyclerViewAdapter.CommentViewHolder) {
                 draw(((CommentFragment.CommentRecyclerViewAdapter.CommentViewHolder) parent.getChildViewHolder(child)).mComment, child, canvas);
@@ -39,9 +38,7 @@ class CommentsItemDecoration extends RecyclerView.ItemDecoration {
 
     private void draw(CommentChild mItem, View child, Canvas canvas) {
         if (mItem != null && (mItem.getType() > 0)) {
-            final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                    .getLayoutParams();
-            final int left = child.getLeft() + params.leftMargin;
+            final int left = child.getLeft();
             final int right = left + mDivider.getIntrinsicHeight();
             final int top = child.getTop();
             final int bottom = child.getBottom();
