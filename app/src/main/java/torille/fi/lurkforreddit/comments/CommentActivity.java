@@ -40,7 +40,10 @@ public class CommentActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        initFragment(CommentFragment.newInstance(originalPost));
+        if (savedInstanceState == null) {
+            initFragment(CommentFragment.newInstance(originalPost));
+        }
+
     }
 
     private void initFragment(Fragment commentFragment) {

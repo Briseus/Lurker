@@ -58,7 +58,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
         final BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
-        if (null == savedInstanceState) {
+        if (savedInstanceState == null) {
             initFrontpage();
         }
 

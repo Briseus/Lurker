@@ -353,13 +353,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
             void bind(CommentChild commentChild) {
                 mComment = commentChild;
-                String text;
-                if (mComment.getData().getId().equals("_")) {
-                    text = "Continue this thread ->";
-                } else {
-                    text = "Load more comments (" + mComment.getData().getCount() + ")";
-                }
-                mClickMore.setText(text);
+                mClickMore.setText(mComment.getData().getFormattedComment());
             }
 
             @Override

@@ -94,7 +94,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
                         Log.d("Test", "Got " + posts.size() + " posts");
 
-                        callback.onLoaded(formatPosts(posts), nextpage);
+                        callback.onLoaded(TextHelper.formatPosts(posts), nextpage);
                     }
                 }
 
@@ -119,7 +119,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                     List<Post> posts = response.body().getData().getPosts();
                     String nextpage = response.body().getData().getNextPage();
 
-                    callback.onLoaded(formatPosts(posts), nextpage);
+                    callback.onLoaded(TextHelper.formatPosts(posts), nextpage);
                 }
             }
 
@@ -130,43 +130,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
         });
     }
 
-    private static List<Post> formatPosts(List<Post> posts) {
 
-        for (Post post : posts) {
-
-            post.getPostDetails().setPreviewScore(TextHelper.formatScore(post.getPostDetails().getScore()));
-
-            if (post.getPostDetails().isStickied()) {
-                post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle() + "<font color='#64FFDA'> Stickied </font>"));
-            } else {
-                post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle()));
-            }
-            // sometimes formatting title can result in empty if it has <----- at start
-            // etc
-            if (post.getPostDetails().getPreviewTitle() != null &&
-                    post.getPostDetails().getPreviewTitle().length() == 0) {
-                SpannableString titleWithoutFormatting = SpannableString.valueOf(post.getPostDetails().getTitle());
-                post.getPostDetails().setPreviewTitle(titleWithoutFormatting);
-            }
-            switch (post.getPostDetails().getThumbnail()) {
-                case "default":
-                case "self":
-                case "":
-                case "image":
-                    post.getPostDetails().setPreviewImage("");
-                    break;
-                case "nsfw":
-                    post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle() + "<font color='#FF1744'> NSFW</font>"));
-                    post.getPostDetails().setPreviewImage("");
-                    break;
-                default:
-                    post.getPostDetails().setPreviewImage(DisplayHelper.getBestPreviewPicture(post.getPostDetails()));
-            }
-
-        }
-
-        return posts;
-    }
 
     @Override
     public void getPostComments(String permaLinkUrl, final CommentsServiceCallback<List<CommentChild>> callback) {
@@ -186,7 +150,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                         reader.close();
                         in.close();
                         response.body().close();
-                        callback.onLoaded(TextHelper.flatten(commentChildList));
+                        callback.onLoaded(TextHelper.flatten(commentChildList, 0));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -222,28 +186,9 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                         in.close();
                         response.body().close();
 
-                        for (int i = 0; i < additionalComments.size(); i++) {
-                            CommentChild commentChild = additionalComments.get(i);
-                            /*
-                            If type is "continue this thread ->"
-                             */
-                            if (commentChild.getData().getId().equals("_") || commentChild.getData().getChildren() != null) {
-                                commentChild.setKind("more");
-                            } else {
-                                commentChild.setKind("t3");
-                            }
-                            commentChild.setType(parentComment.getType());
-                            commentChild.setData(TextHelper.formatCommentData(commentChild.getData()));
+                        List<CommentChild> additionalFlattenedComments = TextHelper.flattenAdditionalComments(additionalComments, parentComment.getType());
 
-                        }
-                        for (int i = 0; i < additionalComments.size(); i++) {
-                            for (int j = 0; j < additionalComments.size(); j++) {
-                                if (additionalComments.get(i).getData().getName().equals(additionalComments.get(j).getData().getParentId())) {
-                                    additionalComments.get(j).setType(additionalComments.get(i).getType() + 1);
-                                }
-                            }
-                        }
-                        callback.onMoreLoaded(additionalComments, position);
+                        callback.onMoreLoaded(additionalFlattenedComments, position);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -269,7 +214,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                 if (response.isSuccessful()) {
                     List<SubredditChildren> results = response.body().getData().getChildren();
                     String after = response.body().getData().getAfter();
-                    callback.onLoaded(formatSubreddits(results), after);
+                    callback.onLoaded(TextHelper.formatSubreddits(results), after);
                 }
             }
 
@@ -291,7 +236,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                 if (response.isSuccessful()) {
                     List<SubredditChildren> results = response.body().getData().getChildren();
                     String after = response.body().getData().getAfter();
-                    callback.onLoaded(formatSubreddits(results), after);
+                    callback.onLoaded(TextHelper.formatSubreddits(results), after);
                 }
             }
 
@@ -301,35 +246,6 @@ public class RedditServiceApiImpl implements RedditServiceApi {
             }
         });
 
-    }
-
-    private static List<SubredditChildren> formatSubreddits
-            (List<SubredditChildren> childrens) {
-        for (SubredditChildren result : childrens) {
-            Subreddit subreddit = result.getSubreddit();
-
-            final String info = subreddit.getSubscribers() + " subscribers, Community since " + DateUtils.getRelativeTimeSpanString(subreddit.getCreatedUtc() * 1000);
-            subreddit.setFormattedInfo(info);
-
-            if (subreddit.isOver18()) {
-                subreddit.setFormattedTitle(TextHelper.fromHtml(subreddit.getUrl() + "<font color='#FF1744'> NSFW</font>"));
-            } else {
-                subreddit.setFormattedTitle(subreddit.getUrl());
-            }
-
-            if (subreddit.isSubscribed()) {
-                subreddit.setFormattedSubscription("Subscribed");
-            } else {
-                subreddit.setFormattedSubscription("Not subscribed");
-            }
-
-            if (subreddit.getDescriptionHtml() != null && !subreddit.getDescriptionHtml().isEmpty()) {
-                subreddit.setFormattedDescription(TextHelper.trimTrailingWhitespace(TextHelper.fromHtml(subreddit.getDescriptionHtml())));
-            } else {
-                subreddit.setFormattedDescription("No description");
-            }
-        }
-        return childrens;
     }
 
     private void authenticateApp(final String subredditId, final PostsServiceCallback<List<Post>> callback) {

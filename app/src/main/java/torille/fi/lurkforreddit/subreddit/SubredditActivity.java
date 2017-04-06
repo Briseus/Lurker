@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.Fragment;
@@ -28,29 +29,33 @@ public class SubredditActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_subreddit);
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.appBarLayout);
 
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.appBarLayout);
         setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setHomeAsUpIndicator(getResources().getDrawable(R.drawable.ic_arrow_back_white_24px, null));
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+
         Subreddit subreddit = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_SUBREDDIT));
 
         if (subreddit != null) {
             getSupportActionBar().setTitle(subreddit.getDisplay_name());
             loadBannerImage(subreddit);
-            initFragment(SubredditFragment.newInstance(subreddit));
-        } else {
-            handleIntent(getIntent());
+
+            if (savedInstanceState == null) {
+                initFragment(SubredditFragment.newInstance(subreddit));
+            } else {
+                handleIntent(getIntent(), savedInstanceState);
+            }
         }
+
 
     }
 
-    public void handleIntent(Intent intent) {
+    public void handleIntent(Intent intent, @Nullable Bundle savedInstanceState) {
         if (intent != null && intent.getData() != null) {
             Uri appLinkData = intent.getData();
 
@@ -63,7 +68,10 @@ public class SubredditActivity extends AppCompatActivity {
                 getSupportActionBar().setTitle(name);
             }
 
-            initFragment(SubredditFragment.newInstance(subreddit));
+            if (savedInstanceState == null) {
+                initFragment(SubredditFragment.newInstance(subreddit));
+            }
+
         }
 
     }
@@ -71,7 +79,7 @@ public class SubredditActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        handleIntent(intent);
+        handleIntent(intent, null);
 
     }
 
