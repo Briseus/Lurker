@@ -8,6 +8,7 @@ import android.util.Log;
 import com.google.gson.stream.JsonReader;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Comparator;
@@ -131,7 +132,6 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     }
 
 
-
     @Override
     public void getPostComments(String permaLinkUrl, final CommentsServiceCallback<List<CommentChild>> callback) {
         String token = SharedPreferencesHelper.getToken();
@@ -142,21 +142,17 @@ public class RedditServiceApiImpl implements RedditServiceApi {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    try {
-                        InputStreamReader in = new InputStreamReader(response.body().source().inputStream(), "UTF-8");
-                        JsonReader reader = new JsonReader(in);
+                    try (InputStream stream = response.body().source().inputStream();
+                         InputStreamReader in = new InputStreamReader(stream, "UTF-8");
+                         JsonReader reader = new JsonReader(in)) {
 
                         List<CommentChild> commentChildList = CommentsStreamingParser.readCommentListingArray(reader).get(1).getCommentData().getCommentChildren();
-                        reader.close();
-                        in.close();
-                        response.body().close();
-                        callback.onLoaded(TextHelper.flatten(commentChildList, 0));
+                        List<CommentChild> commentChildFlatList = TextHelper.flatten(commentChildList, 0);
+
+                        callback.onLoaded(commentChildFlatList);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    //TODO when no comments callback
-                    //List<CommentChild> commentChildList = response.body().get(1).getCommentData().getCommentChildren();
-
                 }
 
             }
@@ -177,15 +173,11 @@ public class RedditServiceApiImpl implements RedditServiceApi {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    try {
-                        InputStreamReader in = new InputStreamReader(response.body().source().inputStream(), "UTF-8");
-                        JsonReader reader = new JsonReader(in);
+                    try (InputStream stream = response.body().source().inputStream();
+                         InputStreamReader in = new InputStreamReader(stream, "UTF-8");
+                         JsonReader reader = new JsonReader(in)) {
+
                         List<CommentChild> additionalComments = CommentsStreamingParser.readMoreComments(reader);
-
-                        reader.close();
-                        in.close();
-                        response.body().close();
-
                         List<CommentChild> additionalFlattenedComments = TextHelper.flattenAdditionalComments(additionalComments, parentComment.getType());
 
                         callback.onMoreLoaded(additionalFlattenedComments, position);
