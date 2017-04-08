@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.parceler.Parcels;
 
@@ -44,7 +45,6 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mListAdapter = new SubredditsAdapter(new ArrayList<SubredditChildren>(0), mItemListener, ContextCompat.getColor(getContext(), R.color.colorAccent));
         mActionsListener = new SubredditsPresenter(Injection.provideRedditRepository(), this);
     }
@@ -118,6 +118,11 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
         Intent intent = new Intent(getContext(), SubredditActivity.class);
         intent.putExtra(SubredditActivity.EXTRA_SUBREDDIT, Parcels.wrap(subreddit));
         startActivity(intent);
+    }
+
+    @Override
+    public void onError(String errorText) {
+        Toast.makeText(getContext(), errorText, Toast.LENGTH_SHORT).show();
     }
 
     private static class SubredditsAdapter extends RecyclerView.Adapter<SubredditsAdapter.ViewHolder> {

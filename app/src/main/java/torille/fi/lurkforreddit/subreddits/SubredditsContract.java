@@ -18,6 +18,8 @@ public interface SubredditsContract {
         void showSubreddits(List<SubredditChildren> subreddits);
 
         void loadSelectedSubreddit(Subreddit subreddit);
+
+        void onError(String errorText);
     }
 
     interface UserActionsListener {

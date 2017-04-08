@@ -20,6 +20,8 @@ public interface SearchContract {
 
         void clearResults();
 
+        void showError(String errorText);
+
     }
 
     interface UserActionsListener {

@@ -41,8 +41,7 @@ public class FullscreenPresenter implements FullscreenContract.UserActionsListen
 
     @VisibleForTesting
     void checkType(String urlString, String previewImageUrl) {
-
-        switch (TextHelper.getLastFourChars(urlString)) {
+         switch (TextHelper.getLastFourChars(urlString)) {
             case ".gif":
             case "webm":
             case ".png":

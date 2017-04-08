@@ -21,41 +21,6 @@ public class FakeRedditServiceApiImpl implements RedditServiceApi {
 
     private static String AFTER = "";
 
-    @Override
-    public void getSubreddits(SubredditsServiceCallback<List<SubredditChildren>> callback) {
-        callback.onLoaded(SUBREDDIT_SERVICE_DATA);
-    }
-
-    @Override
-    public void getSubredditPosts(String subredditId, PostsServiceCallback<List<Post>, String> callback) {
-        callback.onLoaded(POSTS_SERVICE_DATA, AFTER);
-    }
-
-    @Override
-    public void getMorePosts(String subredditId, String nextpage, PostsServiceCallback<List<Post>, String> callback) {
-        callback.onLoaded(POSTS_SERVICE_DATA, AFTER);
-    }
-
-    @Override
-    public void getPostComments(String permaLinkUrl, CommentsServiceCallback<List<CommentChild>> callback) {
-
-    }
-
-    @Override
-    public void getMorePostComments(CommentChild parentComment, String linkId, int position, CommentsServiceCallback<List<CommentChild>> callback) {
-
-    }
-
-    @Override
-    public void getSearchResults(String query, SearchServiceCallback<List<SubredditChildren>> callback) {
-
-    }
-
-    @Override
-    public void getMoreSearchResults(String query, String after, SearchServiceCallback<List<SubredditChildren>> callback) {
-
-    }
-
     @VisibleForTesting
     public static void addPosts(Post... posts) {
         for (Post post: posts) {
@@ -73,5 +38,40 @@ public class FakeRedditServiceApiImpl implements RedditServiceApi {
     @VisibleForTesting
     public static void addAfterString(String after) {
         AFTER = after;
+    }
+
+    @Override
+    public void getSubreddits(ServiceCallback<List<SubredditChildren>> callback, RedditRepository.ErrorCallback errorCallback) {
+        callback.onLoaded(SUBREDDIT_SERVICE_DATA);
+    }
+
+    @Override
+    public void getSubredditPosts(String subredditId, ServiceCallbackWithNextpage<List<Post>> callback, RedditRepository.ErrorCallback errorCallback) {
+        callback.onLoaded(POSTS_SERVICE_DATA, AFTER);
+    }
+
+    @Override
+    public void getMorePosts(String subredditId, String nextPageId, ServiceCallbackWithNextpage<List<Post>> callback, RedditRepository.ErrorCallback errorCallback) {
+        callback.onLoaded(POSTS_SERVICE_DATA, AFTER);
+    }
+
+    @Override
+    public void getPostComments(String permaLinkUrl, CommentsServiceCallback<List<CommentChild>> callback, RedditRepository.ErrorCallback errorCallback) {
+
+    }
+
+    @Override
+    public void getMorePostComments(CommentChild parentComment, String linkId, int position, CommentsServiceCallback<List<CommentChild>> callback, RedditRepository.ErrorCallback errorCallback) {
+
+    }
+
+    @Override
+    public void getSearchResults(String query, ServiceCallbackWithNextpage<List<SubredditChildren>> callback, RedditRepository.ErrorCallback errorCallback) {
+
+    }
+
+    @Override
+    public void getMoreSearchResults(String query, String after, ServiceCallbackWithNextpage<List<SubredditChildren>> callback, RedditRepository.ErrorCallback errorCallback) {
+
     }
 }

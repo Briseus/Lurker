@@ -36,7 +36,7 @@ public class SubredditActivity extends AppCompatActivity {
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setHomeAsUpIndicator(getResources().getDrawable(R.drawable.ic_arrow_back_white_24px, null));
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         Subreddit subreddit = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_SUBREDDIT));
@@ -47,9 +47,9 @@ public class SubredditActivity extends AppCompatActivity {
 
             if (savedInstanceState == null) {
                 initFragment(SubredditFragment.newInstance(subreddit));
-            } else {
-                handleIntent(getIntent(), savedInstanceState);
             }
+        } else {
+            handleIntent(getIntent(), savedInstanceState);
         }
 
 

@@ -62,7 +62,9 @@
         app:layout_constraintVertical_chainStyle="packed"
         android:layout_marginLeft="0dp"
         android:layout_marginBottom="8dp"
-        android:layout_marginTop="0dp" />
+        android:layout_marginTop="0dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <Button
         android:id="@+id/comment_post_score"

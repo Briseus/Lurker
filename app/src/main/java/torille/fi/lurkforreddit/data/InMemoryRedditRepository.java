@@ -24,39 +24,47 @@ public class InMemoryRedditRepository implements RedditRepository {
         mRedditServiceApi = redditServiceApi;
     }
 
+
+
     @Override
-    public void getSubreddits(@NonNull final LoadSubredditsCallback callback) {
+    public void getSubreddits(@NonNull final LoadSubredditsCallback callback,
+                              @NonNull ErrorCallback errorCallback) {
         if (mCachedSubreddits == null) {
-            mRedditServiceApi.getSubreddits(new RedditServiceApi.SubredditsServiceCallback<List<SubredditChildren>>() {
+            mRedditServiceApi.getSubreddits(new RedditServiceApi.ServiceCallback<List<SubredditChildren>>() {
                 @Override
                 public void onLoaded(List<SubredditChildren> subreddits) {
                     mCachedSubreddits = subreddits;
                     callback.onSubredditsLoaded(mCachedSubreddits);
                 }
-            });
+            }, errorCallback);
         } else {
             callback.onSubredditsLoaded(mCachedSubreddits);
         }
     }
 
     @Override
-    public void getSubredditPosts(@NonNull String subredditId, @NonNull final LoadSubredditPostsCallback callback) {
-        mRedditServiceApi.getSubredditPosts(subredditId, new RedditServiceApi.PostsServiceCallback<List<Post>>() {
+    public void getSubredditPosts(@NonNull String subredditId,
+                                  @NonNull final LoadSubredditPostsCallback callback,
+                                  @NonNull ErrorCallback errorCallback) {
+        mRedditServiceApi.getSubredditPosts(subredditId, new RedditServiceApi.ServiceCallbackWithNextpage<List<Post>>() {
             @Override
             public void onLoaded(List<Post> posts, String nextpage) {
                 callback.onPostsLoaded(posts, nextpage);
             }
-        });
+        }, errorCallback);
     }
 
     @Override
-    public void getMoreSubredditPosts(@NonNull String subredditUrl, @NonNull String nextpageId, @NonNull final LoadSubredditPostsCallback callback) {
-        mRedditServiceApi.getMorePosts(subredditUrl, nextpageId, new RedditServiceApi.PostsServiceCallback<List<Post>>() {
+    public void getMoreSubredditPosts(@NonNull String subredditUrl,
+                                      @NonNull String nextpageId,
+                                      @NonNull final LoadSubredditPostsCallback callback,
+                                      @NonNull ErrorCallback errorCallback) {
+        mRedditServiceApi.getMorePosts(subredditUrl, nextpageId, new RedditServiceApi.ServiceCallbackWithNextpage<List<Post>>() {
             @Override
             public void onLoaded(List<Post> posts, String nextpage) {
                 callback.onPostsLoaded(posts, nextpage);
             }
-        });
+        }, errorCallback);
     }
 
     @Override
@@ -65,7 +73,9 @@ public class InMemoryRedditRepository implements RedditRepository {
     }
 
     @Override
-    public void getCommentsForPost(@NonNull String permaLinkUrl, @NonNull final LoadPostCommentsCallback callback) {
+    public void getCommentsForPost(@NonNull String permaLinkUrl,
+                                   @NonNull final LoadPostCommentsCallback callback,
+                                   @NonNull ErrorCallback errorCallback) {
         mRedditServiceApi.getPostComments(permaLinkUrl, new RedditServiceApi.CommentsServiceCallback<List<CommentChild>>() {
             @Override
             public void onLoaded(List<CommentChild> comments) {
@@ -76,11 +86,15 @@ public class InMemoryRedditRepository implements RedditRepository {
             public void onMoreLoaded(List<CommentChild> comments, int position) {
 
             }
-        });
+        }, errorCallback);
     }
 
     @Override
-    public void getMoreCommentsForPostAt(@NonNull CommentChild parentComment, @NonNull String linkId, int position, @NonNull final LoadPostCommentsCallback callback) {
+    public void getMoreCommentsForPostAt(@NonNull CommentChild parentComment,
+                                         @NonNull String linkId,
+                                         int position,
+                                         @NonNull final LoadPostCommentsCallback callback,
+                                         @NonNull ErrorCallback errorCallback) {
         mRedditServiceApi.getMorePostComments(parentComment, linkId, position, new RedditServiceApi.CommentsServiceCallback<List<CommentChild>>() {
             @Override
             public void onLoaded(List<CommentChild> comments) {
@@ -91,26 +105,31 @@ public class InMemoryRedditRepository implements RedditRepository {
             public void onMoreLoaded(List<CommentChild> comments, int position) {
                 callback.onMoreCommentsLoaded(comments, position);
             }
-        });
+        }, errorCallback);
     }
 
     @Override
-    public void getSearchResults(@NonNull String query, @NonNull final LoadCommentsCallback callback) {
-        mRedditServiceApi.getSearchResults(query, new RedditServiceApi.SearchServiceCallback<List<SubredditChildren>>() {
+    public void getSearchResults(@NonNull String query,
+                                 @NonNull final LoadCommentsCallback callback,
+                                 @NonNull ErrorCallback errorCallback) {
+        mRedditServiceApi.getSearchResults(query, new RedditServiceApi.ServiceCallbackWithNextpage<List<SubredditChildren>>() {
             @Override
             public void onLoaded(List<SubredditChildren> result, String after) {
                 callback.onSearchLoaded(result, after);
             }
-        });
+        }, errorCallback);
     }
 
     @Override
-    public void getMoreSearchResults(@NonNull String query, @NonNull String after, @NonNull final LoadCommentsCallback callback) {
-        mRedditServiceApi.getMoreSearchResults(query, after, new RedditServiceApi.SearchServiceCallback<List<SubredditChildren>>() {
+    public void getMoreSearchResults(@NonNull String query,
+                                     @NonNull String after,
+                                     @NonNull final LoadCommentsCallback callback,
+                                     @NonNull ErrorCallback errorCallback) {
+        mRedditServiceApi.getMoreSearchResults(query, after, new RedditServiceApi.ServiceCallbackWithNextpage<List<SubredditChildren>>() {
             @Override
             public void onLoaded(List<SubredditChildren> result, String after) {
                 callback.onSearchLoaded(result, after);
             }
-        });
+        }, errorCallback);
     }
 }

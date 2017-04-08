@@ -23,7 +23,6 @@ public class CommentPresenter implements CommentContract.UserActionsListener {
         mCommentsView = commentsView;
     }
 
-
     @Override
     public void loadComments(@NonNull String permaLinkUrl) {
         mCommentsView.showProgressbarAt(1, 0);
@@ -38,11 +37,17 @@ public class CommentPresenter implements CommentContract.UserActionsListener {
             public void onMoreCommentsLoaded(List<CommentChild> comments, int position) {
 
             }
+        }, new RedditRepository.ErrorCallback() {
+            @Override
+            public void onError(String errorText) {
+                mCommentsView.hideProgressbarAt(1);
+                mCommentsView.showError(errorText);
+            }
         });
     }
 
     @Override
-    public void loadMoreCommentsAt(CommentChild parentComment, String linkId, int position) {
+    public void loadMoreCommentsAt(CommentChild parentComment, String linkId, final int position) {
         final int level = parentComment.getType();
         mCommentsView.showProgressbarAt(position, level);
 
@@ -56,6 +61,12 @@ public class CommentPresenter implements CommentContract.UserActionsListener {
             public void onMoreCommentsLoaded(List<CommentChild> comments, int position) {
                 mCommentsView.hideProgressbarAt(position);
                 mCommentsView.addCommentsAt(comments, position);
+            }
+        }, new RedditRepository.ErrorCallback() {
+            @Override
+            public void onError(String errorText) {
+                mCommentsView.showError(errorText);
+                mCommentsView.showErrorAt(position);
             }
         });
     }

@@ -107,6 +107,9 @@ public class SubredditPresenterTest {
     @Captor
     private ArgumentCaptor<RedditRepository.LoadSubredditPostsCallback> mLoadPostsCallbackArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<RedditRepository.ErrorCallback> loadErrorCallbackArgumentCaptor;
+    
     private SubredditPresenter mSubredditPresenter;
 
     @Before
@@ -140,7 +143,9 @@ public class SubredditPresenterTest {
     public void loadPostsFromRepositoryAndLoadIntoView() {
         mSubredditPresenter.loadPosts(SUBREDDIT_WORLDNEWS.getUrl());
 
-        verify(mRedditRepository).getSubredditPosts(any(String.class), mLoadPostsCallbackArgumentCaptor.capture());
+        verify(mRedditRepository).getSubredditPosts(any(String.class),
+                mLoadPostsCallbackArgumentCaptor.capture(),
+                loadErrorCallbackArgumentCaptor.capture());
         mLoadPostsCallbackArgumentCaptor.getValue().onPostsLoaded(POSTS, AFTER);
 
         verify(mSubredditView).setProgressIndicator(false);
@@ -151,7 +156,10 @@ public class SubredditPresenterTest {
     public void loadMorePostsFromRepositoryAndLoadIntoView() {
         mSubredditPresenter.loadMorePosts(SUBREDDIT_WORLDNEWS.getUrl(), AFTER);
 
-        verify(mRedditRepository).getMoreSubredditPosts(any(String.class), any(String.class), mLoadPostsCallbackArgumentCaptor.capture());
+        verify(mRedditRepository).getMoreSubredditPosts(any(String.class),
+                any(String.class),
+                mLoadPostsCallbackArgumentCaptor.capture(),
+                loadErrorCallbackArgumentCaptor.capture());
         mLoadPostsCallbackArgumentCaptor.getValue().onPostsLoaded(POSTS, AFTER);
 
         verify(mSubredditView).setListProgressIndicator(false);

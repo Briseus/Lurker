@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -284,6 +285,12 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         startActivity(intent);
     }
 
+    @Override
+    public void onError(String errorText) {
+        Toast.makeText(getContext(), errorText, Toast.LENGTH_SHORT).show();
+
+    }
+
     private static class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final static int VIEW_ITEM = 1;
         private final static int VIEW_PROGRESS = 0;
@@ -345,9 +352,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
             for (int i = fromIndex; i < toIndex; i++) {
                 final String url = mPosts.get(i).getPostDetails().getPreviewImage();
-                if (!url.isEmpty()) {
-                    imagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(url), null);
-                }
+                imagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(url), null);
             }
         }
 
@@ -371,12 +376,9 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         }
 
         void addMorePosts(@NonNull final List<Post> newPosts) {
-            final int progressBarPosition = mPosts.size() - 1;
-            mPosts.set(progressBarPosition, newPosts.get(0));
-            newPosts.remove(0);
-            notifyItemChanged(progressBarPosition);
-            mPosts.addAll(progressBarPosition, newPosts);
-            notifyItemRangeInserted(progressBarPosition, newPosts.size());
+            final int index = mPosts.size();
+            mPosts.addAll(index, newPosts);
+            notifyItemRangeInserted(index, newPosts.size());
 
 
         }
@@ -386,6 +388,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 final int oldSize = mPosts.size();
                 mPosts.clear();
                 notifyItemRangeRemoved(0, oldSize);
+
             }
         }
 
@@ -395,8 +398,8 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
          * that is used in the progressbar
          **/
         void setRefreshing(boolean active) {
+            final int index = mPosts.size() - 1;
             if (active) {
-                android.os.Handler handler = new android.os.Handler();
                 Post dummy = new Post();
                 PostDetails dummyDetails = new PostDetails();
                 dummyDetails.setId("Progressbar");
@@ -404,12 +407,18 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 dummy.setPostDetails(dummyDetails);
                 dummy.setKind("Progressbar");
                 mPosts.add(dummy);
+                android.os.Handler handler = new android.os.Handler();
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyItemInserted(mPosts.size() - 1);
+                        notifyItemInserted(index);
                     }
                 });
+
+            } else {
+                mPosts.remove(index);
+                notifyItemRemoved(index);
+
             }
 
         }
@@ -480,7 +489,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 score.setText(postDetails.getPreviewScore());
                 comments.setText(String.valueOf(postDetails.getNumberOfComments()));
 
-                if (postDetails.getPreviewImage().isEmpty()) {
+                if (postDetails.getPreviewImage() != null && postDetails.getPreviewImage().isEmpty()) {
                     image.setVisibility(GONE);
                 } else {
                     image.setVisibility(View.VISIBLE);

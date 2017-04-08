@@ -21,7 +21,6 @@ public class FullscreenPresenterTest {
     private static Post videoPost = new Post();
     private static Post gfycatPost = new Post();
     private static Post imgurVideoPost = new Post();
-
     @Mock
     private FullscreenContract.View mFullscreenView;
 
@@ -51,7 +50,7 @@ public class FullscreenPresenterTest {
     @Test
     public void loadImageIntoView() {
         mFullscreenPresenter.checkDomain(mImagePost);
-        verify(mFullscreenView).showImage(anyString(), previewImageUrl);
+        verify(mFullscreenView).showImage(anyString(), anyString());
     }
 
     @Test

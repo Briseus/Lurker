@@ -19,12 +19,11 @@ public class SubredditPresenter implements SubredditContract.UserActionsListener
 
     private final SubredditContract.View mSubredditsView;
 
-    public SubredditPresenter(@NonNull RedditRepository redditRepository,
+    SubredditPresenter(@NonNull RedditRepository redditRepository,
                               @NonNull SubredditContract.View subredditView) {
         mRedditRepository = redditRepository;
         mSubredditsView = subredditView;
     }
-
 
     @Override
     public void openComments(@NonNull Post clickedPost) {
@@ -57,14 +56,21 @@ public class SubredditPresenter implements SubredditContract.UserActionsListener
         // that the appm is busy until the response is handled.
         EspressoIdlingResource.increment(); // App is busy until further notice
 
-        mRedditRepository.getSubredditPosts(subredditUrl, new RedditRepository.LoadSubredditPostsCallback() {
-            @Override
-            public void onPostsLoaded(List<Post> posts, String nextpage) {
-                EspressoIdlingResource.decrement(); // Set app as idle.
-                mSubredditsView.setProgressIndicator(false);
-                mSubredditsView.showPosts(posts, nextpage);
-            }
-        });
+        mRedditRepository.getSubredditPosts(subredditUrl,
+                new RedditRepository.LoadSubredditPostsCallback() {
+                    @Override
+                    public void onPostsLoaded(List<Post> posts, String nextpage) {
+                        EspressoIdlingResource.decrement(); // Set app as idle.
+                        mSubredditsView.setProgressIndicator(false);
+                        mSubredditsView.showPosts(posts, nextpage);
+                    }
+                }, new RedditRepository.ErrorCallback() {
+                    @Override
+                    public void onError(String errorText) {
+                        mSubredditsView.setProgressIndicator(false);
+                        mSubredditsView.onError(errorText);
+                    }
+                });
 
     }
 
@@ -74,13 +80,22 @@ public class SubredditPresenter implements SubredditContract.UserActionsListener
 
         EspressoIdlingResource.increment();
 
-        mRedditRepository.getMoreSubredditPosts(subredditUrl, nextpage, new RedditRepository.LoadSubredditPostsCallback() {
-            @Override
-            public void onPostsLoaded(List<Post> posts, String nextpage) {
-                EspressoIdlingResource.decrement();
-                mSubredditsView.setListProgressIndicator(false);
-                mSubredditsView.addMorePosts(posts, nextpage);
-            }
-        });
+        mRedditRepository.getMoreSubredditPosts(subredditUrl,
+                nextpage,
+                new RedditRepository.LoadSubredditPostsCallback() {
+                    @Override
+                    public void onPostsLoaded(List<Post> posts, String nextpage) {
+                        EspressoIdlingResource.decrement();
+                        mSubredditsView.setListProgressIndicator(false);
+                        mSubredditsView.addMorePosts(posts, nextpage);
+                    }
+
+                }, new RedditRepository.ErrorCallback() {
+                    @Override
+                    public void onError(String errorText) {
+                        mSubredditsView.setListProgressIndicator(false);
+                        mSubredditsView.onError(errorText);
+                    }
+                });
     }
 }

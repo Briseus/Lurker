@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.parceler.Parcels;
 
@@ -124,6 +125,11 @@ public class SearchFragment extends Fragment implements SearchContract.View {
     @Override
     public void clearResults() {
         mAdapter.clear();
+    }
+
+    @Override
+    public void showError(String errorText) {
+        Toast.makeText(getContext(), errorText, Toast.LENGTH_SHORT).show();
     }
 
     final SearchClickListener searchClickListener = new SearchClickListener() {

@@ -23,6 +23,13 @@ public class SearchPresenter implements SearchContract.UserActionsListener {
         this.mSearchView = mSearchView;
     }
 
+    private RedditRepository.ErrorCallback errorCallback = new RedditRepository.ErrorCallback() {
+        @Override
+        public void onError(String errorText) {
+            mSearchView.showError(errorText);
+        }
+    };
+
     @Override
     public void searchSubreddits(@NonNull String query) {
         this.searchQuery = query;
@@ -34,7 +41,7 @@ public class SearchPresenter implements SearchContract.UserActionsListener {
                 mSearchView.showResults(subredditChildrens);
                 searchAfter = after;
             }
-        });
+        }, errorCallback);
     }
 
     @Override
@@ -46,6 +53,6 @@ public class SearchPresenter implements SearchContract.UserActionsListener {
                 mSearchView.showResults(subredditChildrens);
                 searchAfter = after;
             }
-        });
+        }, errorCallback);
     }
 }

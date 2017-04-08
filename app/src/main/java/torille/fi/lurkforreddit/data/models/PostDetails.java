@@ -1,5 +1,6 @@
 package torille.fi.lurkforreddit.data.models;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.Spanned;
 
@@ -24,7 +25,7 @@ public class PostDetails {
     String author;
     String name;
     int score;
-    String thumbnail;
+    String thumbnail = "";
     @SerializedName("subreddit_id")
     String subredditId;
     String url;
@@ -49,12 +50,12 @@ public class PostDetails {
     @Nullable
     @SerializedName("preview")
     ImagePreview images;
-    @Nullable
-    String previewImage;
-    @Nullable
-    String previewText;
-    @Nullable
-    String previewScore;
+    @NonNull
+    String previewImage = "";
+    @NonNull
+    String previewText = "";
+    @NonNull
+    String previewScore = "";
     @Nullable
     private transient Spanned previewTitle;
 
@@ -62,7 +63,7 @@ public class PostDetails {
     }
 
     @ParcelConstructor
-    public PostDetails(String subreddit, String selftext, @Nullable String selftextHtml, int likes, String author, String name, int score, @Nullable String thumbnail, String subredditId, String url, String title, @Nullable String postHint, String domain, String id, Boolean isSelf, long created, long createdUtc, boolean stickied, @Nullable String distinguished, String permalink, int numberOfComments, ImagePreview images, @Nullable String previewImage, @Nullable String previewText, String previewScore) {
+    public PostDetails(String subreddit, String selftext, @Nullable String selftextHtml, int likes, String author, String name, int score, @Nullable String thumbnail, String subredditId, String url, String title, @Nullable String postHint, String domain, String id, Boolean isSelf, long created, long createdUtc, boolean stickied, @Nullable String distinguished, String permalink, int numberOfComments, @Nullable ImagePreview images, @Nullable String previewImage, @Nullable String previewText, String previewScore) {
         this.subreddit = subreddit;
         this.selftext = selftext;
         this.selftextHtml = selftextHtml;

@@ -18,6 +18,10 @@ public interface CommentContract {
         void hideProgressbarAt(int position);
 
         void addCommentsAt(List<CommentChild> comments, int position);
+
+        void showError(String errorText);
+
+        void showErrorAt(int position);
     }
 
     interface UserActionsListener {

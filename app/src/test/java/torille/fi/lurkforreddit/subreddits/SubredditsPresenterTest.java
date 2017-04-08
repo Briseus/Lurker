@@ -44,6 +44,9 @@ public class SubredditsPresenterTest {
     @Captor
     private ArgumentCaptor<RedditRepository.LoadSubredditsCallback> loadSubredditsCallbackArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<RedditRepository.ErrorCallback> loadErrorCallbackArgumentCaptor;
+
     private SubredditsPresenter mSubredditsPresenter;
 
     @Before
@@ -59,7 +62,7 @@ public class SubredditsPresenterTest {
     public void loadSubredditsFromRepositoryAndLoadIntoView() {
         mSubredditsPresenter.loadSubreddits(true);
 
-        verify(mRedditRepository).getSubreddits(loadSubredditsCallbackArgumentCaptor.capture());
+        verify(mRedditRepository).getSubreddits(loadSubredditsCallbackArgumentCaptor.capture(), loadErrorCallbackArgumentCaptor.capture());
         loadSubredditsCallbackArgumentCaptor.getValue().onSubredditsLoaded(SUBREDDITS);
 
         verify(mSubredditsView).setProgressIndicator(false);

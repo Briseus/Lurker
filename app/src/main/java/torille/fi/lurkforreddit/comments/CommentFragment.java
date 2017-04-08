@@ -1,6 +1,7 @@
 package torille.fi.lurkforreddit.comments;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.interfaces.DraweeController;
@@ -125,6 +127,16 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         }
     }
 
+    @Override
+    public void showError(String errorText) {
+        Toast.makeText(getContext(), errorText, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showErrorAt(int position) {
+        mCommentAdapter.changeToErrorAt(position);
+    }
+
     /**
      * Listener for clicks on notes in the RecyclerView.
      */
@@ -211,10 +223,11 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             return mComments.get(position).getData().getId().hashCode();
         }
 
-        void addComments(List<CommentChild> commentChildren) {
-            int oldDataEnd = mComments.size();
+        void addComments(final List<CommentChild> commentChildren) {
+            final int oldDataEnd = mComments.size();
             mComments.addAll(commentChildren);
             notifyItemRangeInserted(oldDataEnd, commentChildren.size());
+
         }
 
         /**
@@ -234,36 +247,39 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             return dummyComment;
         }
 
-        void addProgressbar(int position, int level) {
+        void addProgressbar(final int position, final int level) {
             Log.d("more", "Adding to " + position);
             if (position > 1) {
                 mComments.set(position, createProgressbar(level));
                 notifyItemChanged(position);
+
             } else {
                 mComments.add(position, createProgressbar(level));
                 notifyItemInserted(position);
+
             }
 
         }
 
-        void removeAt(int position) {
+        void changeToErrorAt(final int position) {
+            final CommentChild error = mComments.get(position);
+            error.setKind("more");
+            error.getData().setFormattedComment("Retry");
+            error.getData().setId("retry");
+            notifyItemChanged(position, error);
+
+        }
+
+        void removeAt(final int position) {
             mComments.remove(position);
             notifyItemRemoved(position);
+
         }
 
-        void addAllCommentsTo(int position, @NonNull List<CommentChild> comments) {
+        void addAllCommentsTo(final int position, @NonNull final List<CommentChild> comments) {
             mComments.addAll(position, comments);
             notifyItemRangeInserted(position, comments.size());
-        }
 
-        public void removeAndAddProgressBar(int position, int level) {
-            mComments.set(position, createProgressbar(level));
-            notifyItemChanged(position);
-        }
-
-        public void changeCommentAt(int position, CommentChild comment) {
-            mComments.set(position, comment);
-            notifyItemChanged(position);
         }
 
         class PostViewHolder extends RecyclerView.ViewHolder {

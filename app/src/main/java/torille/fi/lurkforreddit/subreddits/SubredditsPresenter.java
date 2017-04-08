@@ -23,6 +23,14 @@ public class SubredditsPresenter implements SubredditsContract.UserActionsListen
         mSubredditsView = subredditsView;
     }
 
+    private RedditRepository.ErrorCallback errorCallback = new RedditRepository.ErrorCallback() {
+        @Override
+        public void onError(String errorText) {
+            mSubredditsView.setProgressIndicator(false);
+            mSubredditsView.onError(errorText);
+        }
+    };
+
     @Override
     public void loadSubreddits(boolean forceUpdate) {
         mSubredditsView.setProgressIndicator(true);
@@ -40,7 +48,7 @@ public class SubredditsPresenter implements SubredditsContract.UserActionsListen
                 mSubredditsView.setProgressIndicator(false);
                 mSubredditsView.showSubreddits(subreddits);
             }
-        });
+        }, errorCallback);
     }
 
     @Override

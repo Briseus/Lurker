@@ -29,6 +29,8 @@ public interface SubredditContract {
         void showCommentsUI(Post clickedPost);
 
         void launchCustomActivity(Post clickedPost);
+
+        void onError(String errorText);
     }
 
     interface UserActionsListener {

@@ -13,35 +13,30 @@ import torille.fi.lurkforreddit.data.models.SubredditChildren;
 
 interface RedditServiceApi {
 
-    interface SubredditsServiceCallback<T> {
+    interface ServiceCallback<T> {
         void onLoaded(T subreddits);
     }
 
-    interface PostsServiceCallback<T> {
-        void onLoaded(T subreddits, String nextpage);
+    interface ServiceCallbackWithNextpage<T> {
+        void onLoaded(T subreddits, String nextPageId);
     }
 
     interface CommentsServiceCallback<T> {
         void onLoaded(T comments);
-
         void onMoreLoaded(T comments, int position);
     }
 
-    interface SearchServiceCallback<T> {
-        void onLoaded(T result, String after);
-    }
+    void getSubreddits(ServiceCallback<List<SubredditChildren>> callback, RedditRepository.ErrorCallback errorCallback);
 
-    void getSubreddits(SubredditsServiceCallback<List<SubredditChildren>> callback);
+    void getSubredditPosts(String subredditId, ServiceCallbackWithNextpage<List<Post>> callback, RedditRepository.ErrorCallback errorCallback);
 
-    void getSubredditPosts(String subredditId, PostsServiceCallback<List<Post>> callback);
+    void getMorePosts(String subredditId, String nextPageId, ServiceCallbackWithNextpage<List<Post>> callback, RedditRepository.ErrorCallback errorCallback);
 
-    void getMorePosts(String subredditId, String nextpage, PostsServiceCallback<List<Post>> callback);
+    void getPostComments(String permaLinkUrl, CommentsServiceCallback<List<CommentChild>> callback, RedditRepository.ErrorCallback errorCallback);
 
-    void getPostComments(String permaLinkUrl, CommentsServiceCallback<List<CommentChild>> callback);
+    void getMorePostComments(CommentChild parentComment, String linkId, int position, CommentsServiceCallback<List<CommentChild>> callback, RedditRepository.ErrorCallback errorCallback);
 
-    void getMorePostComments(CommentChild parentComment, String linkId, int position, CommentsServiceCallback<List<CommentChild>> callback);
+    void getSearchResults(String query, ServiceCallbackWithNextpage<List<SubredditChildren>> callback, RedditRepository.ErrorCallback errorCallback);
 
-    void getSearchResults(String query, SearchServiceCallback<List<SubredditChildren>> callback);
-
-    void getMoreSearchResults(String query, String after, SearchServiceCallback<List<SubredditChildren>> callback);
+    void getMoreSearchResults(String query, String after, ServiceCallbackWithNextpage<List<SubredditChildren>> callback, RedditRepository.ErrorCallback errorCallback);
 }
