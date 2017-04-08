@@ -17,11 +17,9 @@ import torille.fi.lurkforreddit.data.models.ImagePreview;
 public class PostDetails {
 
     String subreddit;
-    String selftext;
     @Nullable
     @SerializedName("selftext_html")
     String selftextHtml;
-    int likes;
     String author;
     String name;
     int score;
@@ -37,24 +35,17 @@ public class PostDetails {
     String id;
     @SerializedName("is_self")
     public Boolean isSelf;
-    @SerializedName("created")
-    long created;
     @SerializedName("created_utc")
     long createdUtc;
     boolean stickied;
-    @Nullable
-    String distinguished;
     String permalink;
     @SerializedName("num_comments")
     int numberOfComments;
     @Nullable
     @SerializedName("preview")
     ImagePreview images;
-    @NonNull
     String previewImage = "";
-    @NonNull
     String previewText = "";
-    @NonNull
     String previewScore = "";
     @Nullable
     private transient Spanned previewTitle;
@@ -63,11 +54,9 @@ public class PostDetails {
     }
 
     @ParcelConstructor
-    public PostDetails(String subreddit, String selftext, @Nullable String selftextHtml, int likes, String author, String name, int score, @Nullable String thumbnail, String subredditId, String url, String title, @Nullable String postHint, String domain, String id, Boolean isSelf, long created, long createdUtc, boolean stickied, @Nullable String distinguished, String permalink, int numberOfComments, @Nullable ImagePreview images, @Nullable String previewImage, @Nullable String previewText, String previewScore) {
+    public PostDetails(String subreddit, @Nullable String selftextHtml, String author, String name, int score, @Nullable String thumbnail, String subredditId, String url, String title, @Nullable String postHint, String domain, String id, Boolean isSelf, long createdUtc, boolean stickied, String permalink, int numberOfComments, @Nullable ImagePreview images, @Nullable String previewImage, @Nullable String previewText, String previewScore) {
         this.subreddit = subreddit;
-        this.selftext = selftext;
         this.selftextHtml = selftextHtml;
-        this.likes = likes;
         this.author = author;
         this.name = name;
         this.score = score;
@@ -79,10 +68,8 @@ public class PostDetails {
         this.domain = domain;
         this.id = id;
         this.isSelf = isSelf;
-        this.created = created;
         this.createdUtc = createdUtc;
         this.stickied = stickied;
-        this.distinguished = distinguished;
         this.permalink = permalink;
         this.numberOfComments = numberOfComments;
         this.images = images;
@@ -99,14 +86,6 @@ public class PostDetails {
         this.subreddit = subreddit;
     }
 
-    public String getSelftext() {
-        return selftext;
-    }
-
-    public void setSelftext(String selftext) {
-        this.selftext = selftext;
-    }
-
     @Nullable
     public String getSelftextHtml() {
         return selftextHtml;
@@ -114,14 +93,6 @@ public class PostDetails {
 
     public void setSelftextHtml(@Nullable String selftextHtml) {
         this.selftextHtml = selftextHtml;
-    }
-
-    public int getLikes() {
-        return likes;
-    }
-
-    public void setLikes(int likes) {
-        this.likes = likes;
     }
 
     public String getAuthor() {
@@ -213,14 +184,6 @@ public class PostDetails {
         isSelf = self;
     }
 
-    public long getCreated() {
-        return created;
-    }
-
-    public void setCreated(long created) {
-        this.created = created;
-    }
-
     public long getCreatedUtc() {
         return createdUtc;
     }
@@ -235,15 +198,6 @@ public class PostDetails {
 
     public void setStickied(boolean stickied) {
         this.stickied = stickied;
-    }
-
-    @Nullable
-    public String getDistinguished() {
-        return distinguished;
-    }
-
-    public void setDistinguished(@Nullable String distinguished) {
-        this.distinguished = distinguished;
     }
 
     public String getPermalink() {

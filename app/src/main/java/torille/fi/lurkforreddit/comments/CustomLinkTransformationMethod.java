@@ -1,14 +1,9 @@
 package torille.fi.lurkforreddit.comments;
 
 import android.graphics.Rect;
-import android.support.v4.text.util.LinkifyCompat;
 import android.text.Spannable;
-import android.text.Spanned;
-import android.text.method.LinkMovementMethod;
 import android.text.method.TransformationMethod;
-import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
-import android.text.util.Linkify;
 import android.view.View;
 import android.widget.TextView;
 
@@ -16,7 +11,7 @@ import android.widget.TextView;
  * Transforms links with the help of {@link CustomUrlSpan}
  */
 
-public class CustomLinkTransformationMethod implements TransformationMethod {
+class CustomLinkTransformationMethod implements TransformationMethod {
     @Override
     public CharSequence getTransformation(CharSequence source, View view) {
         if (view instanceof TextView) {

@@ -110,7 +110,6 @@ public final class CommentsStreamingParser {
     }
 
     private static CommentData readCommentData(JsonReader reader) throws IOException {
-        String modhash = null;
         List<CommentChild> commentChildren = new ArrayList<>();
         String after = null;
         String before = null;
@@ -129,7 +128,7 @@ public final class CommentsStreamingParser {
             }
         }
         reader.endObject();
-        return new CommentData(modhash, commentChildren, after, before);
+        return new CommentData(commentChildren, after, before);
 
     }
 
@@ -189,8 +188,6 @@ public final class CommentsStreamingParser {
         String parendId = null;
         int score = 0;
         int controversiality = 0;
-        String body = null;
-        int downs = 0;
         String bodyHtml = null;
         boolean stickied = false;
         String subreddit = null;
@@ -242,12 +239,6 @@ public final class CommentsStreamingParser {
                     break;
                 case "controversiality":
                     controversiality = reader.nextInt();
-                    break;
-                case "body":
-                    body = reader.nextString();
-                    break;
-                case "downs":
-                    downs = reader.nextInt();
                     break;
                 case "body_html":
                     bodyHtml = reader.nextString();
@@ -305,8 +296,6 @@ public final class CommentsStreamingParser {
                 parendId,
                 score,
                 controversiality,
-                body,
-                downs,
                 bodyHtml,
                 stickied,
                 subreddit,

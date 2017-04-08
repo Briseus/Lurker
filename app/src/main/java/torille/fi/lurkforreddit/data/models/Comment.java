@@ -14,7 +14,7 @@ public class Comment {
     @SerializedName("link_id")
     String linkId;
     @SerializedName("replies")
-     CommentListing replies;
+    CommentListing replies;
     @SerializedName("saved")
     boolean saved;
     @SerializedName("id")
@@ -31,10 +31,6 @@ public class Comment {
     int score;
     @SerializedName("controversiality")
     int controversiality;
-    @SerializedName("body")
-    String body;
-    @SerializedName("downs")
-    int downs;
     @SerializedName("body_html")
     String bodyHtml;
     @SerializedName("stickied")
@@ -45,8 +41,6 @@ public class Comment {
     boolean scoreHidden;
     @SerializedName("name")
     String name;
-    @SerializedName("created")
-    long created;
     @SerializedName("author_flair_text")
     String authorFlairText;
     @SerializedName("created_utc")
@@ -93,8 +87,6 @@ public class Comment {
      * @param parentId
      * @param score
      * @param controversiality
-     * @param body
-     * @param downs
      * @param bodyHtml
      * @param stickied
      * @param subreddit
@@ -106,7 +98,7 @@ public class Comment {
      * @param count
      * @param children
      */
-    public Comment(String subredditId, String linkId, CommentListing replies, Boolean saved, String id, Integer gilded, Boolean archived, String author, String parentId, Integer score, Integer controversiality, String body, Integer downs, String bodyHtml, Boolean stickied, String subreddit, Boolean scoreHidden, String name, long createdUtc, String authorFlairText, Integer ups, int count, List<String> children) {
+    public Comment(String subredditId, String linkId, CommentListing replies, Boolean saved, String id, Integer gilded, Boolean archived, String author, String parentId, Integer score, Integer controversiality, String bodyHtml, Boolean stickied, String subreddit, Boolean scoreHidden, String name, long createdUtc, String authorFlairText, Integer ups, int count, List<String> children) {
         this.subredditId = subredditId;
         this.linkId = linkId;
         this.replies = replies;
@@ -118,8 +110,6 @@ public class Comment {
         this.parentId = parentId;
         this.score = score;
         this.controversiality = controversiality;
-        this.body = body;
-        this.downs = downs;
         this.bodyHtml = bodyHtml;
         this.stickied = stickied;
         this.subreddit = subreddit;
@@ -220,22 +210,6 @@ public class Comment {
         this.controversiality = controversiality;
     }
 
-    public String getBody() {
-        return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-    }
-
-    public int getDowns() {
-        return downs;
-    }
-
-    public void setDowns(int downs) {
-        this.downs = downs;
-    }
-
     public String getBodyHtml() {
         return bodyHtml;
     }
@@ -274,14 +248,6 @@ public class Comment {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public long getCreated() {
-        return created;
-    }
-
-    public void setCreated(long created) {
-        this.created = created;
     }
 
     public String getAuthorFlairText() {
@@ -370,14 +336,11 @@ public class Comment {
                 ", parentId='" + parentId + '\'' +
                 ", score=" + score +
                 ", controversiality=" + controversiality +
-                ", body='" + body + '\'' +
-                ", downs=" + downs +
                 ", bodyHtml='" + bodyHtml + '\'' +
                 ", stickied=" + stickied +
                 ", subreddit='" + subreddit + '\'' +
                 ", scoreHidden=" + scoreHidden +
                 ", name='" + name + '\'' +
-                ", created=" + created +
                 ", authorFlairText='" + authorFlairText + '\'' +
                 ", createdUtc=" + createdUtc +
                 ", ups=" + ups +

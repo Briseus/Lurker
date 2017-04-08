@@ -16,8 +16,6 @@ import java.util.List;
 @Parcel
 public class CommentData {
 
-    @SerializedName("modhash")
-    String modhash;
     @SerializedName("children")
     List<CommentChild> commentChildren = new ArrayList<>();
     @SerializedName("after")
@@ -26,19 +24,10 @@ public class CommentData {
     String before;
 
     @ParcelConstructor
-    public CommentData(String modhash, List<CommentChild> commentChildren, String after, String before) {
-        this.modhash = modhash;
+    public CommentData(List<CommentChild> commentChildren, String after, String before) {
         this.commentChildren = commentChildren;
         this.after = after;
         this.before = before;
-    }
-
-    public String getModhash() {
-        return modhash;
-    }
-
-    public void setModhash(String modhash) {
-        this.modhash = modhash;
     }
 
     public List<CommentChild> getCommentChildren() {
@@ -68,7 +57,6 @@ public class CommentData {
     @Override
     public String toString() {
         return "CommentData{" +
-                "modhash='" + modhash + '\'' +
                 ", commentChildren=" + commentChildren +
                 ", after=" + after +
                 ", before=" + before +

@@ -96,6 +96,7 @@ public class RedditService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(okHttpClient
                         .newBuilder()
+                        .addNetworkInterceptor(logger)
                         .addNetworkInterceptor(rawJsonInterceptor)
                         .addNetworkInterceptor(tokenInterceptor)
                         .authenticator(authenticator).build())

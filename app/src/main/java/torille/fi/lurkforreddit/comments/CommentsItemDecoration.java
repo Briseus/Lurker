@@ -72,9 +72,9 @@ class CommentsItemDecoration extends RecyclerView.ItemDecoration {
     }
 
     private static void setPadding(CommentChild mComment, Rect outRect) {
-        if (mComment != null) {
+
             outRect.left = (mComment.getType() * 16);
-        }
+
     }
 
 }
