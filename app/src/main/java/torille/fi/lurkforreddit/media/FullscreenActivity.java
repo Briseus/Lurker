@@ -1,16 +1,16 @@
 package torille.fi.lurkforreddit.media;
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 
 import org.parceler.Parcels;
 
+import timber.log.Timber;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.models.Post;
 
@@ -36,15 +36,11 @@ public class FullscreenActivity extends AppCompatActivity {
         if (null == savedInstanceState) {
             Post post = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_POST));
             if (post != null) {
-                Log.d("Fullscreen", "activity got " + post.toString());
+                Timber.d("activity got " + post.toString());
                 initFragment(FullscreenFragment.newInstance(post));
             }
 
         }
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        //findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
     }
 
 

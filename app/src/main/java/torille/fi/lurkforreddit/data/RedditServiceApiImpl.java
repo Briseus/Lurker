@@ -1,7 +1,6 @@
 package torille.fi.lurkforreddit.data;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.google.gson.stream.JsonReader;
 
@@ -16,6 +15,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 import torille.fi.lurkforreddit.data.models.CommentChild;
 import torille.fi.lurkforreddit.data.models.Post;
 import torille.fi.lurkforreddit.data.models.PostListing;
@@ -41,10 +41,10 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
         Call<SubredditListing> call;
         if (SharedPreferencesHelper.isLoggedIn()) {
-            Log.d("LoginStatus", "Was logged in, getting personal subreddits");
+            Timber.d("Was logged in, getting personal subreddits");
             call = RedditService.getInstance(token).getMySubreddits(100);
         } else {
-            Log.d("LoginStatus", "Was not logged in, getting default subreddits");
+            Timber.d("Was not logged in, getting default subreddits");
             call = RedditService.getInstance(token).getDefaultSubreddits(100);
         }
 
@@ -69,7 +69,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
             @Override
             public void onFailure(Call<SubredditListing> call, Throwable t) {
-                Log.e("Subreddits", "Failed to get subreddits " + t.toString());
+                Timber.e("Failed to get subreddits " + t.toString());
                 errorCallback.onError(t.toString());
             }
         });
@@ -93,7 +93,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                         List<Post> formattedPosts = getFormattedPosts(response.body().getData().getPosts());
                         String nextpage = response.body().getData().getNextPage();
 
-                        Log.d("Test", "Got " + formattedPosts.size() + " posts");
+                        Timber.d("Got " + formattedPosts.size() + " posts");
 
                         callback.onLoaded(formattedPosts, nextpage);
                     }
@@ -102,7 +102,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                 // TODO show error message callback
                 @Override
                 public void onFailure(Call<PostListing> call, Throwable t) {
-                    Log.e("Subreddits", "Failed to get subreddit posts " + t.toString());
+                    Timber.e("Failed to get subreddit posts " + t.toString());
                     errorCallback.onError(t.toString());
                 }
             });
@@ -134,7 +134,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
             @Override
             public void onFailure(Call<PostListing> call, Throwable t) {
-                Log.e("Subreddits", "Failed to load more posts " + t.toString());
+                Timber.e("Failed to load more posts " + t.toString());
                 errorCallback.onError(t.toString());
             }
         });
@@ -170,7 +170,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("Comments", "Something went wrong fetching comments " + t.toString());
+                Timber.e("Something went wrong fetching comments " + t.toString());
                 errorCallback.onError(t.toString());
             }
         });
@@ -229,7 +229,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
             @Override
             public void onFailure(Call<SubredditListing> call, Throwable t) {
-                Log.e("API", "Failed to load seach results " + t.toString());
+                Timber.e("Failed to load seach results " + t.toString());
                 errorCallback.onError(t.toString());
             }
         });
@@ -253,7 +253,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
             @Override
             public void onFailure(Call<SubredditListing> call, Throwable t) {
-                Log.e("API", "Failed to load more seach results " + t.toString());
+                Timber.e("Failed to load more seach results " + t.toString());
                 errorCallback.onError(t.toString());
             }
         });
@@ -275,7 +275,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
             @Override
             public void onFailure(Call<RedditToken> call, Throwable t) {
-                Log.e("Error", t.toString());
+                Timber.e(t.toString());
                 errorCallback.onError(t.toString());
             }
         });

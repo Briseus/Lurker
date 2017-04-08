@@ -1,7 +1,6 @@
 package torille.fi.lurkforreddit.retrofit;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.io.IOException;
 
@@ -15,6 +14,7 @@ import okhttp3.Route;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import timber.log.Timber;
 import torille.fi.lurkforreddit.BuildConfig;
 import torille.fi.lurkforreddit.utils.NetworkHelper;
 
@@ -34,7 +34,7 @@ public class RedditService {
     private RedditService() {
 
         final HttpLoggingInterceptor logger = new HttpLoggingInterceptor();
-        if(BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             logger.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         } else {
             logger.setLevel(HttpLoggingInterceptor.Level.NONE);
@@ -45,12 +45,12 @@ public class RedditService {
             @Override
             public Request authenticate(Route route, Response response) throws IOException {
                 if (responseCount(response) >= 3) {
-                    Log.e("Authentication", "Too many retries");
+                    Timber.e("Too many retries");
                     return null;
                 }
                 String newAccessToken = NetworkHelper.authenticateApp();
                 if (newAccessToken.length() < 3) {
-                    Log.e("Authentication", "New token " + newAccessToken + " was too short");
+                    Timber.e("New token " + newAccessToken + " was too short");
                     return null;
                 }
                 return response.request().newBuilder()

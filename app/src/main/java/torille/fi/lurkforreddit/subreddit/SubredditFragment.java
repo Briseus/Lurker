@@ -5,14 +5,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +33,7 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
 import torille.fi.lurkforreddit.Injection;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.comments.CommentActivity;
@@ -132,7 +131,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
                     if (!refreshing && scrolledItems >= totalItemCount) {
                         refreshing = true;
-                        Log.d("SubredditFragment", "Last item reached, getting more!");
+                        Timber.d("Last item reached, getting more!");
                         mActionsListener.loadMorePosts(getSubredditUrl(), mNextPageId);
                     }
                 }
@@ -499,7 +498,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                                 @Override
                                 public void onFailure(String id, Throwable throwable) {
                                     super.onFailure(id, throwable);
-                                    Log.e("Subreddit", "Failed to load image id: " + id + " error " + throwable.getLocalizedMessage());
+                                    Timber.e("Failed to load image id: " + id + " error " + throwable.getLocalizedMessage());
                                     image.setImageURI(getItem(getAdapterPosition()).getPostDetails().getThumbnail());
                                 }
                             })

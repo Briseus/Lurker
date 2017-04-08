@@ -1,7 +1,6 @@
 package torille.fi.lurkforreddit.comments;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,7 +9,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +27,7 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
 import torille.fi.lurkforreddit.Injection;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.models.Comment;
@@ -248,7 +247,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         }
 
         void addProgressbar(final int position, final int level) {
-            Log.d("more", "Adding to " + position);
+            Timber.d("Adding to " + position);
             if (position > 1) {
                 mComments.set(position, createProgressbar(level));
                 notifyItemChanged(position);
@@ -374,7 +373,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
             @Override
             public void onClick(View v) {
-                Log.d("more", mComment.toString());
+                Timber.d(mComment.toString());
                 if (!mComment.getData().getId().equals("_")) {
                     mClickListener.onClick(mComment, mClickedPost.getPostDetails().getName(), getAdapterPosition());
                 }

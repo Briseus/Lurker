@@ -6,6 +6,7 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
+import timber.log.Timber;
 import torille.fi.lurkforreddit.retrofit.RedditService;
 import torille.fi.lurkforreddit.utils.SharedPreferencesHelper;
 
@@ -21,6 +22,11 @@ public class MyApplication extends Application {
                 .build();
 
         Fresco.initialize(this, config);
+
         SharedPreferencesHelper.init(this);
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
     }
 }

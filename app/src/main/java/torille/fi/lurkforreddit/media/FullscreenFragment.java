@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -31,6 +30,7 @@ import org.parceler.Parcels;
 import java.io.IOException;
 
 import me.relex.photodraweeview.PhotoDraweeView;
+import timber.log.Timber;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.models.Post;
 
@@ -77,26 +77,26 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     @Override
     public void onStop() {
         super.onStop();
-        Log.d("Video", "Stopping");
+        Timber.d("Stopping");
         releaseVideoPlayer();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.d("Video", "Pausing");
+        Timber.d("Pausing");
         releaseVideoPlayer();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("Video", "Resuming");
+        Timber.d("Resuming");
         startStuff();
     }
 
     private void releaseVideoPlayer() {
-        Log.d("Video", "Destroying");
+        Timber.d("Destroying");
         if (mMediaPlayer != null) {
             if (mMediaController.isShowing()) {
                 mMediaController.hide();
@@ -119,7 +119,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
     private void startStuff() {
         Post post = Parcels.unwrap(getArguments().getParcelable(EXTRA_POST));
-        Log.d("fullscreen", "fragment got " + post.toString());
+        Timber.d("Fragment got " + post.toString());
         mActionsListener.checkDomain(post);
     }
 
@@ -151,6 +151,15 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                 .setOldController(mImageView.getController())
                 .setControllerListener(new BaseControllerListener<ImageInfo>() {
                     @Override
+                    public void onIntermediateImageSet(String id, ImageInfo imageInfo) {
+                        super.onIntermediateImageSet(id, imageInfo);
+                        if (imageInfo == null || mImageView == null) {
+                            return;
+                        }
+                        mImageView.update(imageInfo.getWidth(), imageInfo.getHeight());
+                    }
+
+                    @Override
                     public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
                         super.onFinalImageSet(id, imageInfo, animatable);
                         if (imageInfo == null || mImageView == null) {
@@ -166,7 +175,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
     @Override
     public void showVideo(final String url) {
-        Log.d("Video", "Got url " + url);
+        Timber.d("Got url " + url);
         final FrameLayout.LayoutParams svLayoutParams = new FrameLayout.LayoutParams(0, 0);
         mMediaPlayer = new MediaPlayer();
         mMediaController = new MediaController(getContext());
@@ -205,12 +214,12 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                 mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
                     public void onPrepared(final MediaPlayer mp) {
-                        Log.d("Video", "Video is " + mp.getVideoWidth() + " and " + mp.getVideoHeight());
+                        Timber.d("Video is " + mp.getVideoWidth() + " and " + mp.getVideoHeight());
                         if (mp.getVideoHeight() != 0 && mp.getVideoWidth() != 0) {
-                            Log.d("Video", "Video is over 0 0");
+                            Timber.d("Video is over 0 0");
                             configureSurfaceForVideo(mp.getVideoWidth(), mp.getVideoHeight());
                         } else {
-                            Log.d("Video", "Video is 0");
+                            Timber.d("Video is 0");
                             playMedia();
                         }
 
@@ -229,7 +238,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                         }
                         if (percent == 100 && !mp.isPlaying()) {
                             removeMarginTop();
-                            Log.d("Video", "Buffering percent over 40! " + mBufferPercent);
+                            Timber.d("Buffering percent over 40! " + mBufferPercent);
                             mProgressBar.setProgress(0);
                             mProgressBar.setVisibility(GONE);
                             playMedia();
@@ -239,9 +248,9 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
             }
 
             private void playMedia() {
-                Log.d("Video", "Checking if playing");
+                Timber.d("Checking if playing");
                 if (!mMediaPlayer.isPlaying()) {
-                    Log.d("Video", "GOING TO PLAY");
+                    Timber.d("GOING TO PLAY");
                     mMediaController.setEnabled(true);
                     mMediaPlayer.start();
                     mMediaPlayer.setLooping(true);
@@ -278,12 +287,12 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                Log.d("Video", "Surface changed");
+                Timber.d("Surface changed");
             }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                Log.d("Video", "Surface destroyed");
+                Timber.d("Surface destroyed");
             }
         });
     }

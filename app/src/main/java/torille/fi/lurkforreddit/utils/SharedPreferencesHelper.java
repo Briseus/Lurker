@@ -14,7 +14,8 @@ public class SharedPreferencesHelper {
     private static SharedPreferences mSharedPreferences;
     private static String clientId;
 
-    private SharedPreferencesHelper() {}
+    private SharedPreferencesHelper() {
+    }
 
     public static void init(Context context) {
         context = context.getApplicationContext();

@@ -10,7 +10,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +23,7 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
 import torille.fi.lurkforreddit.Injection;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.models.Subreddit;
@@ -80,7 +80,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
 
                     if (!loading && (visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                         loading = true;
-                        Log.d("SearchFragment", "Last item reached, getting more!");
+                        Timber.d("Last item reached, getting more!");
                         mActionsListener.searchMoreSubreddits();
                     }
 
@@ -96,7 +96,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 if (!query.isEmpty()) {
-                    Log.d("Search", "Going to search for " + query);
+                    Timber.d("Going to search for " + query);
                     mSearchView.clearFocus();
                     mActionsListener.searchSubreddits(query);
                 }

@@ -44,4 +44,6 @@ ext {
     espressoVersion = '2.2.2'
     parcelerVersion = '1.1.6'
     frescoVersion = '1.2.0'
+    timberVersion = '4.5.1'
+    photoDraweeViewVersion = '1.1.2'
 }
