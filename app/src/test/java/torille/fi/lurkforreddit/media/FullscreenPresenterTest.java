@@ -17,10 +17,11 @@ import static org.mockito.Mockito.verify;
 public class FullscreenPresenterTest {
 
 
-    private static Post mImagePost = new Post();
-    private static Post videoPost = new Post();
-    private static Post gfycatPost = new Post();
-    private static Post imgurVideoPost = new Post();
+    private static final Post mImagePost = new Post();
+    private static final Post videoPost = new Post();
+    private static final Post gfycatPost = new Post();
+    private static final Post imgurVideoPost = new Post();
+
     @Mock
     private FullscreenContract.View mFullscreenView;
 

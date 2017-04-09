@@ -23,7 +23,7 @@ public class SubredditsPresenter implements SubredditsContract.UserActionsListen
         mSubredditsView = subredditsView;
     }
 
-    private RedditRepository.ErrorCallback errorCallback = new RedditRepository.ErrorCallback() {
+    private final RedditRepository.ErrorCallback errorCallback = new RedditRepository.ErrorCallback() {
         @Override
         public void onError(String errorText) {
             mSubredditsView.setProgressIndicator(false);

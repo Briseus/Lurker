@@ -28,10 +28,6 @@ class CustomUrlSpan extends URLSpan {
         super(url);
     }
 
-    public CustomUrlSpan(Parcel src) {
-        super(src);
-    }
-
     @Override
     public void onClick(View widget) {
         String url = getURL();
@@ -64,4 +60,28 @@ class CustomUrlSpan extends URLSpan {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+    }
+
+    protected CustomUrlSpan(Parcel in) {
+        super(in);
+    }
+
+    public static final Creator<CustomUrlSpan> CREATOR = new Creator<CustomUrlSpan>() {
+        @Override
+        public CustomUrlSpan createFromParcel(Parcel source) {
+            return new CustomUrlSpan(source);
+        }
+
+        @Override
+        public CustomUrlSpan[] newArray(int size) {
+            return new CustomUrlSpan[size];
+        }
+    };
 }

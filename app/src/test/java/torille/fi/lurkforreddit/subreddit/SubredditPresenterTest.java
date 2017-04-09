@@ -23,26 +23,26 @@ import static org.mockito.Mockito.verify;
  */
 
 public class SubredditPresenterTest {
-    private static String AFTER = "t3_5tkppe";
+    private static final String AFTER = "t3_5tkppe";
 
-    private static Subreddit SUBREDDIT_WORLDNEWS = new Subreddit("2qh13", "World News", "/r/worldnews", "t5_2qh13", "", "worldnews", "", false, 15325795, true, (long) 1201231119, null, null);
+    private static final Subreddit SUBREDDIT_WORLDNEWS = new Subreddit("2qh13", "World News", "/r/worldnews", "t5_2qh13", "", "worldnews", "", false, 15325795, true, (long) 1201231119, null, null);
 
-    private static PostDetails POSTDETAILS_1_WORLDNEWS = new PostDetails();
-    private static PostDetails POSTDETAILS_2_WORLDNEWS = new PostDetails();
+    private static final PostDetails POSTDETAILS_1_WORLDNEWS = new PostDetails();
+    private static final PostDetails POSTDETAILS_2_WORLDNEWS = new PostDetails();
     private static Post POST_1_WORLDNEWS;
     private static Post POST_2_WORLDNEWS;
 
-    private static Post POST_SELFPOST = new Post();
-    private static PostDetails POSTDETAILS_SELFPOST = new PostDetails();
+    private static final Post POST_SELFPOST = new Post();
+    private static final PostDetails POSTDETAILS_SELFPOST = new PostDetails();
 
-    private static Post POST_CUSTOMURL = new Post();
-    private static PostDetails POSTDETAILS_CUSTOMURL = new PostDetails();
+    private static final Post POST_CUSTOMURL = new Post();
+    private static final PostDetails POSTDETAILS_CUSTOMURL = new PostDetails();
 
-    private static Post POST_MEDIA = new Post();
-    private static PostDetails POSTDETAILS_MEDIA = new PostDetails();
+    private static final Post POST_MEDIA = new Post();
+    private static final PostDetails POSTDETAILS_MEDIA = new PostDetails();
 
-    private static Post POST_LAUNCH_ACTIVITY = new Post();
-    private static PostDetails POSTDETAILS_LAUNCH_ACTIVITY = new PostDetails();
+    private static final Post POST_LAUNCH_ACTIVITY = new Post();
+    private static final PostDetails POSTDETAILS_LAUNCH_ACTIVITY = new PostDetails();
 
     private static List<Post> POSTS;
 

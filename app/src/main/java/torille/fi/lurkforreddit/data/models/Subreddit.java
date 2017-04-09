@@ -37,7 +37,7 @@ public class Subreddit {
     public Subreddit() {
     }
 
-    public Subreddit(String id, String title, String url, String name, String key_color, String display_name, @Nullable String descriptionHtml, boolean over18, int subscribers, boolean subscribed, long createdUtc, String icon, String banner) {
+    public Subreddit(String id, String title, String url, String name, String key_color, String display_name, @Nullable String descriptionHtml, boolean over18, int subscribers, boolean subscribed, long createdUtc, @Nullable String icon, @Nullable String banner) {
         this.id = id;
         this.title = title;
         this.url = url;
@@ -141,19 +141,21 @@ public class Subreddit {
         this.createdUtc = createdUtc;
     }
 
+    @Nullable
     public String getIcon() {
         return icon;
     }
 
-    public void setIcon(String icon) {
+    public void setIcon(@Nullable String icon) {
         this.icon = icon;
     }
 
+    @Nullable
     public String getBanner() {
         return banner;
     }
 
-    public void setBanner(String banner) {
+    public void setBanner(@Nullable String banner) {
         this.banner = banner;
     }
 

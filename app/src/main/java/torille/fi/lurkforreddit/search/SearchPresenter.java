@@ -23,7 +23,7 @@ public class SearchPresenter implements SearchContract.UserActionsListener {
         this.mSearchView = mSearchView;
     }
 
-    private RedditRepository.ErrorCallback errorCallback = new RedditRepository.ErrorCallback() {
+    private final RedditRepository.ErrorCallback errorCallback = new RedditRepository.ErrorCallback() {
         @Override
         public void onError(String errorText) {
             mSearchView.showError(errorText);
