@@ -1,8 +1,10 @@
 package torille.fi.lurkforreddit.media;
 
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
+import timber.log.Timber;
 import torille.fi.lurkforreddit.data.models.Post;
 import torille.fi.lurkforreddit.utils.TextHelper;
 
@@ -27,6 +29,12 @@ public class FullscreenPresenter implements FullscreenContract.UserActionsListen
                     final String gfyUri = "https://thumbs.g" + gfy[1] + "-mobile.mp4";
                     mFullscreenView.showGfycatVideo(gfyUri);
                     break;
+                case "streamable.com":
+                    Uri uri = Uri.parse(post.getPostDetails().getUrl());
+                    String identifier = uri.getLastPathSegment();
+                    Timber.d("Got identifier " + identifier + " from uri " + uri);
+                    mFullscreenView.showStreamableVideo(identifier);
+                    break;
                 case "i.imgur.com":
                 case "imgur.com":
                 default:
@@ -41,7 +49,7 @@ public class FullscreenPresenter implements FullscreenContract.UserActionsListen
 
     @VisibleForTesting
     void checkType(String urlString, String previewImageUrl) {
-         switch (TextHelper.getLastFourChars(urlString)) {
+        switch (TextHelper.getLastFourChars(urlString)) {
             case ".gif":
             case "webm":
             case ".png":

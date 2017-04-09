@@ -34,6 +34,7 @@ final public class MediaHelper {
         switch (domain) {
             case "gfycat.com":
             case "i.reddituploads.com":
+            case "streamable.com":
                 return true;
             default:
                 return false;

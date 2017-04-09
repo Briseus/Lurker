@@ -16,6 +16,8 @@ public interface FullscreenContract {
         void showVideo(String url);
 
         void showGfycatVideo(String url);
+
+        void showStreamableVideo(String identifier);
     }
 
     interface UserActionsListener {

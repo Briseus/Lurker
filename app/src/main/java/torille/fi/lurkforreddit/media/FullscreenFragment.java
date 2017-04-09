@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
@@ -30,9 +31,14 @@ import org.parceler.Parcels;
 import java.io.IOException;
 
 import me.relex.photodraweeview.PhotoDraweeView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import timber.log.Timber;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.models.Post;
+import torille.fi.lurkforreddit.data.models.StreamableVideo;
+import torille.fi.lurkforreddit.retrofit.StreamableService;
 
 import static android.view.View.GONE;
 
@@ -305,6 +311,28 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     @Override
     public void showGfycatVideo(String url) {
         showVideo(url);
+    }
+
+
+    @Override
+    public void showStreamableVideo(String identifier) {
+        Call<StreamableVideo> call = StreamableService.getInstance().getVideo(identifier);
+
+        call.enqueue(new Callback<StreamableVideo>() {
+            @Override
+            public void onResponse(Call<StreamableVideo> call, Response<StreamableVideo> response) {
+                if (response.isSuccessful()) {
+                    // comes in
+                    String videoUrl = response.body().getMobileVideoUrl();
+                    showVideo(videoUrl);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<StreamableVideo> call, Throwable t) {
+                Toast.makeText(getContext(), t.toString(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
