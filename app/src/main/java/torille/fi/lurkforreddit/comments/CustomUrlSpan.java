@@ -31,11 +31,14 @@ class CustomUrlSpan extends URLSpan {
     @Override
     public void onClick(View widget) {
         String url = getURL();
+        Uri uri = Uri.parse(url);
+        String domain = uri.getHost();
         Timber.d("got url " + url);
         Intent intent;
-        if (MediaHelper.isContentMedia(url)) {
+        if (MediaHelper.isContentMedia(url) || MediaHelper.checkDomainForMedia(domain)) {
             Post post = new Post("t5", new PostDetails());
             post.getPostDetails().setUrl(url);
+            post.getPostDetails().setDomain(domain);
             intent = new Intent(widget.getContext(), FullscreenActivity.class);
             intent.putExtra(FullscreenActivity.EXTRA_POST, Parcels.wrap(post));
             widget.getContext().startActivity(intent);
