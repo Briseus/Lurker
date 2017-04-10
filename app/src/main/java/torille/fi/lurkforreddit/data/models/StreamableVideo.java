@@ -14,7 +14,8 @@ public class StreamableVideo {
     @SerializedName("files")
     private Videos videos;
 
-    private class Videos {
+    private static class Videos {
+
         @SerializedName("mp4-mobile")
         private ImageResolution mobileVideo;
 
