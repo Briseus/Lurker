@@ -13,18 +13,29 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.parceler.Parcels;
 
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import timber.log.Timber;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.models.Subreddit;
+import torille.fi.lurkforreddit.data.models.SubredditChildren;
+import torille.fi.lurkforreddit.retrofit.RedditService;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
+import torille.fi.lurkforreddit.utils.SharedPreferencesHelper;
 
 public class SubredditActivity extends AppCompatActivity {
 
     public static final String EXTRA_SUBREDDIT = "subreddit";
+    public static final String EXTRA_SUBREDDITNAME = "subredditname";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +53,7 @@ public class SubredditActivity extends AppCompatActivity {
         Subreddit subreddit = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_SUBREDDIT));
 
         if (subreddit != null) {
-            getSupportActionBar().setTitle(subreddit.getDisplay_name());
+
             loadBannerImage(subreddit);
 
             if (savedInstanceState == null) {
@@ -55,24 +66,61 @@ public class SubredditActivity extends AppCompatActivity {
 
     }
 
-    public void handleIntent(Intent intent, @Nullable Bundle savedInstanceState) {
-        if (intent != null && intent.getData() != null) {
-            Uri appLinkData = intent.getData();
+    public void handleIntent(Intent intent, @Nullable final Bundle savedInstanceState) {
+        if (intent != null) {
 
-            String name = appLinkData.getLastPathSegment();
-            Subreddit subreddit = new Subreddit();
-            subreddit.setName(name);
-            subreddit.setUrl("/r/" + name.toUpperCase());
+            String subredditName = intent.getStringExtra(EXTRA_SUBREDDITNAME);
 
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle(name);
+            if (subredditName != null) {
+                String token = SharedPreferencesHelper.getToken();
+                Call<SubredditChildren> call = RedditService
+                        .getInstance(token)
+                        .getSubredditInfo(subredditName);
+
+                call.enqueue(new Callback<SubredditChildren>() {
+                    @Override
+                    public void onResponse(Call<SubredditChildren> call, Response<SubredditChildren> response) {
+
+                        if (response.isSuccessful()) {
+                            Timber.d("Got " + response.body().toString());
+                            Subreddit subreddit = response.body().getSubreddit();
+                            loadBannerImage(subreddit);
+                            if (savedInstanceState == null) {
+                                initFragment(SubredditFragment.newInstance(subreddit));
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<SubredditChildren> call, Throwable t) {
+                        Timber.e(t);
+                        Toast.makeText(getApplicationContext(), "Subreddit not found", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            } else if (intent.getData() != null) {
+                Uri appLinkData = intent.getData();
+
+                List<String> pathList = appLinkData.getPathSegments();
+                Timber.d("Got path list " + pathList.toString());
+
+                if (pathList.size() == 2) {
+                    String name = pathList.get(1);
+                    Subreddit subreddit = new Subreddit();
+                    subreddit.setName(name);
+                    subreddit.setUrl("/r/" + name.toUpperCase());
+
+                    loadBannerImage(subreddit);
+
+                    if (savedInstanceState == null) {
+                        initFragment(SubredditFragment.newInstance(subreddit));
+                    }
+                    //if path is comments
+                }
+
             }
-
-            if (savedInstanceState == null) {
-                initFragment(SubredditFragment.newInstance(subreddit));
-            }
-
         }
+
 
     }
 
@@ -90,6 +138,11 @@ public class SubredditActivity extends AppCompatActivity {
     }
 
     private void loadBannerImage(Subreddit subreddit) {
+        String title = subreddit.getDisplay_name();
+        if (title != null && getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(title);
+        }
+
         SimpleDraweeView banner = (SimpleDraweeView) findViewById(R.id.banner);
         boolean hasBannerSource = (subreddit.getBanner() != null && !subreddit.getBanner().isEmpty());
         boolean hasCustomColor = (subreddit.getKey_color() != null && !subreddit.getKey_color().isEmpty());
@@ -109,11 +162,11 @@ public class SubredditActivity extends AppCompatActivity {
 
     }
 
-    private void initFragment(Fragment subredditFragment) {
+    private void initFragment(Fragment fragment) {
         // Add the NotesDetailFragment to the layout
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.contentFrame, subredditFragment);
+        transaction.add(R.id.contentFrame, fragment);
         transaction.commit();
     }
 

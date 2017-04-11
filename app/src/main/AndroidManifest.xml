@@ -41,7 +41,7 @@
                 <data
                     android:scheme="https"
                     android:host="www.reddit.com"
-                    android:pathPattern=".*\/r\/.*\/" />
+                    android:pathPattern="(\/r\/.*?\/)" />
             </intent-filter>
         </activity>
         <activity

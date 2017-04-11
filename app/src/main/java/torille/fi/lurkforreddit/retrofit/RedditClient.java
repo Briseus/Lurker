@@ -10,6 +10,8 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 import torille.fi.lurkforreddit.data.models.PostListing;
 import torille.fi.lurkforreddit.data.models.RedditToken;
+import torille.fi.lurkforreddit.data.models.Subreddit;
+import torille.fi.lurkforreddit.data.models.SubredditChildren;
 import torille.fi.lurkforreddit.data.models.SubredditListing;
 
 /**
@@ -54,4 +56,6 @@ public interface RedditClient {
     @GET("subreddits/search")
     Call<SubredditListing> searchSubredditsNextPage(@Query(value = "q") String searchQuery, @Query(value = "sort") String sortBy, @Query(value = "after") String after);
 
+    @GET("{subreddit}/about")
+    Call<SubredditChildren> getSubredditInfo(@Path(value = "subreddit", encoded = true) String subredditName);
 }

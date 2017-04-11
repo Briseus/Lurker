@@ -24,10 +24,8 @@ public class Subreddit {
     @SerializedName("created_utc")
     public long createdUtc;
     @SerializedName("icon_img")
-    @Nullable
     public String icon;
     @SerializedName("banner_img")
-    @Nullable
     public String banner;
     private transient CharSequence formattedTitle;
     private transient String formattedSubscription;
@@ -37,7 +35,7 @@ public class Subreddit {
     public Subreddit() {
     }
 
-    public Subreddit(String id, String title, String url, String name, String key_color, String display_name, @Nullable String descriptionHtml, boolean over18, int subscribers, boolean subscribed, long createdUtc, @Nullable String icon, @Nullable String banner) {
+    public Subreddit(String id, String title, String url, String name, String key_color, String display_name, @Nullable String descriptionHtml, boolean over18, int subscribers, boolean subscribed, long createdUtc, String icon, String banner) {
         this.id = id;
         this.title = title;
         this.url = url;

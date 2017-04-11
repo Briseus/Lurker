@@ -17,6 +17,11 @@ final public class MediaHelper {
     private MediaHelper() {}
 
     public static boolean isContentMedia(final String url) {
+
+        if (url == null || url.length() < 4) {
+            return false;
+        }
+
         switch (TextHelper.getLastFourChars(url)) {
             case ".jpg":
             case ".png":
@@ -31,6 +36,10 @@ final public class MediaHelper {
     }
 
     public static boolean checkDomainForMedia(String domain) {
+        if (domain == null) {
+            return false;
+        }
+
         switch (domain) {
             case "gfycat.com":
             case "i.reddituploads.com":
@@ -42,7 +51,11 @@ final public class MediaHelper {
     }
 
     public static boolean launchCustomActivity(Post post) {
-        switch (post.getPostDetails().getDomain()) {
+        String domain = post.getPostDetails().getDomain();
+        if (domain == null) {
+            return false;
+        }
+        switch (domain) {
             case "youtube.com":
             case "youtu.be":
                 return true;

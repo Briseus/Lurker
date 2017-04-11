@@ -1,5 +1,6 @@
 package torille.fi.lurkforreddit.comments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
@@ -34,20 +35,27 @@ class CustomUrlSpan extends URLSpan {
         Uri uri = Uri.parse(url);
         String domain = uri.getHost();
         Timber.d("got url " + url);
+
         Intent intent;
+        Context context = widget.getContext();
         if (MediaHelper.isContentMedia(url) || MediaHelper.checkDomainForMedia(domain)) {
             Post post = new Post("t5", new PostDetails());
             post.getPostDetails().setUrl(url);
             post.getPostDetails().setDomain(domain);
-            intent = new Intent(widget.getContext(), FullscreenActivity.class);
+
+            intent = new Intent(context, FullscreenActivity.class);
             intent.putExtra(FullscreenActivity.EXTRA_POST, Parcels.wrap(post));
-            widget.getContext().startActivity(intent);
+
+            context.startActivity(intent);
         } else if (checkForReddit(url)) {
             Uri redditUri = Uri.parse("https://www.reddit.com" + url);
-            intent = new Intent(widget.getContext(), SubredditActivity.class);
-            intent.setData(redditUri);
-            Timber.d("Going to launch " + redditUri);
-            widget.getContext().startActivity(intent);
+
+            intent = new Intent(context, SubredditActivity.class);
+            intent.putExtra(SubredditActivity.EXTRA_SUBREDDITNAME, url);
+
+            Timber.d("Going to checkout subreddit " + url);
+
+            context.startActivity(intent);
         } else {
             super.onClick(widget);
         }
