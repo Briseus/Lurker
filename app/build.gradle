@@ -28,8 +28,8 @@ android {
         applicationId "torille.fi.lurkforreddit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
-        versionName "0.4"
+        versionCode 8
+        versionName "0.4fix"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -99,6 +99,10 @@ dependencies {
     compile "org.parceler:parceler-api:$rootProject.ext.parcelerVersion"
     annotationProcessor "org.parceler:parceler:$rootProject.ext.parcelerVersion"
     compile "com.jakewharton.timber:timber:$rootProject.ext.timberVersion"
+
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
 
     // Dependencies for local unit tests
     testCompile "junit:junit:$rootProject.ext.junitVersion"

@@ -31,23 +31,11 @@
         <activity
             android:name=".subreddit.SubredditActivity"
             android:parentActivityName=".subreddits.SubredditsActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:scheme="https"
-                    android:host="www.reddit.com"
-                    android:pathPattern="(\/r\/.*?\/)" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".comments.CommentActivity"
             android:parentActivityName=".subreddit.SubredditActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".media.FullscreenActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"

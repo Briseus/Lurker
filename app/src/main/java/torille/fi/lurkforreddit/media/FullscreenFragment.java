@@ -95,6 +95,12 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Timber.d("Destroying");
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         Timber.d("Resuming");
@@ -102,12 +108,13 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     }
 
     private void releaseVideoPlayer() {
-        Timber.d("Destroying");
+        Timber.d("Destroying player");
         if (mMediaPlayer != null) {
             if (mMediaController.isShowing()) {
                 mMediaController.hide();
             }
             mMediaPlayer.release();
+
         }
     }
 
@@ -202,8 +209,10 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                 return false;
             }
         });
+
         mVideoView.setVisibility(View.VISIBLE);
         final SurfaceHolder surfaceHolder = mVideoView.getHolder();
+
         surfaceHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -213,7 +222,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                mMediaPlayer.setDisplay(surfaceHolder);
+                mMediaPlayer.setSurface(surfaceHolder.getSurface());
                 mMediaPlayer.prepareAsync();
 
 
