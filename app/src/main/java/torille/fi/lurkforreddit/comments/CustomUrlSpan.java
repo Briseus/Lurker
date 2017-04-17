@@ -48,7 +48,6 @@ class CustomUrlSpan extends URLSpan {
 
             context.startActivity(intent);
         } else if (checkForReddit(url)) {
-            Uri redditUri = Uri.parse("https://www.reddit.com" + url);
 
             intent = new Intent(context, SubredditActivity.class);
             intent.putExtra(SubredditActivity.EXTRA_SUBREDDITNAME, url);
@@ -65,7 +64,7 @@ class CustomUrlSpan extends URLSpan {
 
     private boolean checkForReddit(String redditUrl) {
         Timber.d("Checking url " + redditUrl);
-        Pattern p = Pattern.compile("(\\/r\\/.*)");
+        Pattern p = Pattern.compile("(/r/.*)");
         Matcher m = p.matcher(redditUrl);
         return m.matches();
     }
