@@ -64,7 +64,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     private boolean refreshing;
     private String mNextPageId;
     private CustomTabActivityHelper mCustomTabActivityHelper;
-
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -168,6 +167,11 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     public void onStart() {
         super.onStart();
         mCustomTabActivityHelper.bindCustomTabsService(getActivity());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     @Override
@@ -445,7 +449,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             final Button comments;
             final ImageButton openBrowser;
             final SimpleDraweeView image;
-
+            final BaseControllerListener<ImageInfo> baseControllerListener;
             PostViewHolder(View postView) {
                 super(postView);
                 title = (TextView) postView.findViewById(R.id.post_title);
@@ -479,6 +483,14 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     }
                 });
                 score.getBackground().setTint(mDefaultAccentColor);
+                baseControllerListener = new BaseControllerListener<ImageInfo>() {
+                    @Override
+                    public void onFailure(String id, Throwable throwable) {
+                        super.onFailure(id, throwable);
+                        Timber.e("Failed to load image id: " + id + " error " + throwable.getLocalizedMessage());
+                        image.setImageURI(getItem(getAdapterPosition()).getPostDetails().getThumbnail());
+                    }
+                };
             }
 
             final void bind(final PostDetails postDetails) {
@@ -494,14 +506,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     image.setVisibility(View.VISIBLE);
 
                     DraweeController draweeController = Fresco.newDraweeControllerBuilder()
-                            .setControllerListener(new BaseControllerListener<ImageInfo>() {
-                                @Override
-                                public void onFailure(String id, Throwable throwable) {
-                                    super.onFailure(id, throwable);
-                                    Timber.e("Failed to load image id: " + id + " error " + throwable.getLocalizedMessage());
-                                    image.setImageURI(getItem(getAdapterPosition()).getPostDetails().getThumbnail());
-                                }
-                            })
+                            .setControllerListener(baseControllerListener)
                             .setImageRequest(ImageRequest.fromUri(postDetails.getPreviewImage()))
                             .setOldController(image.getController())
                             .build();
