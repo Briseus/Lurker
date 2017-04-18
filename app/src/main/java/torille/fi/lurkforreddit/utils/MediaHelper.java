@@ -1,6 +1,7 @@
 package torille.fi.lurkforreddit.utils;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsSession;
 import android.support.v4.content.ContextCompat;
@@ -65,18 +66,19 @@ final public class MediaHelper {
     }
 
     public static CustomTabsIntent createCustomTabIntent(Context context, CustomTabsSession session) {
-        final CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder(session);
+        CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder(session);
 
         intentBuilder.setToolbarColor(ContextCompat.getColor(context, R.color.colorPrimary));
         intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
 
+        intentBuilder.addDefaultShareMenuItem();
         intentBuilder.enableUrlBarHiding();
         intentBuilder.setShowTitle(true);
-        intentBuilder.addDefaultShareMenuItem();
 
         intentBuilder.setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left);
-        intentBuilder.setExitAnimations(context, R.anim.slide_in_left,
-                R.anim.slide_out_right);
+        intentBuilder.setExitAnimations(context, android.R.anim.slide_in_left,
+                android.R.anim.slide_out_right);
+
         return intentBuilder.build();
     }
 }
