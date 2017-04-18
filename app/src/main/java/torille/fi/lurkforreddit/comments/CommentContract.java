@@ -22,6 +22,8 @@ public interface CommentContract {
         void showError(String errorText);
 
         void showErrorAt(int position);
+
+        void setProgressIndicator(boolean active);
     }
 
     interface UserActionsListener {

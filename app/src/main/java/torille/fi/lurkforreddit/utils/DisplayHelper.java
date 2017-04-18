@@ -12,7 +12,8 @@ import torille.fi.lurkforreddit.data.models.PostDetails;
 final public class DisplayHelper {
     private static int mDisplayDPI;
 
-    private DisplayHelper() {}
+    private DisplayHelper() {
+    }
 
 
     /**

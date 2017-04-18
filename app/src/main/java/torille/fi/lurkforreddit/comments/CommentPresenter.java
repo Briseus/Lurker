@@ -11,25 +11,25 @@ import torille.fi.lurkforreddit.data.RedditRepository;
  * Created by eva on 2/13/17.
  */
 
-public class CommentPresenter implements CommentContract.UserActionsListener {
+class CommentPresenter implements CommentContract.UserActionsListener {
 
     private final RedditRepository mRedditRepository;
 
     private final CommentContract.View mCommentsView;
 
-    public CommentPresenter(@NonNull RedditRepository redditRepository,
-                            @NonNull CommentContract.View commentsView) {
+    CommentPresenter(@NonNull RedditRepository redditRepository,
+                     @NonNull CommentContract.View commentsView) {
         mRedditRepository = redditRepository;
         mCommentsView = commentsView;
     }
 
     @Override
     public void loadComments(@NonNull String permaLinkUrl) {
-        mCommentsView.showProgressbarAt(1, 0);
+        mCommentsView.setProgressIndicator(true);
         mRedditRepository.getCommentsForPost(permaLinkUrl, new RedditRepository.LoadPostCommentsCallback() {
             @Override
             public void onCommentsLoaded(List<CommentChild> commentChildren) {
-                mCommentsView.hideProgressbarAt(1);
+                mCommentsView.setProgressIndicator(false);
                 mCommentsView.showComments(commentChildren);
             }
 
@@ -40,7 +40,7 @@ public class CommentPresenter implements CommentContract.UserActionsListener {
         }, new RedditRepository.ErrorCallback() {
             @Override
             public void onError(String errorText) {
-                mCommentsView.hideProgressbarAt(1);
+                mCommentsView.setProgressIndicator(false);
                 mCommentsView.showError(errorText);
             }
         });

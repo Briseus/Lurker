@@ -20,6 +20,7 @@ public final class CommentsStreamingParser {
 
     /**
      * End point to read more comment api response
+     *
      * @param reader needed for parsing
      * @return a list of {@link CommentChild}
      * @throws IOException
@@ -42,7 +43,8 @@ public final class CommentsStreamingParser {
 
     /**
      * Reads and parses more comments api response
-     * @param reader used for parsing
+     *
+     * @param reader    used for parsing
      * @param searchFor used to travel the response
      * @return at the end returns a list of  {@link CommentChild}
      * @throws IOException
@@ -93,7 +95,7 @@ public final class CommentsStreamingParser {
             String name = reader.nextName();
             if (name.equals("kind")) {
                 kind = reader.nextString();
-                /**
+                /*
                  * Return null for kind that are not really comments
                  */
                 if (kind.equals("t3")) {

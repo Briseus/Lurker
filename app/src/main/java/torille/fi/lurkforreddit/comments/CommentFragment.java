@@ -1,10 +1,12 @@
 package torille.fi.lurkforreddit.comments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
@@ -68,6 +70,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         mPost = Parcels.unwrap(getArguments().getParcelable(ARGUMENT_CLICKED_POST));
         mCommentAdapter = new CommentRecyclerViewAdapter(mPost, addDummyComment(), mClickListener);
         mActionsListener = new CommentPresenter(Injection.provideRedditRepository(), this);
+
     }
 
     private List<CommentChild> addDummyComment() {
@@ -95,18 +98,36 @@ public class CommentFragment extends Fragment implements CommentContract.View {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
         View root = inflater.inflate(R.layout.fragment_comments, container, false);
+
+        Context context = getContext();
+
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.comments_list);
         recyclerView.setHasFixedSize(true);
-        recyclerView.addItemDecoration(new CommentsItemDecoration(ContextCompat.getDrawable(getContext(), R.drawable.comment_item_decorator)));
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new CommentsItemDecoration(ContextCompat.getDrawable(context, R.drawable.comment_item_decorator)));
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(mCommentAdapter);
+
+        SwipeRefreshLayout mSwipeRefreshLayout = (SwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
+
+        mSwipeRefreshLayout.setColorSchemeColors(
+                ContextCompat.getColor(context, R.color.colorPrimary),
+                ContextCompat.getColor(context, R.color.colorAccent),
+                ContextCompat.getColor(context, R.color.colorPrimaryDark));
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mActionsListener.loadComments(mPost.getPostDetails().getPermalink());
+            }
+        });
         return root;
     }
 
     @Override
     public void showComments(List<CommentChild> commentChildren) {
-        mCommentAdapter.addComments(commentChildren);
+        mCommentAdapter.replaceData(commentChildren);
     }
 
     @Override
@@ -134,6 +155,21 @@ public class CommentFragment extends Fragment implements CommentContract.View {
     @Override
     public void showErrorAt(int position) {
         mCommentAdapter.changeToErrorAt(position);
+    }
+
+    @Override
+    public void setProgressIndicator(final boolean active) {
+        if (getView() == null) {
+            return;
+        }
+        final SwipeRefreshLayout srl = (SwipeRefreshLayout) getView().findViewById(R.id.refresh_layout);
+        srl.post(new Runnable() {
+            @Override
+            public void run() {
+                srl.setRefreshing(active);
+            }
+        });
+
     }
 
     /**
@@ -220,6 +256,17 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         @Override
         public long getItemId(int position) {
             return mComments.get(position).getData().getId().hashCode();
+        }
+
+        void replaceData(List<CommentChild> commentChildren) {
+            int size = mComments.size();
+            int newSize = commentChildren.size();
+
+            mComments.removeAll(mComments.subList(1, size));
+            notifyItemRangeRemoved(1, size);
+            mComments.addAll(commentChildren);
+            notifyItemRangeInserted(1, newSize);
+
         }
 
         void addComments(final List<CommentChild> commentChildren) {

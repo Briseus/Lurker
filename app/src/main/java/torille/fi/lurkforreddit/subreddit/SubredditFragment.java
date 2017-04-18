@@ -64,6 +64,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     private boolean refreshing;
     private String mNextPageId;
     private CustomTabActivityHelper mCustomTabActivityHelper;
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -450,6 +451,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             final ImageButton openBrowser;
             final SimpleDraweeView image;
             final BaseControllerListener<ImageInfo> baseControllerListener;
+
             PostViewHolder(View postView) {
                 super(postView);
                 title = (TextView) postView.findViewById(R.id.post_title);

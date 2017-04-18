@@ -53,11 +53,12 @@ public class CommentPresenterTest {
     @Test
     public void loadCommentsFromRepositoryAndLoadIntoView() {
         mCommentPresenter.loadComments(mockLinkId);
+        verify(mCommentView).setProgressIndicator(true);
         verify(mRedditRepository).getCommentsForPost(any(String.class),
                 loadPostCommentsCallbackArgumentCaptor.capture(),
                 loadErrorCallbackArgumentCaptor.capture());
         loadPostCommentsCallbackArgumentCaptor.getValue().onCommentsLoaded(mockComments);
-        verify(mCommentView).hideProgressbarAt(1);
+        verify(mCommentView).setProgressIndicator(false);
         verify(mCommentView).showComments(mockComments);
     }
 
