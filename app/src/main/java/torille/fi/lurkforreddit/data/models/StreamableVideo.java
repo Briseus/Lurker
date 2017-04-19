@@ -19,8 +19,15 @@ public class StreamableVideo {
         @SerializedName("mp4-mobile")
         private ImageResolution mobileVideo;
 
-        private String getMobileVideoUrl() {
-            return mobileVideo.getUrl();
+        @SerializedName("mp4")
+        private ImageResolution video;
+
+        public ImageResolution getMobileVideo() {
+            return mobileVideo;
+        }
+
+        public ImageResolution getVideo() {
+            return video;
         }
 
     }
@@ -30,7 +37,19 @@ public class StreamableVideo {
     }
 
     public String getMobileVideoUrl() {
-        return "https:" + videos.getMobileVideoUrl();
-    }
 
+        String url = "";
+
+        if (videos.mobileVideo != null) {
+            url = videos.mobileVideo.getUrl();
+        } else if (videos.video != null) {
+            url = videos.getVideo().getUrl();
+        }
+        if (url.isEmpty()) {
+            return "";
+        } else {
+            return "https:" + url;
+        }
+
+    }
 }

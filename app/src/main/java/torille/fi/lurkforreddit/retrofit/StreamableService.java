@@ -1,5 +1,6 @@
 package torille.fi.lurkforreddit.retrofit;
 
+import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -16,7 +17,7 @@ import torille.fi.lurkforreddit.data.models.StreamableVideo;
 
 public class StreamableService {
 
-    private static final String API_BASE_URL =  "https://api.streamable.com/";
+    private static final String API_BASE_URL = "https://api.streamable.com/";
     private static StreamableService instance;
     private final Streamable client;
 
@@ -27,10 +28,15 @@ public class StreamableService {
         } else {
             logger.setLevel(HttpLoggingInterceptor.Level.NONE);
         }
+        OkHttpClient okHttpClient = RedditService.getClient()
+                .newBuilder()
+                .addNetworkInterceptor(logger)
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(API_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(RedditService.getClient())
+                .client(okHttpClient)
                 .build();
 
         client = retrofit.create(Streamable.class);

@@ -13,7 +13,7 @@ import org.parceler.Parcel;
 public class ImageResolution {
 
     @SerializedName("url")
-    String url;
+    String url = "";
     @SerializedName("width")
     int width;
     @SerializedName("height")
