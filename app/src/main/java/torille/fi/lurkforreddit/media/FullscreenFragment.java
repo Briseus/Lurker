@@ -1,20 +1,15 @@
 package torille.fi.lurkforreddit.media;
 
+import android.content.Context;
 import android.graphics.drawable.Animatable;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -25,10 +20,31 @@ import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.LoopingMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.util.Util;
 
 import org.parceler.Parcels;
-
-import java.io.IOException;
 
 import me.relex.photodraweeview.PhotoDraweeView;
 import retrofit2.Call;
@@ -38,6 +54,7 @@ import timber.log.Timber;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.models.Post;
 import torille.fi.lurkforreddit.data.models.StreamableVideo;
+import torille.fi.lurkforreddit.retrofit.RedditService;
 import torille.fi.lurkforreddit.retrofit.StreamableService;
 
 import static android.view.View.GONE;
@@ -46,18 +63,16 @@ import static android.view.View.GONE;
  * Created by eva on 3/3/17.
  */
 
-public class FullscreenFragment extends Fragment implements FullscreenContract.View, MediaController.MediaPlayerControl {
+public class FullscreenFragment extends Fragment implements FullscreenContract.View {
 
     private static final String EXTRA_POST = "post";
 
     private PhotoDraweeView mImageView;
-    private SurfaceView mVideoView;
+    private SimpleExoPlayerView mSimpleExpoPlayerView;
     private ProgressBar mProgressBar;
-    private MediaPlayer mMediaPlayer;
-    private MediaController mMediaController;
     private FullscreenPresenter mActionsListener;
-    private int mBufferPercent;
     private View mView;
+    private SimpleExoPlayer player;
 
     /**
      * Use this factory method to create a new instance of
@@ -109,12 +124,8 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
     private void releaseVideoPlayer() {
         Timber.d("Destroying player");
-        if (mMediaPlayer != null) {
-            if (mMediaController.isShowing()) {
-                mMediaController.hide();
-            }
-            mMediaPlayer.release();
-
+        if (player != null) {
+            player.release();
         }
     }
 
@@ -123,7 +134,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_fullscreen, container, false);
         mImageView = (PhotoDraweeView) root.findViewById(R.id.fullscreen_image);
-        mVideoView = (SurfaceView) root.findViewById(R.id.fullscreen_video);
+        mSimpleExpoPlayerView = (SimpleExoPlayerView) root.findViewById(R.id.fullscreen_video);
         mView = root;
         mProgressBar = (ProgressBar) root.findViewById(R.id.progressBarHorizontal);
 
@@ -188,128 +199,78 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
     @Override
     public void showVideo(final String url) {
-        Timber.d("Got url " + url);
-        final FrameLayout.LayoutParams svLayoutParams = new FrameLayout.LayoutParams(0, 0);
-        mMediaPlayer = new MediaPlayer();
-        mMediaController = new MediaController(getContext());
-        mMediaController.setMediaPlayer(this);
-        mMediaController.setAnchorView(mView);
-        mView.setOnTouchListener(new View.OnTouchListener() {
+        mSimpleExpoPlayerView.setVisibility(View.INVISIBLE);
+        Context context = getContext();
+
+        // Measures bandwidth during playback. Can be null if not required.
+        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+
+        TrackSelection.Factory videoTrackSelectionFactory =
+                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        TrackSelector trackSelector =
+                new DefaultTrackSelector(videoTrackSelectionFactory);
+
+        String userAgent = Util.getUserAgent(context, getString(R.string.app_name));
+        // Produces DataSource instances through which media data is loaded.
+        DataSource.Factory dataSourceFactory = new OkHttpDataSourceFactory(RedditService.getClient(),
+                userAgent, bandwidthMeter);
+
+        // Produces Extractor instances for parsing the media data.
+        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+        // This is the MediaSource representing the media to be played.
+        MediaSource videoSource = new ExtractorMediaSource(Uri.parse(url),
+                dataSourceFactory, extractorsFactory, null, null);
+
+
+        LoopingMediaSource loopingSource = new LoopingMediaSource(videoSource);
+
+        LoadControl loadControl = new DefaultLoadControl();
+
+        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector, loadControl);
+
+        player.addListener(new ExoPlayer.EventListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public void onTimelineChanged(Timeline timeline, Object manifest) {
 
-                if (mMediaController != null && mMediaPlayer.isPlaying()) {
-                    /*
-                      the MediaController will hide after 3 seconds - tap the screen to
-                      make it appear again
-                     */
-                    mMediaController.show();
+            }
 
+            @Override
+            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+            }
+
+            @Override
+            public void onLoadingChanged(boolean isLoading) {
+
+            }
+
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if (playbackState == ExoPlayer.STATE_READY) {
+                    mProgressBar.setProgress(0);
+                    mProgressBar.setVisibility(GONE);
+                    removeMarginTop();
+                    mSimpleExpoPlayerView.setVisibility(View.VISIBLE);
                 }
-                return false;
+            }
+
+            @Override
+            public void onPlayerError(ExoPlaybackException error) {
+                Timber.e(error);
+                Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPositionDiscontinuity() {
+
             }
         });
+        mSimpleExpoPlayerView.setPlayer(player);
 
-        mVideoView.setVisibility(View.VISIBLE);
-        final SurfaceHolder surfaceHolder = mVideoView.getHolder();
+        // Prepare the player with the source.
+        player.prepare(loopingSource);
+        player.setPlayWhenReady(true);
 
-        surfaceHolder.addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-                try {
-                    mMediaPlayer.reset();
-                    mMediaPlayer.setDataSource(url);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                mMediaPlayer.setSurface(surfaceHolder.getSurface());
-                mMediaPlayer.prepareAsync();
-
-
-                mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(final MediaPlayer mp) {
-                        Timber.d("Video is " + mp.getVideoWidth() + " and " + mp.getVideoHeight());
-                        if (mp.getVideoHeight() != 0 && mp.getVideoWidth() != 0) {
-                            Timber.d("Video is over 0 0");
-                            configureSurfaceForVideo(mp.getVideoWidth(), mp.getVideoHeight());
-                        } else {
-                            Timber.d("Video is 0");
-                            playMedia();
-                        }
-
-                    }
-                });
-                mMediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
-                    @Override
-                    public void onBufferingUpdate(MediaPlayer mp, int percent) {
-
-                        mBufferPercent = percent;
-                        mProgressBar.setIndeterminate(false);
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                            mProgressBar.setProgress(mBufferPercent, true);
-                        } else {
-                            mProgressBar.setProgress(mBufferPercent);
-                        }
-                        if (percent == 100 && !mp.isPlaying()) {
-                            removeMarginTop();
-                            Timber.d("Buffering percent over 40! " + mBufferPercent);
-                            mProgressBar.setProgress(0);
-                            mProgressBar.setVisibility(GONE);
-                            playMedia();
-                        }
-                    }
-                });
-            }
-
-            private void playMedia() {
-                Timber.d("Checking if playing");
-                if (!mMediaPlayer.isPlaying()) {
-                    Timber.d("GOING TO PLAY");
-                    mMediaController.setEnabled(true);
-                    mMediaPlayer.start();
-                    mMediaPlayer.setLooping(true);
-                }
-            }
-
-            private void configureSurfaceForVideo(int videoWidth, int videoHeight) {
-
-                int screenHeight = mView.getHeight();
-                int screenWidth = mView.getWidth();
-
-                double aspectRatio = ((double) videoHeight / (double) videoWidth);
-
-                if (screenHeight > (int) (screenWidth * aspectRatio)) {
-                    // limited by narrow width; restrict height
-                    svLayoutParams.width = screenWidth;
-                    svLayoutParams.height = (screenWidth * videoHeight) / videoWidth;
-                } else {
-                    // limited by short height; restrict width
-                    svLayoutParams.width = (screenHeight * videoWidth) / videoHeight;
-                    svLayoutParams.height = screenHeight;
-                }
-
-                svLayoutParams.gravity = Gravity.CENTER;
-
-                mVideoView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mVideoView.setLayoutParams(svLayoutParams);
-                    }
-                });
-
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                Timber.d("Surface changed");
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                Timber.d("Surface destroyed");
-            }
-        });
     }
 
     private void removeMarginTop() {
@@ -332,8 +293,14 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
             public void onResponse(Call<StreamableVideo> call, Response<StreamableVideo> response) {
                 if (response.isSuccessful()) {
                     // comes in
+                    Timber.d(response.toString());
                     String videoUrl = response.body().getMobileVideoUrl();
-                    showVideo(videoUrl);
+                    if (!videoUrl.isEmpty()) {
+                        showVideo(videoUrl);
+                    } else {
+                        onFailure(call, new Throwable("No video found"));
+                    }
+
                 }
             }
 
@@ -344,62 +311,4 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
         });
     }
 
-    @Override
-    public void start() {
-        mMediaPlayer.start();
-    }
-
-    @Override
-    public void pause() {
-        mMediaPlayer.pause();
-    }
-
-    @Override
-    public int getDuration() {
-        return mMediaPlayer.getDuration();
-    }
-
-    @Override
-    public int getCurrentPosition() {
-        return mMediaPlayer.getCurrentPosition();
-    }
-
-    @Override
-    public void seekTo(int pos) {
-        mMediaPlayer.seekTo(pos);
-    }
-
-    @Override
-    public boolean isPlaying() {
-        return mMediaPlayer.isPlaying();
-    }
-
-    @Override
-    public int getBufferPercentage() {
-        if (mBufferPercent != 0) {
-            return mBufferPercent;
-        } else {
-            return 0;
-        }
-    }
-
-    @Override
-    public boolean canPause() {
-        return true;
-    }
-
-    @Override
-    public boolean canSeekBackward() {
-        return true;
-    }
-
-    @Override
-    public boolean canSeekForward() {
-        return true;
-    }
-
-    @Override
-    public int getAudioSessionId() {
-        return mMediaPlayer.getAudioSessionId();
-    }
 }

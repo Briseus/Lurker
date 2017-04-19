@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginTop="-6dp"
-    android:background="@color/black_overlay">
+    android:background="@android:color/black">
 
     <me.relex.photodraweeview.PhotoDraweeView
         android:id="@+id/fullscreen_image"
@@ -14,7 +14,7 @@
         android:contentDescription="@string/fullscreen_image"
         android:visibility="gone" />
 
-    <SurfaceView
+    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
         android:id="@+id/fullscreen_video"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
