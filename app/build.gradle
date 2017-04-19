@@ -28,8 +28,8 @@ android {
         applicationId "torille.fi.lurkforreddit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9
-        versionName "0.4.1"
+        versionCode 10
+        versionName "0.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
