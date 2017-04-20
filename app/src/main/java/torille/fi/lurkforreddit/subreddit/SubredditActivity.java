@@ -75,9 +75,9 @@ public class SubredditActivity extends AppCompatActivity {
             String subredditName = intent.getStringExtra(EXTRA_SUBREDDITNAME);
 
             if (subredditName != null) {
-                String token = SharedPreferencesHelper.getToken();
+
                 Call<SubredditChildren> call = RedditService
-                        .getInstance(token)
+                        .getInstance()
                         .getSubredditInfo(subredditName);
 
                 call.enqueue(new Callback<SubredditChildren>() {

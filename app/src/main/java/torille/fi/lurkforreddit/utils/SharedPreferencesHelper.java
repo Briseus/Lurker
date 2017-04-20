@@ -14,37 +14,46 @@ public class SharedPreferencesHelper {
     private static SharedPreferences mSharedPreferences;
     private static String clientId;
 
+    private static final String CONFIG = "config";
+    private static final String TOKEN = "token";
+    private static final String REFRESH_TOKEN = "refreshtoken";
+    private static final String LOGGED_IN = "logged_in";
+
     private SharedPreferencesHelper() {
     }
 
     public static void init(Context context) {
         context = context.getApplicationContext();
-        mSharedPreferences = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+        mSharedPreferences = context.getSharedPreferences(CONFIG, Context.MODE_PRIVATE);
         clientId = context.getResources().getString(R.string.client_id);
     }
 
     public static String getToken() {
-        return mSharedPreferences.getString("token", null);
+        String token = mSharedPreferences.getString(TOKEN, null);
+        if (token == null) {
+            return "";
+        }
+        return token;
     }
 
     public static void setToken(String token) {
-        mSharedPreferences.edit().putString("token", token).apply();
+        mSharedPreferences.edit().putString(TOKEN, token).apply();
     }
 
     public static void setRefreshToken(String token) {
-        mSharedPreferences.edit().putString("refreshtoken", token).apply();
+        mSharedPreferences.edit().putString(REFRESH_TOKEN, token).apply();
     }
 
     public static String getRefreshToken() {
-        return mSharedPreferences.getString("refreshtoken", null);
+        return mSharedPreferences.getString(REFRESH_TOKEN, null);
     }
 
     public static Boolean isLoggedIn() {
-        return mSharedPreferences.getBoolean("logged_in", false);
+        return mSharedPreferences.getBoolean(LOGGED_IN, false);
     }
 
     public static void loggedIn(Boolean bool) {
-        mSharedPreferences.edit().putBoolean("logged_in", bool).apply();
+        mSharedPreferences.edit().putBoolean(LOGGED_IN, bool).apply();
     }
 
     public static String getSubreddit(String sub) {

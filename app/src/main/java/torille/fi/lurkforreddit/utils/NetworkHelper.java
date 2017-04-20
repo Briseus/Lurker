@@ -80,15 +80,27 @@ final public class NetworkHelper {
         return "";
     }
 
-    public static Call<RedditToken> createAuthCall() {
+    public static String getToken() throws IOException {
 
         final String UUID = NetworkHelper.createUUID();
         final String grant_type = "https://oauth.reddit.com/grants/installed_client";
         final String client_id = SharedPreferencesHelper.getClientId();
         Timber.d("Creating auth call client id " + client_id);
         final RedditClient redditClient = RedditAuthService.createService(RedditClient.class, client_id, "");
-        return redditClient.getAuthToken(grant_type, UUID);
+        Call<RedditToken> call = redditClient.getAuthToken(grant_type, UUID);
+        Timber.d("Getting token");
+        Response<RedditToken> response = call.execute();
+        if (response.isSuccessful()) {
+            final String access_token = response.body().getAccess_token();
+            SharedPreferencesHelper.setToken(access_token);
+            Timber.d("Got new token " + access_token);
+            return access_token;
+        } else {
+            Timber.e("Got something else as response " + response.errorBody().string());
+            return "";
+        }
     }
+
 
 
 }

@@ -37,15 +37,14 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     @Override
     public void getSubreddits(final ServiceCallback<List<SubredditChildren>> callback,
                               final RedditRepository.ErrorCallback errorCallback) {
-        String token = SharedPreferencesHelper.getToken();
 
         Call<SubredditListing> call;
         if (SharedPreferencesHelper.isLoggedIn()) {
             Timber.d("Was logged in, getting personal subreddits");
-            call = RedditService.getInstance(token).getMySubreddits(100);
+            call = RedditService.getInstance().getMySubreddits(100);
         } else {
             Timber.d("Was not logged in, getting default subreddits");
-            call = RedditService.getInstance(token).getDefaultSubreddits(100);
+            call = RedditService.getInstance().getDefaultSubreddits(100);
         }
 
         call.enqueue(new Callback<SubredditListing>() {
@@ -81,35 +80,32 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     public void getSubredditPosts(String subredditId,
                                   final ServiceCallbackWithNextpage<List<Post>> callback,
                                   final RedditRepository.ErrorCallback errorCallback) {
-        String token = SharedPreferencesHelper.getToken();
-        if (token == null) {
-            authenticateApp(subredditId, callback, errorCallback);
-        } else {
-            Call<PostListing> call = RedditService.getInstance(token).getSubreddit(subredditId);
-            call.enqueue(new Callback<PostListing>() {
-                @Override
-                public void onResponse(Call<PostListing> call, Response<PostListing> response) {
-                    List<Post> posts = response.body().getData().getPosts();
-                    if (response.isSuccessful() && posts != null) {
 
-                        List<Post> formattedPosts = getFormattedPosts(posts);
-                        String nextpage = response.body().getData().getNextPage();
+        Call<PostListing> call = RedditService.getInstance().getSubreddit(subredditId);
+        call.enqueue(new Callback<PostListing>() {
+            @Override
+            public void onResponse(Call<PostListing> call, Response<PostListing> response) {
+                List<Post> posts = response.body().getData().getPosts();
+                if (response.isSuccessful() && posts != null) {
 
-                        Timber.d("Got " + formattedPosts.size() + " posts");
+                    List<Post> formattedPosts = getFormattedPosts(posts);
+                    String nextpage = response.body().getData().getNextPage();
 
-                        callback.onLoaded(formattedPosts, nextpage);
-                    }
+                    Timber.d("Got " + formattedPosts.size() + " posts");
+
+                    callback.onLoaded(formattedPosts, nextpage);
                 }
+            }
 
-                // TODO show error message callback
-                @Override
-                public void onFailure(Call<PostListing> call, Throwable t) {
-                    Timber.e("Failed to get subreddit posts " + t.toString());
-                    errorCallback.onError(t.toString());
-                }
-            });
+            // TODO show error message callback
+            @Override
+            public void onFailure(Call<PostListing> call, Throwable t) {
+                Timber.e("Failed to get subreddit posts " + t.toString());
+                errorCallback.onError(t.toString());
+            }
+        });
 
-        }
+
     }
 
     private static List<Post> getFormattedPosts(List<Post> posts) {
@@ -121,10 +117,11 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                              String nextpageId,
                              final ServiceCallbackWithNextpage<List<Post>> callback,
                              final RedditRepository.ErrorCallback errorCallback) {
-        String token = SharedPreferencesHelper.getToken();
+
         Call<PostListing> call = RedditService
-                .getInstance(token)
+                .getInstance()
                 .getSubredditNextPage(subredditUrl, nextpageId);
+
         call.enqueue(new Callback<PostListing>() {
             @Override
             public void onResponse(Call<PostListing> call, Response<PostListing> response) {
@@ -150,9 +147,8 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     public void getPostComments(String permaLinkUrl,
                                 final CommentsServiceCallback<List<CommentChild>> callback,
                                 final RedditRepository.ErrorCallback errorCallback) {
-        String token = SharedPreferencesHelper.getToken();
 
-        Call<ResponseBody> call = RedditService.getInstance(token).getComments(permaLinkUrl);
+        Call<ResponseBody> call = RedditService.getInstance().getComments(permaLinkUrl);
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -193,10 +189,9 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                                     final int position,
                                     final CommentsServiceCallback<List<CommentChild>> callback,
                                     final RedditRepository.ErrorCallback errorCallback) {
-        String token = SharedPreferencesHelper.getToken();
 
         Call<ResponseBody> call = RedditService
-                .getInstance(token)
+                .getInstance()
                 .getMoreComments(
                         linkId,
                         TextUtils.join(",", parentComment.getData().getChildren()),
@@ -235,10 +230,11 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     public void getSearchResults(String query,
                                  final ServiceCallbackWithNextpage<List<SubredditChildren>> callback,
                                  final RedditRepository.ErrorCallback errorCallback) {
-        String token = SharedPreferencesHelper.getToken();
+
         Call<SubredditListing> call = RedditService
-                .getInstance(token)
+                .getInstance()
                 .searchSubreddits(query, "relevance");
+
         call.enqueue(new Callback<SubredditListing>() {
             @Override
             public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
@@ -262,10 +258,11 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                                      String after,
                                      final ServiceCallbackWithNextpage<List<SubredditChildren>> callback,
                                      final RedditRepository.ErrorCallback errorCallback) {
-        String token = SharedPreferencesHelper.getToken();
+
         Call<SubredditListing> call = RedditService
-                .getInstance(token)
+                .getInstance()
                 .searchSubredditsNextPage(query, "relevance", after);
+
         call.enqueue(new Callback<SubredditListing>() {
             @Override
             public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
@@ -283,28 +280,6 @@ public class RedditServiceApiImpl implements RedditServiceApi {
             }
         });
 
-    }
-
-    private void authenticateApp(final String subredditId,
-                                 final ServiceCallbackWithNextpage<List<Post>> callback,
-                                 final RedditRepository.ErrorCallback errorCallback) {
-        Call<RedditToken> call = NetworkHelper.createAuthCall();
-        call.enqueue(new Callback<RedditToken>() {
-            @Override
-            public void onResponse(Call<RedditToken> call, Response<RedditToken> response) {
-                String accessToken = response.body().getAccess_token();
-                if (response.isSuccessful() && accessToken != null) {
-                    SharedPreferencesHelper.setToken(accessToken);
-                    getSubredditPosts(subredditId, callback, errorCallback);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<RedditToken> call, Throwable t) {
-                Timber.e(t.toString());
-                errorCallback.onError(t.toString());
-            }
-        });
     }
 
 }

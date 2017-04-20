@@ -17,6 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import timber.log.Timber;
 import torille.fi.lurkforreddit.BuildConfig;
 import torille.fi.lurkforreddit.utils.NetworkHelper;
+import torille.fi.lurkforreddit.utils.SharedPreferencesHelper;
 
 /**
  * Service to create calls to fetch data from Reddit with token refresh
@@ -27,7 +28,6 @@ public class RedditService {
     private static final String API_BASE_URL = "https://oauth.reddit.com/";
     private static RedditService instance;
     private final RedditClient redditClient;
-    private static String TOKEN;
 
     private final static OkHttpClient okHttpClient = new OkHttpClient();
 
@@ -83,8 +83,17 @@ public class RedditService {
                 if (original.header("Authorization") != null) {
                     return chain.proceed(original);
                 }
+
+                String token = SharedPreferencesHelper.getToken();
+
+                if (token == null || token.isEmpty()) {
+                    Timber.d("Token was not set, going to get token");
+                    token = NetworkHelper.getToken();
+                    Timber.d("Got new token " + token);
+                }
+
                 Request.Builder requestBuilder = original.newBuilder()
-                        .header("Authorization", "bearer " + TOKEN)
+                        .header("Authorization", "bearer " + token)
                         .method(original.method(), original.body());
 
                 Request request = requestBuilder.build();
@@ -105,8 +114,8 @@ public class RedditService {
         redditClient = retrofit.create(RedditClient.class);
     }
 
-    public static RedditClient getInstance(@NonNull String token) {
-        TOKEN = token;
+    public static RedditClient getInstance() {
+
         if (instance == null) {
             instance = new RedditService();
         }
