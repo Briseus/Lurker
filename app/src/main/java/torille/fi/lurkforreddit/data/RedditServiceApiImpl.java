@@ -158,7 +158,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    try (InputStream stream = response.body().source().inputStream();
+                    try (InputStream stream = response.body().byteStream();
                          InputStreamReader in = new InputStreamReader(stream, "UTF-8");
                          JsonReader reader = new JsonReader(in)) {
 
@@ -167,6 +167,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                                 .get(1)
                                 .getCommentData()
                                 .getCommentChildren();
+
                         List<CommentChild> commentChildFlatList = TextHelper
                                 .flatten(commentChildList, 0);
 
@@ -200,11 +201,12 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                         linkId,
                         TextUtils.join(",", parentComment.getData().getChildren()),
                         "json");
+
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    try (InputStream stream = response.body().source().inputStream();
+                    try (InputStream stream = response.body().byteStream();
                          InputStreamReader in = new InputStreamReader(stream, "UTF-8");
                          JsonReader reader = new JsonReader(in)) {
 

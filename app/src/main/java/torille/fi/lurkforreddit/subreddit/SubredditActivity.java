@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
@@ -45,9 +46,11 @@ public class SubredditActivity extends AppCompatActivity {
         final Toolbar toolbar = (Toolbar) findViewById(R.id.appBarLayout);
         setSupportActionBar(toolbar);
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setHomeAsUpIndicator(getResources().getDrawable(R.drawable.ic_arrow_back_white_24px, null));
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(getResources().getDrawable(R.drawable.ic_arrow_back_white_24px, null));
+            actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         Subreddit subreddit = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_SUBREDDIT));
@@ -142,22 +145,23 @@ public class SubredditActivity extends AppCompatActivity {
         if (title != null && getSupportActionBar() != null) {
             getSupportActionBar().setTitle(title);
         }
-
+        String subredditColorHex = subreddit.getKey_color();
+        String bannerUrl = subreddit.getBanner();
         SimpleDraweeView banner = (SimpleDraweeView) findViewById(R.id.banner);
-        boolean hasBannerSource = (subreddit.getBanner() != null && !subreddit.getBanner().isEmpty());
-        boolean hasCustomColor = (subreddit.getKey_color() != null && !subreddit.getKey_color().isEmpty());
+        boolean hasBannerSource = (bannerUrl != null && !bannerUrl.isEmpty());
+        boolean hasCustomColor = (subredditColorHex != null && !subredditColorHex.isEmpty());
         int color;
 
         if (hasBannerSource) {
-            banner.setImageURI(subreddit.getBanner());
-        }
-
-        if (hasCustomColor) {
-            color = Color.parseColor(subreddit.getKey_color());
+            banner.setImageURI(bannerUrl);
         } else {
-            color = ContextCompat.getColor(this, R.color.colorAccent);
+            if (hasCustomColor) {
+                color = Color.parseColor(subredditColorHex);
+            } else {
+                color = ContextCompat.getColor(this, R.color.colorAccent);
+            }
+            banner.setBackgroundColor(color);
         }
-        banner.setBackgroundColor(color);
 
 
     }

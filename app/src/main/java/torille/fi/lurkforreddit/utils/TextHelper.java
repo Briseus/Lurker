@@ -27,7 +27,7 @@ public class TextHelper {
     }
 
     @SuppressWarnings("deprecation")
-    public static Spanned fromHtml(final String html) {
+    private static Spanned fromHtml(final String html) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
         } else {
@@ -35,7 +35,7 @@ public class TextHelper {
         }
     }
 
-    public static String formatScore(int score) {
+    private static String formatScore(int score) {
         final String value = String.valueOf(score);
         if (score < 1000) {
             return value;
@@ -51,15 +51,15 @@ public class TextHelper {
     }
 
     public static List<CommentChild> flatten(List<CommentChild> list, int level) {
-        List<CommentChild> flatComments = new ArrayList<>();
+        List<CommentChild> flatComments = new ArrayList<>(list.size());
         flatComments = flattenHelper(list, flatComments, level);
         return flatComments;
     }
 
     public static List<CommentChild> flattenAdditionalComments(List<CommentChild> list, int level) {
         List<CommentChild> additionalComments = flatten(list, level);
-        for (int i = 0; i < additionalComments.size(); i++) {
-            for (int j = 0; j < additionalComments.size(); j++) {
+        for (int i = 0, size = additionalComments.size(); i < size; i++) {
+            for (int j = 0, nestedSize = additionalComments.size(); j < nestedSize; j++) {
                 if (additionalComments.get(i).getData().getName().equals(additionalComments.get(j).getData().getParentId())) {
                     additionalComments.get(j).setType(additionalComments.get(i).getType() + 1);
                 }
@@ -71,7 +71,7 @@ public class TextHelper {
     private static Comment formatCommentData(Comment comment) {
 
         if (comment.getBodyHtml() != null) {
-            comment.setFormattedComment(trimTrailingWhitespace(fromHtml((comment.getBodyHtml()))));
+            comment.setFormattedComment(formatTextToHtml(comment.getBodyHtml()));
         }
 
         String author = "";
@@ -88,6 +88,7 @@ public class TextHelper {
     }
 
     private static Comment formatAdditionalCommentData(Comment comment) {
+
         String text;
         if (comment.getId().equals("_")) {
             text = "Continue this thread ->";
@@ -95,11 +96,13 @@ public class TextHelper {
             text = "Load more comments (" + comment.getCount() + ")";
         }
         comment.setFormattedComment(text);
+
         return comment;
     }
 
     private static List<CommentChild> flattenHelper(List<CommentChild> nestedList, List<CommentChild> flatList, int level) {
-        for (int i = 0; i < nestedList.size(); i++) {
+
+        for (int i = 0, size = nestedList.size(); i < size; i++) {
             CommentChild commentChild = nestedList.get(i);
             Comment comment = commentChild.getData();
             commentChild.setType(level);
@@ -123,9 +126,10 @@ public class TextHelper {
     }
 
     public static List<Post> formatPosts(List<Post> posts) {
+        List<Post> formattedPosts = new ArrayList<>(posts.size());
 
-        for (Post post : posts) {
-
+        for (int i = 0, size = posts.size(); i < size; i++) {
+            Post post = posts.get(i);
             post.getPostDetails().setPreviewScore(TextHelper.formatScore(post.getPostDetails().getScore()));
 
             if (post.getPostDetails().isStickied()) {
@@ -140,6 +144,7 @@ public class TextHelper {
                 SpannableString titleWithoutFormatting = SpannableString.valueOf(post.getPostDetails().getTitle());
                 post.getPostDetails().setPreviewTitle(titleWithoutFormatting);
             }
+
             switch (post.getPostDetails().getThumbnail()) {
                 case "default":
                 case "self":
@@ -154,18 +159,21 @@ public class TextHelper {
                 default:
                     post.getPostDetails().setPreviewImage(DisplayHelper.getBestPreviewPicture(post.getPostDetails()));
             }
-
+            formattedPosts.add(post);
         }
 
-        return posts;
+        return formattedPosts;
     }
 
-    public static List<SubredditChildren> formatSubreddits (List<SubredditChildren> childrens) {
-        for (SubredditChildren result : childrens) {
-            Subreddit subreddit = result.getSubreddit();
+    public static List<SubredditChildren> formatSubreddits(List<SubredditChildren> childrens) {
+        List<SubredditChildren> formattedChildren = new ArrayList<>(childrens.size());
+        for (int i = 0, size = childrens.size(); i < size; i++) {
+            SubredditChildren subredditChild = childrens.get(i);
+            Subreddit subreddit = subredditChild.getSubreddit();
 
             final String info = subreddit.getSubscribers() + " subscribers, Community since "
                     + DateUtils.getRelativeTimeSpanString(subreddit.getCreatedUtc() * 1000);
+
             subreddit.setFormattedInfo(info);
 
             if (subreddit.isOver18()) {
@@ -182,12 +190,14 @@ public class TextHelper {
             }
 
             if (subreddit.getDescriptionHtml() != null && !subreddit.getDescriptionHtml().isEmpty()) {
-                subreddit.setFormattedDescription(TextHelper.trimTrailingWhitespace(TextHelper.fromHtml(subreddit.getDescriptionHtml())));
+                subreddit.setFormattedDescription(formatTextToHtml(subreddit.getDescriptionHtml()));
             } else {
                 subreddit.setFormattedDescription("No description");
             }
+            subredditChild.setSubreddit(subreddit);
+            formattedChildren.add(subredditChild);
         }
-        return childrens;
+        return formattedChildren;
     }
 
     /**
@@ -204,7 +214,7 @@ public class TextHelper {
      *
      * @return "" if source is null, otherwise string with all trailing whitespace removed
      */
-    public static CharSequence trimTrailingWhitespace(CharSequence source) {
+    private static CharSequence trimTrailingWhitespace(CharSequence source) {
 
         if (source == null)
             return "";
@@ -218,4 +228,11 @@ public class TextHelper {
         return source.subSequence(0, i + 1);
     }
 
+    public static CharSequence formatTextToHtml(String bodyText) {
+        if (bodyText == null) {
+            return "";
+        }
+        Spanned htmlText = fromHtml(bodyText);
+        return trimTrailingWhitespace(htmlText);
+    }
 }

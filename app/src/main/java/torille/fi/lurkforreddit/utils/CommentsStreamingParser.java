@@ -26,6 +26,7 @@ public final class CommentsStreamingParser {
      * @throws IOException
      */
     public static List<CommentChild> readMoreComments(JsonReader reader) throws IOException {
+
         List<CommentChild> comments = new ArrayList<>();
         reader.beginObject();
         while (reader.hasNext()) {

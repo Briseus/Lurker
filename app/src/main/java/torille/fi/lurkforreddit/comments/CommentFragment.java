@@ -362,8 +362,9 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                             .build();
                     mImage.setController(controller);
                 }
-                if (mClickedPost.getPostDetails().getSelftextHtml() != null && !mClickedPost.getPostDetails().getSelftextHtml().isEmpty()) {
-                    mSelftext.setText(TextHelper.trimTrailingWhitespace(TextHelper.fromHtml(mClickedPost.getPostDetails().getSelftextHtml())));
+                String selftext = mClickedPost.getPostDetails().getSelftextHtml();
+                if (selftext != null) {
+                    mSelftext.setText(TextHelper.formatTextToHtml(selftext));
                 } else {
                     mSelftext.setVisibility(View.GONE);
                 }
