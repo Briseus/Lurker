@@ -4,9 +4,10 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.CommentChild;
-import torille.fi.lurkforreddit.data.models.Post;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.view.Comment;
+import torille.fi.lurkforreddit.data.models.view.Post;
+import torille.fi.lurkforreddit.data.models.view.SearchResult;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 
 /**
  * Main entry point for accessing data.
@@ -18,7 +19,7 @@ public interface RedditRepository {
     }
 
     interface LoadSubredditsCallback {
-        void onSubredditsLoaded(List<SubredditChildren> subreddits);
+        void onSubredditsLoaded(List<Subreddit> subreddits);
     }
 
     interface LoadSubredditPostsCallback {
@@ -26,12 +27,12 @@ public interface RedditRepository {
     }
 
     interface LoadPostCommentsCallback {
-        void onCommentsLoaded(List<CommentChild> commentChildren);
-        void onMoreCommentsLoaded(List<CommentChild> comments, int position);
+        void onCommentsLoaded(List<Comment> comments);
+        void onMoreCommentsLoaded(List<Comment> comments, int position);
     }
 
     interface LoadCommentsCallback {
-        void onSearchLoaded(List<SubredditChildren> subredditChildrens, String after);
+        void onSearchLoaded(List<SearchResult> subredditChildrens, String after);
     }
 
     void getSubreddits(@NonNull LoadSubredditsCallback callback,
@@ -52,7 +53,7 @@ public interface RedditRepository {
                             @NonNull LoadPostCommentsCallback callback,
                             @NonNull ErrorCallback errorCallback);
 
-    void getMoreCommentsForPostAt(@NonNull CommentChild parentComment,
+    void getMoreCommentsForPostAt(@NonNull Comment parentComment,
                                   @NonNull String linkId,
                                   int position,
                                   @NonNull LoadPostCommentsCallback callback,

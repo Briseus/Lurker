@@ -10,7 +10,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 import torille.fi.lurkforreddit.data.RedditRepository;
-import torille.fi.lurkforreddit.data.models.CommentChild;
+import torille.fi.lurkforreddit.data.models.view.Comment;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
@@ -24,10 +24,10 @@ public class CommentPresenterTest {
     private static final int mockPosition = 5;
 
     @Mock
-    private List<CommentChild> mockComments;
+    private List<Comment> mockComments;
 
     @Mock
-    private CommentChild mockParentComment;
+    private Comment mockParentComment;
 
     @Mock
     private RedditRepository mRedditRepository;
@@ -65,7 +65,7 @@ public class CommentPresenterTest {
     @Test
     public void loadMoreCommentsFromRepositoryAndLoadIntoView() {
         mCommentPresenter.loadMoreCommentsAt(mockParentComment, mockLinkId, mockPosition);
-        verify(mRedditRepository).getMoreCommentsForPostAt(any(CommentChild.class),
+        verify(mRedditRepository).getMoreCommentsForPostAt(any(Comment.class),
                 any(String.class),
                 any(int.class),
                 loadPostCommentsCallbackArgumentCaptor.capture(),

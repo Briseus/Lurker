@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.Comment;
-import torille.fi.lurkforreddit.data.models.CommentChild;
-import torille.fi.lurkforreddit.data.models.CommentData;
-import torille.fi.lurkforreddit.data.models.CommentListing;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentResponse;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentData;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing;
 
 /**
  * Utility classes to stream parse {@link CommentListing} Json and nested models
@@ -109,7 +109,7 @@ public final class CommentsStreamingParser {
             }
         }
         reader.endObject();
-        return new CommentListing(kind, commentData);
+        return CommentListing.create(kind, commentData);
     }
 
     private static CommentData readCommentData(JsonReader reader) throws IOException {
@@ -131,7 +131,7 @@ public final class CommentsStreamingParser {
             }
         }
         reader.endObject();
-        return new CommentData(commentChildren, after, before);
+        return CommentData.create(commentChildren, after, before);
 
     }
 
@@ -157,7 +157,7 @@ public final class CommentsStreamingParser {
 
     private static CommentChild readCommentChild(JsonReader reader) throws IOException {
         String kind = null;
-        Comment comment = null;
+        CommentResponse comment = null;
 
         reader.beginObject();
         while (reader.hasNext()) {
@@ -175,11 +175,11 @@ public final class CommentsStreamingParser {
             }
         }
         reader.endObject();
-        return new CommentChild(kind, comment);
+        return CommentChild.create(kind, comment);
 
     }
 
-    private static Comment readComment(JsonReader reader) throws IOException {
+    private static CommentResponse readComment(JsonReader reader) throws IOException {
         String subredditId = null;
         String linkId = null;
         CommentListing replies = null;
@@ -288,27 +288,28 @@ public final class CommentsStreamingParser {
             }
         }
         reader.endObject();
-        return new Comment(subredditId,
-                linkId,
-                replies,
-                saved,
-                id,
-                gilded,
-                archived,
-                author,
-                parendId,
-                score,
-                controversiality,
-                bodyHtml,
-                stickied,
-                subreddit,
-                scoreHidden,
-                name,
-                createdUtc,
-                authorFlairText,
-                ups,
-                count,
-                childrenIds);
+        return CommentResponse.builder()
+                .setLinkId(linkId)
+                .setReplies(replies)
+                .setSaved(saved)
+                .setId(id)
+                .setGilded(gilded)
+                .setArchived(archived)
+                .setAuthor(author)
+                .setCount(count)
+                .setParentId(parendId)
+                .setScore(score)
+                .setControversiality(controversiality)
+                .setBodyHtml(bodyHtml)
+                .setStickied(stickied)
+                .setSubreddit(subreddit)
+                .setScoreHidden(scoreHidden)
+                .setName(name)
+                .setAuthorFlairText(authorFlairText)
+                .setCreatedUtc(createdUtc)
+                .setUps(ups)
+                .setChildren(childrenIds)
+                .build();
 
     }
 

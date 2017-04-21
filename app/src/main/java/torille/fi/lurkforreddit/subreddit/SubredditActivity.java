@@ -2,8 +2,8 @@ package torille.fi.lurkforreddit.subreddit;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.test.espresso.IdlingResource;
@@ -18,25 +18,22 @@ import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
-import org.parceler.Parcels;
-
-import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.models.Subreddit;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 import torille.fi.lurkforreddit.retrofit.RedditService;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
-import torille.fi.lurkforreddit.utils.SharedPreferencesHelper;
+import torille.fi.lurkforreddit.utils.TextHelper;
 
 public class SubredditActivity extends AppCompatActivity {
 
     public static final String EXTRA_SUBREDDIT = "subreddit";
     public static final String EXTRA_SUBREDDITNAME = "subredditname";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,21 +49,31 @@ public class SubredditActivity extends AppCompatActivity {
             actionBar.setHomeAsUpIndicator(getResources().getDrawable(R.drawable.ic_arrow_back_white_24px, null));
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
-        Subreddit subreddit = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_SUBREDDIT));
+        Intent intent = getIntent();
+        Subreddit subreddit = intent.getParcelableExtra(EXTRA_SUBREDDIT);
 
         if (subreddit != null) {
-
-            loadBannerImage(subreddit);
-
-            if (savedInstanceState == null) {
-                initFragment(SubredditFragment.newInstance(subreddit));
-            }
+            Timber.d(subreddit.toString());
+            initSubreddit(subreddit, savedInstanceState, actionBar);
         } else {
-            handleIntent(getIntent(), savedInstanceState);
+            handleIntent(intent, savedInstanceState);
         }
 
 
+    }
+
+
+    public void initSubreddit(@NonNull Subreddit subreddit, @Nullable Bundle savedInstanceState,
+                              @Nullable ActionBar actionBar) {
+        loadBannerImage(subreddit.bannerUrl(), subreddit.keyColor());
+
+        if (actionBar != null) {
+            actionBar.setTitle(subreddit.displayName());
+        }
+
+        if (savedInstanceState == null) {
+            initFragment(SubredditFragment.newInstance(subreddit));
+        }
     }
 
     public void handleIntent(Intent intent, @Nullable final Bundle savedInstanceState) {
@@ -86,40 +93,17 @@ public class SubredditActivity extends AppCompatActivity {
 
                         if (response.isSuccessful()) {
                             Timber.d("Got " + response.body().toString());
-                            Subreddit subreddit = response.body().getSubreddit();
-                            loadBannerImage(subreddit);
-                            if (savedInstanceState == null) {
-                                initFragment(SubredditFragment.newInstance(subreddit));
-                            }
+                            Subreddit subreddit = TextHelper.formatSubreddit(response.body());
+                            initSubreddit(subreddit, savedInstanceState, getSupportActionBar());
                         }
                     }
 
                     @Override
                     public void onFailure(Call<SubredditChildren> call, Throwable t) {
                         Timber.e(t);
-                        Toast.makeText(getApplicationContext(), "Subreddit not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "SubredditResponse not found", Toast.LENGTH_SHORT).show();
                     }
                 });
-
-            } else if (intent.getData() != null) {
-                Uri appLinkData = intent.getData();
-
-                List<String> pathList = appLinkData.getPathSegments();
-                Timber.d("Got path list " + pathList.toString());
-
-                if (pathList.size() == 2) {
-                    String name = pathList.get(1);
-                    Subreddit subreddit = new Subreddit();
-                    subreddit.setName(name);
-                    subreddit.setUrl("/r/" + name.toUpperCase());
-
-                    loadBannerImage(subreddit);
-
-                    if (savedInstanceState == null) {
-                        initFragment(SubredditFragment.newInstance(subreddit));
-                    }
-                    //if path is comments
-                }
 
             }
         }
@@ -140,23 +124,18 @@ public class SubredditActivity extends AppCompatActivity {
         return true;
     }
 
-    private void loadBannerImage(Subreddit subreddit) {
-        String title = subreddit.getDisplay_name();
-        if (title != null && getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(title);
-        }
-        String subredditColorHex = subreddit.getKey_color();
-        String bannerUrl = subreddit.getBanner();
+    private void loadBannerImage(@Nullable String bannerUrl, @Nullable String keyColor) {
+
         SimpleDraweeView banner = (SimpleDraweeView) findViewById(R.id.banner);
-        boolean hasBannerSource = (bannerUrl != null && !bannerUrl.isEmpty());
-        boolean hasCustomColor = (subredditColorHex != null && !subredditColorHex.isEmpty());
+        boolean hasBannerSource = (bannerUrl != null);
+        boolean hasCustomColor = (keyColor != null);
         int color;
 
         if (hasBannerSource) {
             banner.setImageURI(bannerUrl);
         } else {
             if (hasCustomColor) {
-                color = Color.parseColor(subredditColorHex);
+                color = Color.parseColor(keyColor);
             } else {
                 color = ContextCompat.getColor(this, R.color.colorAccent);
             }

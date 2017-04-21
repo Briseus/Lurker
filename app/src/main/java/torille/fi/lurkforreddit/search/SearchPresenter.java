@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import java.util.List;
 
 import torille.fi.lurkforreddit.data.RedditRepository;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.view.SearchResult;
 
 /**
  * Created by eva on 3/20/17.
@@ -37,7 +37,7 @@ public class SearchPresenter implements SearchContract.UserActionsListener {
         mSearchView.showProgressbar();
         mRedditRepository.getSearchResults(searchQuery, new RedditRepository.LoadCommentsCallback() {
             @Override
-            public void onSearchLoaded(List<SubredditChildren> subredditChildrens, String after) {
+            public void onSearchLoaded(List<SearchResult> subredditChildrens, String after) {
                 mSearchView.showResults(subredditChildrens);
                 searchAfter = after;
             }
@@ -49,7 +49,7 @@ public class SearchPresenter implements SearchContract.UserActionsListener {
         mSearchView.showProgressbar();
         mRedditRepository.getMoreSearchResults(searchQuery, searchAfter, new RedditRepository.LoadCommentsCallback() {
             @Override
-            public void onSearchLoaded(List<SubredditChildren> subredditChildrens, String after) {
+            public void onSearchLoaded(List<SearchResult> subredditChildrens, String after) {
                 mSearchView.showResults(subredditChildrens);
                 searchAfter = after;
             }

@@ -1,5 +1,6 @@
 package torille.fi.lurkforreddit.media;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,11 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 
-import org.parceler.Parcels;
-
 import timber.log.Timber;
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.models.Post;
+import torille.fi.lurkforreddit.data.models.view.Post;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -36,10 +35,15 @@ public class FullscreenActivity extends AppCompatActivity {
         }
 
         if (null == savedInstanceState) {
-            Post post = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_POST));
+            Intent intent = getIntent();
+            Post post = intent.getParcelableExtra(EXTRA_POST);
             if (post != null) {
                 Timber.d("activity got " + post.toString());
-                initFragment(FullscreenFragment.newInstance(post));
+                initFragment(FullscreenFragment.newInstance(post.url(), post.previewImage()));
+            } else {
+                String url = intent.getStringExtra(EXTRA_URL);
+                Timber.d("activity got " + url);
+                initFragment(FullscreenFragment.newInstance(url, null));
             }
 
         }

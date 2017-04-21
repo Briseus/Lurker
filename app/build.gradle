@@ -1,4 +1,16 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
+    }
+}
+
 apply plugin: 'com.android.application'
+apply plugin: "net.ltgt.apt"
 
 // Create a variable called keystorePropertiesFile, and initialize it to your
 // keystore.properties file, in the rootProject folder.
@@ -31,18 +43,20 @@ android {
         versionCode 10
         versionName "0.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
     }
 
     buildTypes {
         release {
+            shrinkResources true
             minifyEnabled true
-            zipAlignEnabled true
             proguardFile 'proguard-fresco.pro'
             proguardFile 'proguard-gson.pro'
             proguardFile 'proguard-retrofit.pro'
             proguardFile 'proguard-rules.pro'
             proguardFiles getDefaultProguardFile('proguard-android.txt')
             testProguardFile 'proguard-test.pro'
+            zipAlignEnabled true
         }
         debug {
             // Run code coverage reports by default on debug builds.
@@ -79,6 +93,12 @@ android {
 dependencies {
 
     // App dependencies
+    annotationProcessor 'com.ryanharter.auto.value:auto-value-gson:0.4.6'
+    provided 'com.ryanharter.auto.value:auto-value-gson:0.4.6'
+    annotationProcessor 'com.ryanharter.auto.value:auto-value-parcel:0.2.5'
+    provided 'com.ryanharter.auto.value:auto-value-parcel-adapter:0.2.5'
+
+    compile 'com.google.code.gson:gson:2.8.0'
 
     // Fresco dependencies
     compile "com.facebook.fresco:fresco:$rootProject.ext.frescoVersion"
@@ -107,14 +127,14 @@ dependencies {
     compile "com.squareup.retrofit2:converter-gson:$rootProject.ext.retrofitVersion"
     compile "com.squareup.okhttp3:logging-interceptor:$rootProject.ext.okHttpVersion"
 
-    // Misc
-    compile "org.parceler:parceler-api:$rootProject.ext.parcelerVersion"
-    annotationProcessor "org.parceler:parceler:$rootProject.ext.parcelerVersion"
     compile "com.jakewharton.timber:timber:$rootProject.ext.timberVersion"
 
     debugCompile "com.squareup.leakcanary:leakcanary-android:$rootProject.ext.leakCanaryVersion"
     releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:$rootProject.ext.leakCanaryVersion"
     testCompile "com.squareup.leakcanary:leakcanary-android-no-op:$rootProject.ext.leakCanaryVersion"
+
+
+
 
     // Dependencies for local unit tests
     testCompile "junit:junit:$rootProject.ext.junitVersion"

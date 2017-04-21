@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.Post;
 import torille.fi.lurkforreddit.data.RedditRepository;
+import torille.fi.lurkforreddit.data.models.view.Post;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
 import torille.fi.lurkforreddit.utils.MediaHelper;
 
@@ -20,7 +20,7 @@ public class SubredditPresenter implements SubredditContract.UserActionsListener
     private final SubredditContract.View mSubredditsView;
 
     SubredditPresenter(@NonNull RedditRepository redditRepository,
-                              @NonNull SubredditContract.View subredditView) {
+                       @NonNull SubredditContract.View subredditView) {
         mRedditRepository = redditRepository;
         mSubredditsView = subredditView;
     }
@@ -37,14 +37,16 @@ public class SubredditPresenter implements SubredditContract.UserActionsListener
 
     @Override
     public void openMedia(@NonNull Post post) {
-        if (MediaHelper.isContentMedia(post.getPostDetails().getUrl()) || MediaHelper.checkDomainForMedia(post.getPostDetails().getDomain())) {
+        String domain = post.domain();
+        String url = post.url();
+        if (MediaHelper.isContentMedia(url) || MediaHelper.checkDomainForMedia(domain)) {
             mSubredditsView.showMedia(post);
-        } else if (MediaHelper.launchCustomActivity(post)) {
+        } else if (MediaHelper.launchCustomActivity(domain)) {
             mSubredditsView.launchCustomActivity(post);
-        } else if (post.getPostDetails().isSelf) {
+        } else if (post.isSelf()) {
             openComments(post);
         } else {
-            mSubredditsView.showCustomTabsUI(post.getPostDetails().getUrl());
+            mSubredditsView.showCustomTabsUI(url);
         }
     }
 

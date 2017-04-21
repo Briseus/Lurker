@@ -18,16 +18,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.parceler.Parcels;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import timber.log.Timber;
 import torille.fi.lurkforreddit.Injection;
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.models.Subreddit;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.view.SearchResult;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 import torille.fi.lurkforreddit.subreddit.SubredditActivity;
 
 /**
@@ -51,7 +49,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         mActionsListener = new SearchPresenter(Injection.provideRedditRepository(),
                 this);
         mAdapter = new SearchViewAdapter(
-                new ArrayList<SubredditChildren>(0),
+                new ArrayList<SearchResult>(0),
                 searchClickListener);
     }
 
@@ -112,9 +110,9 @@ public class SearchFragment extends Fragment implements SearchContract.View {
     }
 
     @Override
-    public void showResults(@NonNull List<SubredditChildren> subredditChildrens) {
+    public void showResults(@NonNull List<SearchResult> results) {
         loading = false;
-        mAdapter.addResults(subredditChildrens);
+        mAdapter.addResults(results);
     }
 
     @Override
@@ -136,7 +134,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         @Override
         public void onSearchClick(@NonNull Subreddit subreddit) {
             Intent intent = new Intent(getContext(), SubredditActivity.class);
-            intent.putExtra(SubredditActivity.EXTRA_SUBREDDIT, Parcels.wrap(subreddit));
+            intent.putExtra(SubredditActivity.EXTRA_SUBREDDIT, subreddit);
             startActivity(intent);
         }
     };
@@ -144,11 +142,11 @@ public class SearchFragment extends Fragment implements SearchContract.View {
     private static class SearchViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final static int VIEW_ITEM = 1;
         private final static int VIEW_PROGRESS = 0;
-        private final List<SubredditChildren> mResults;
+        private final List<SearchResult> mResults;
         private final SearchClickListener mClickListener;
         private final Handler mHandler = new Handler();
 
-        SearchViewAdapter(List<SubredditChildren> results, SearchClickListener clickListener) {
+        SearchViewAdapter(List<SearchResult> results, SearchClickListener clickListener) {
             this.mResults = results;
             this.mClickListener = clickListener;
             setHasStableIds(true);
@@ -171,7 +169,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof SearchViewHolder) {
-                ((SearchViewHolder) holder).bind(mResults.get(position).getSubreddit());
+                ((SearchViewHolder) holder).bind(mResults.get(position));
             } else if (holder instanceof ProgressViewHolder) {
                 ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
             }
@@ -179,10 +177,10 @@ public class SearchFragment extends Fragment implements SearchContract.View {
 
         @Override
         public int getItemViewType(int position) {
-            if (mResults.get(position).getKind().equals("t5")) {
-                return VIEW_ITEM;
-            } else {
+            if (mResults.get(position).title().equals("Progressbar")) {
                 return VIEW_PROGRESS;
+            } else {
+                return VIEW_ITEM;
             }
         }
 
@@ -193,11 +191,11 @@ public class SearchFragment extends Fragment implements SearchContract.View {
 
         @Override
         public long getItemId(int position) {
-            return mResults.get(position).getSubreddit().getId().hashCode();
+            return mResults.get(position).title().hashCode();
         }
 
 
-        void addResults(@NonNull List<SubredditChildren> results) {
+        void addResults(@NonNull List<SearchResult> results) {
             int position = mResults.size() - 1;
             mResults.remove(position);
             notifyItemRemoved(position);
@@ -206,11 +204,16 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         }
 
         void addProgressBar() {
-            SubredditChildren dummy = new SubredditChildren();
-            Subreddit dummyReddit = new Subreddit();
-            dummyReddit.setId("Progressbar");
-            dummy.setSubreddit(dummyReddit);
-            dummy.setKind("Progressbar");
+            Subreddit subreddit = Subreddit.builder()
+                    .build();
+            SearchResult dummy = SearchResult.builder()
+                    .setSubscriptionInfo("")
+                    .setInfoText("")
+                    .setDescription("")
+                    .setTitle("Progressbar")
+                    .setSubreddit(subreddit)
+                    .build();
+
             mResults.add(dummy);
             mHandler.post(new Runnable() {
                 @Override
@@ -250,16 +253,16 @@ public class SearchFragment extends Fragment implements SearchContract.View {
                 v.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mClickListener.onSearchClick(mResults.get(getAdapterPosition()).getSubreddit());
+                        mClickListener.onSearchClick(mResults.get(getAdapterPosition()).subreddit());
                     }
                 });
             }
 
-            void bind(Subreddit subreddit) {
-                title.setText(subreddit.getFormattedTitle());
-                description.setText(subreddit.getFormattedDescription());
-                subscribe.setText(subreddit.getFormattedSubscription());
-                infoText.setText(subreddit.getFormattedInfo());
+            void bind(SearchResult result) {
+                title.setText(result.title());
+                description.setText(result.description());
+                subscribe.setText(result.subscriptionInfo());
+                infoText.setText(result.infoText());
 
             }
         }

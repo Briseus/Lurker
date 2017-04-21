@@ -56,24 +56,6 @@ public class SharedPreferencesHelper {
         mSharedPreferences.edit().putBoolean(LOGGED_IN, bool).apply();
     }
 
-    public static String getSubreddit(String sub) {
-        if (sub != null) {
-            return mSharedPreferences.getString(sub, null);
-        }
-        return "";
-    }
-
-    public static void removeSubreddit(String sub) {
-        mSharedPreferences.edit().remove(sub).apply();
-    }
-
-    public static void storeReddit(String sub, String json) {
-        if (sub.equals("multireddits") || sub.equals("subreddits")) {
-            mSharedPreferences.edit().putString(sub, json).apply();
-        }
-
-    }
-
     public static String getClientId() {
         return clientId;
     }

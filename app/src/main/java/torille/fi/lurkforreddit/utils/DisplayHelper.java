@@ -3,7 +3,12 @@ package torille.fi.lurkforreddit.utils;
 import android.content.Context;
 import android.util.DisplayMetrics;
 
-import torille.fi.lurkforreddit.data.models.PostDetails;
+import java.util.List;
+
+import torille.fi.lurkforreddit.data.models.jsonResponses.Image;
+import torille.fi.lurkforreddit.data.models.jsonResponses.ImagePreview;
+import torille.fi.lurkforreddit.data.models.jsonResponses.ImageResolution;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
 
 /**
  * Helper to get dpi and best picture compared to width
@@ -21,18 +26,21 @@ final public class DisplayHelper {
      * @return "" or url of the picture if the picture is not too small or large
      */
     public static String getBestPreviewPicture(PostDetails postDetails) {
-
-        if (postDetails.getImages() != null) {
-            if (postDetails.getImages().getImages().size() >= 1) {
-                for (int i = 0; i < postDetails.getImages().getImages().get(0).getResolutions().size(); i++) {
-                    final int pictureWidth = postDetails.getImages().getImages().get(0).getResolutions().get(i).getWidth();
+        ImagePreview imagesPreviews = postDetails.images();
+        if (imagesPreviews != null) {
+            List<Image> images = imagesPreviews.images();
+            if (images != null && images.size() >= 1) {
+                List<ImageResolution> imageResolutions = images.get(0).resolutions();
+                for (int i = 0, size = imageResolutions.size(); i < size; i++) {
+                    final int pictureWidth = imageResolutions.get(i).width();
                     final double result = compareWidth(mDisplayDPI, pictureWidth);
                     if (result >= 0.7
                             && result <= 1.3) {
-                        return postDetails.getImages().getImages().get(0).getResolutions().get(i).getUrl();
+                        return imageResolutions.get(i).url();
 
                     }
                 }
+
                 return "";
             }
 

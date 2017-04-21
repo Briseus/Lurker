@@ -6,7 +6,8 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import torille.fi.lurkforreddit.data.models.CommentChild;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
+import torille.fi.lurkforreddit.data.models.view.Comment;
 
 /**
  * Item decoration for {@link CommentChild} in {@link torille.fi.lurkforreddit.comments.CommentFragment.CommentRecyclerViewAdapter}
@@ -36,8 +37,8 @@ class CommentsItemDecoration extends RecyclerView.ItemDecoration {
 
     }
 
-    private void draw(CommentChild mItem, View child, Canvas canvas) {
-        if (mItem != null && (mItem.getType() > 0)) {
+    private void draw(Comment mItem, View child, Canvas canvas) {
+        if (mItem != null && (mItem.commentLevel() > 0)) {
             final int left = child.getLeft();
             final int right = left + mDivider.getIntrinsicHeight();
             final int top = child.getTop();
@@ -71,9 +72,9 @@ class CommentsItemDecoration extends RecyclerView.ItemDecoration {
 
     }
 
-    private static void setPadding(CommentChild mComment, Rect outRect) {
+    private static void setPadding(Comment mComment, Rect outRect) {
 
-            outRect.left = (mComment.getType() * 16);
+            outRect.left = (mComment.commentLevel() * 16);
 
     }
 

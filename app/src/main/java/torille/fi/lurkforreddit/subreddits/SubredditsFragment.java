@@ -17,15 +17,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.parceler.Parcels;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import torille.fi.lurkforreddit.Injection;
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.models.Subreddit;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 import torille.fi.lurkforreddit.subreddit.SubredditActivity;
 
 /**
@@ -45,7 +42,7 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mListAdapter = new SubredditsAdapter(new ArrayList<SubredditChildren>(0), mItemListener, ContextCompat.getColor(getContext(), R.color.colorAccent));
+        mListAdapter = new SubredditsAdapter(new ArrayList<Subreddit>(10), mItemListener, ContextCompat.getColor(getContext(), R.color.colorAccent));
         mActionsListener = new SubredditsPresenter(Injection.provideRedditRepository(), this);
     }
 
@@ -109,14 +106,14 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     }
 
     @Override
-    public void showSubreddits(List<SubredditChildren> subreddits) {
+    public void showSubreddits(List<Subreddit> subreddits) {
         mListAdapter.replaceData(subreddits);
     }
 
     @Override
     public void loadSelectedSubreddit(Subreddit subreddit) {
         Intent intent = new Intent(getContext(), SubredditActivity.class);
-        intent.putExtra(SubredditActivity.EXTRA_SUBREDDIT, Parcels.wrap(subreddit));
+        intent.putExtra(SubredditActivity.EXTRA_SUBREDDIT, subreddit);
         startActivity(intent);
     }
 
@@ -127,11 +124,11 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
     private static class SubredditsAdapter extends RecyclerView.Adapter<SubredditsAdapter.ViewHolder> {
 
-        private List<SubredditChildren> mSubreddits;
+        private List<Subreddit> mSubreddits;
         private SubredditItemListener mItemListener;
         private final int mDefaultColor;
 
-        SubredditsAdapter(List<SubredditChildren> subreddits, SubredditItemListener itemListener, int color) {
+        SubredditsAdapter(List<Subreddit> subreddits, SubredditItemListener itemListener, int color) {
             setList(subreddits);
             mItemListener = itemListener;
             mDefaultColor = color;
@@ -148,23 +145,23 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, int position) {
-            Subreddit subreddit = mSubreddits.get(position).getSubreddit();
-
-            viewHolder.title.setText(subreddit.getDisplay_name());
-            if (subreddit.getKey_color() != null && !subreddit.getKey_color().isEmpty()) {
-                viewHolder.colorButton.getBackground().setTint(Color.parseColor(subreddit.getKey_color()));
+            Subreddit subreddit = mSubreddits.get(position);
+            String keyColor = subreddit.keyColor();
+            viewHolder.title.setText(subreddit.displayName());
+            if (keyColor != null && !keyColor.isEmpty()) {
+                viewHolder.colorButton.getBackground().setTint(Color.parseColor(keyColor));
             } else {
                 viewHolder.colorButton.getBackground().setTint(mDefaultColor);
             }
 
         }
 
-        void replaceData(List<SubredditChildren> subreddits) {
+        void replaceData(List<Subreddit> subreddits) {
             setList(subreddits);
             notifyDataSetChanged();
         }
 
-        private void setList(List<SubredditChildren> subreddits) {
+        private void setList(List<Subreddit> subreddits) {
             mSubreddits = subreddits;
         }
 
@@ -175,11 +172,11 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
         @Override
         public long getItemId(int position) {
-            return mSubreddits.get(position).getSubreddit().getId().hashCode();
+            return mSubreddits.get(position).id().hashCode();
         }
 
         Subreddit getItem(int position) {
-            return mSubreddits.get(position).getSubreddit();
+            return mSubreddits.get(position);
         }
 
         class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

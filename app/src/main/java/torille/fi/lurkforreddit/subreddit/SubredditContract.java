@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.Post;
+import torille.fi.lurkforreddit.data.models.view.Post;
 
 /**
  * This specifies the contract between the view and the presenter.

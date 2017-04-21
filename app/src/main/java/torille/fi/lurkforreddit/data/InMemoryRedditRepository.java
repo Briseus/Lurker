@@ -5,25 +5,27 @@ import android.support.annotation.VisibleForTesting;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.CommentChild;
-import torille.fi.lurkforreddit.data.models.Post;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostResponse;
+import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.view.Comment;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
+import torille.fi.lurkforreddit.utils.TextHelper;
 
 /**
  * In memory cache
  */
 
-public class InMemoryRedditRepository implements RedditRepository {
+class InMemoryRedditRepository implements RedditRepository {
 
     private final RedditServiceApi mRedditServiceApi;
 
     @VisibleForTesting
-    List<SubredditChildren> mCachedSubreddits;
+    private List<Subreddit> mCachedSubreddits;
 
-    public InMemoryRedditRepository(@NonNull RedditServiceApi redditServiceApi) {
+    InMemoryRedditRepository(@NonNull RedditServiceApi redditServiceApi) {
         mRedditServiceApi = redditServiceApi;
     }
-
 
 
     @Override
@@ -33,7 +35,7 @@ public class InMemoryRedditRepository implements RedditRepository {
             mRedditServiceApi.getSubreddits(new RedditServiceApi.ServiceCallback<List<SubredditChildren>>() {
                 @Override
                 public void onLoaded(List<SubredditChildren> subreddits) {
-                    mCachedSubreddits = subreddits;
+                    mCachedSubreddits = TextHelper.formatSubreddits(subreddits);
                     callback.onSubredditsLoaded(mCachedSubreddits);
                 }
             }, errorCallback);
@@ -46,10 +48,11 @@ public class InMemoryRedditRepository implements RedditRepository {
     public void getSubredditPosts(@NonNull String subredditId,
                                   @NonNull final LoadSubredditPostsCallback callback,
                                   @NonNull ErrorCallback errorCallback) {
-        mRedditServiceApi.getSubredditPosts(subredditId, new RedditServiceApi.ServiceCallbackWithNextpage<List<Post>>() {
+        mRedditServiceApi.getSubredditPosts(subredditId, new RedditServiceApi.ServiceCallbackWithNextpage<List<PostResponse>>() {
             @Override
-            public void onLoaded(List<Post> posts, String nextpage) {
-                callback.onPostsLoaded(posts, nextpage);
+            public void onLoaded(List<PostResponse> posts, String nextpage) {
+
+                callback.onPostsLoaded(TextHelper.formatPosts(posts), nextpage);
             }
         }, errorCallback);
     }
@@ -59,10 +62,10 @@ public class InMemoryRedditRepository implements RedditRepository {
                                       @NonNull String nextpageId,
                                       @NonNull final LoadSubredditPostsCallback callback,
                                       @NonNull ErrorCallback errorCallback) {
-        mRedditServiceApi.getMorePosts(subredditUrl, nextpageId, new RedditServiceApi.ServiceCallbackWithNextpage<List<Post>>() {
+        mRedditServiceApi.getMorePosts(subredditUrl, nextpageId, new RedditServiceApi.ServiceCallbackWithNextpage<List<PostResponse>>() {
             @Override
-            public void onLoaded(List<Post> posts, String nextpage) {
-                callback.onPostsLoaded(posts, nextpage);
+            public void onLoaded(List<PostResponse> posts, String nextpage) {
+                callback.onPostsLoaded(TextHelper.formatPosts(posts), nextpage);
             }
         }, errorCallback);
     }
@@ -79,7 +82,9 @@ public class InMemoryRedditRepository implements RedditRepository {
         mRedditServiceApi.getPostComments(permaLinkUrl, new RedditServiceApi.CommentsServiceCallback<List<CommentChild>>() {
             @Override
             public void onLoaded(List<CommentChild> comments) {
-                callback.onCommentsLoaded(comments);
+                List<Comment> commentChildFlatList = TextHelper
+                        .flatten(comments, 0);
+                callback.onCommentsLoaded(commentChildFlatList);
             }
 
             @Override
@@ -90,7 +95,7 @@ public class InMemoryRedditRepository implements RedditRepository {
     }
 
     @Override
-    public void getMoreCommentsForPostAt(@NonNull CommentChild parentComment,
+    public void getMoreCommentsForPostAt(@NonNull final Comment parentComment,
                                          @NonNull String linkId,
                                          int position,
                                          @NonNull final LoadPostCommentsCallback callback,
@@ -103,7 +108,9 @@ public class InMemoryRedditRepository implements RedditRepository {
 
             @Override
             public void onMoreLoaded(List<CommentChild> comments, int position) {
-                callback.onMoreCommentsLoaded(comments, position);
+                List<Comment> additionalFlattenedComments = TextHelper
+                        .flattenAdditionalComments(comments, parentComment.commentLevel());
+                callback.onMoreCommentsLoaded(additionalFlattenedComments, position);
             }
         }, errorCallback);
     }
@@ -115,7 +122,7 @@ public class InMemoryRedditRepository implements RedditRepository {
         mRedditServiceApi.getSearchResults(query, new RedditServiceApi.ServiceCallbackWithNextpage<List<SubredditChildren>>() {
             @Override
             public void onLoaded(List<SubredditChildren> result, String after) {
-                callback.onSearchLoaded(result, after);
+                callback.onSearchLoaded(TextHelper.formatSearchResults(result), after);
             }
         }, errorCallback);
     }
@@ -128,7 +135,7 @@ public class InMemoryRedditRepository implements RedditRepository {
         mRedditServiceApi.getMoreSearchResults(query, after, new RedditServiceApi.ServiceCallbackWithNextpage<List<SubredditChildren>>() {
             @Override
             public void onLoaded(List<SubredditChildren> result, String after) {
-                callback.onSearchLoaded(result, after);
+                callback.onSearchLoaded(TextHelper.formatSearchResults(result), after);
             }
         }, errorCallback);
     }

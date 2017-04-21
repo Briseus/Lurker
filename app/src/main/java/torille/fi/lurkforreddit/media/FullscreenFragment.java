@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -44,16 +45,14 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
 
-import org.parceler.Parcels;
-
 import me.relex.photodraweeview.PhotoDraweeView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.models.Post;
-import torille.fi.lurkforreddit.data.models.StreamableVideo;
+import torille.fi.lurkforreddit.data.models.jsonResponses.ImageResolution;
+import torille.fi.lurkforreddit.data.models.jsonResponses.StreamableVideo;
 import torille.fi.lurkforreddit.retrofit.RedditService;
 import torille.fi.lurkforreddit.retrofit.StreamableService;
 
@@ -65,7 +64,8 @@ import static android.view.View.GONE;
 
 public class FullscreenFragment extends Fragment implements FullscreenContract.View {
 
-    private static final String EXTRA_POST = "post";
+    private static final String EXTRA_URL = "url";
+    private static final String EXTRA_PREVIEWIMAGE = "imageUrl";
 
     private PhotoDraweeView mImageView;
     private SimpleExoPlayerView mSimpleExpoPlayerView;
@@ -78,13 +78,15 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param clickedPost Chosen {@link Post}.
+     * @param url        Link to media
+     * @param previewUrl link to previewUrl
      * @return A new instance of fragment SubredditFragment.
      */
-    public static FullscreenFragment newInstance(Post clickedPost) {
+    public static FullscreenFragment newInstance(@NonNull String url, @Nullable String previewUrl) {
         FullscreenFragment fullscreenFragment = new FullscreenFragment();
         Bundle args = new Bundle();
-        args.putParcelable(EXTRA_POST, Parcels.wrap(clickedPost));
+        args.putString(EXTRA_URL, url);
+        args.putString(EXTRA_PREVIEWIMAGE, previewUrl);
         fullscreenFragment.setArguments(args);
         return fullscreenFragment;
     }
@@ -142,9 +144,13 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     }
 
     private void startStuff() {
-        Post post = Parcels.unwrap(getArguments().getParcelable(EXTRA_POST));
-        Timber.d("Fragment got " + post.toString());
-        mActionsListener.checkDomain(post);
+        String url = getArguments().getString(EXTRA_URL);
+        String previewImageUrl = getArguments().getString(EXTRA_PREVIEWIMAGE);
+        if (url != null) {
+            Timber.d("Fragment got " + url + "" + previewImageUrl);
+            mActionsListener.checkDomain(url, previewImageUrl);
+        }
+
     }
 
     @Override
@@ -279,12 +285,6 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     }
 
     @Override
-    public void showGfycatVideo(String url) {
-        showVideo(url);
-    }
-
-
-    @Override
     public void showStreamableVideo(String identifier) {
         Call<StreamableVideo> call = StreamableService.getInstance().getVideo(identifier);
 
@@ -294,11 +294,18 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                 if (response.isSuccessful()) {
                     // comes in
                     Timber.d(response.toString());
-                    String videoUrl = response.body().getMobileVideoUrl();
-                    if (!videoUrl.isEmpty()) {
-                        showVideo(videoUrl);
+                    String videoUrl = "https:";
+                    ImageResolution mobileVideo = response.body().videos().mobileVideo();
+                    if (mobileVideo != null) {
+                        videoUrl = videoUrl + mobileVideo.url();
                     } else {
+                        videoUrl = videoUrl + response.body().videos().video().url();
+                    }
+                    Timber.d("Got streamable with url " + videoUrl);
+                    if (videoUrl.equals("https:")) {
                         onFailure(call, new Throwable("No video found"));
+                    } else {
+                        showVideo(videoUrl);
                     }
 
                 }

@@ -8,11 +8,10 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-import torille.fi.lurkforreddit.data.models.PostListing;
-import torille.fi.lurkforreddit.data.models.RedditToken;
-import torille.fi.lurkforreddit.data.models.Subreddit;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
-import torille.fi.lurkforreddit.data.models.SubredditListing;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostListing;
+import torille.fi.lurkforreddit.data.models.jsonResponses.RedditToken;
+import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditListing;
 
 /**
  * Interface that has all the Retrofit calls

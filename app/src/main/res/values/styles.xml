@@ -10,6 +10,7 @@
         <item name="android:textColorSecondary">@android:color/secondary_text_dark</item>
         <item name="android:textColorTertiary">@android:color/tertiary_text_dark</item>
         <item name="android:itemBackground">@color/colorPrimary</item>
+
     </style>
 
     <style name="AppTheme.Launcher" parent="AppTheme">
@@ -20,7 +21,7 @@
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:background">@null</item>
+        <item name="android:windowBackground">@color/colorDarkBackground</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
@@ -32,7 +33,7 @@
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
         <item name="android:windowActionBarOverlay">true</item>
-        <item name="android:windowBackground">@null</item>
+        <item name="android:windowBackground">@android:color/black</item>
     </style>
 
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">

@@ -7,14 +7,10 @@ import android.os.Parcel;
 import android.text.style.URLSpan;
 import android.view.View;
 
-import org.parceler.Parcels;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import timber.log.Timber;
-import torille.fi.lurkforreddit.data.models.Post;
-import torille.fi.lurkforreddit.data.models.PostDetails;
 import torille.fi.lurkforreddit.media.FullscreenActivity;
 import torille.fi.lurkforreddit.subreddit.SubredditActivity;
 import torille.fi.lurkforreddit.utils.MediaHelper;
@@ -39,12 +35,9 @@ class CustomUrlSpan extends URLSpan {
         Intent intent;
         Context context = widget.getContext();
         if (MediaHelper.isContentMedia(url) || MediaHelper.checkDomainForMedia(domain)) {
-            Post post = new Post("t5", new PostDetails());
-            post.getPostDetails().setUrl(url);
-            post.getPostDetails().setDomain(domain);
 
             intent = new Intent(context, FullscreenActivity.class);
-            intent.putExtra(FullscreenActivity.EXTRA_POST, Parcels.wrap(post));
+            intent.putExtra(FullscreenActivity.EXTRA_URL, url);
 
             context.startActivity(intent);
         } else if (checkForReddit(url)) {

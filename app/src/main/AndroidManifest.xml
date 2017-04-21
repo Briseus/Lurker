@@ -31,11 +31,11 @@
         <activity
             android:name=".subreddit.SubredditActivity"
             android:parentActivityName=".subreddits.SubredditsActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".comments.CommentActivity"
             android:parentActivityName=".subreddit.SubredditActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".media.FullscreenActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"

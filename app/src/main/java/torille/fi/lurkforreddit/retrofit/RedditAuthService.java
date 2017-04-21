@@ -9,7 +9,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Service for creating auth calls to Reddit
@@ -23,7 +22,7 @@ public class RedditAuthService {
     private static final Retrofit.Builder builder =
             new Retrofit.Builder()
                     .baseUrl(API_BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create());
+                    .addConverterFactory(RedditService.getGsonFactory());
 
 
     public static <S> S createService(Class<S> serviceClass, String username, String password) {

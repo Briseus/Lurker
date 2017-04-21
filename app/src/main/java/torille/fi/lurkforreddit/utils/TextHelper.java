@@ -1,18 +1,25 @@
 package torille.fi.lurkforreddit.utils;
 
 import android.text.Html;
-import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.format.DateUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.Comment;
-import torille.fi.lurkforreddit.data.models.CommentChild;
-import torille.fi.lurkforreddit.data.models.Post;
-import torille.fi.lurkforreddit.data.models.Subreddit;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentResponse;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostResponse;
+import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditResponse;
+import torille.fi.lurkforreddit.data.models.view.Comment;
+import torille.fi.lurkforreddit.data.models.view.Post;
+import torille.fi.lurkforreddit.data.models.view.SearchResult;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 
 /**
  * Contains utility classes for parsing text
@@ -50,154 +57,230 @@ public class TextHelper {
         }
     }
 
-    public static List<CommentChild> flatten(List<CommentChild> list, int level) {
-        List<CommentChild> flatComments = new ArrayList<>(list.size());
+    public static List<Comment> flatten(List<CommentChild> list, int level) {
+        List<Comment> flatComments = new ArrayList<>(list.size());
         flatComments = flattenHelper(list, flatComments, level);
         return flatComments;
     }
 
-    public static List<CommentChild> flattenAdditionalComments(List<CommentChild> list, int level) {
-        List<CommentChild> additionalComments = flatten(list, level);
+    public static List<Comment> flattenAdditionalComments(List<CommentChild> list, int level) {
+        List<Comment> additionalComments = flatten(list, level);
         for (int i = 0, size = additionalComments.size(); i < size; i++) {
             for (int j = 0, nestedSize = additionalComments.size(); j < nestedSize; j++) {
-                if (additionalComments.get(i).getData().getName().equals(additionalComments.get(j).getData().getParentId())) {
-                    additionalComments.get(j).setType(additionalComments.get(i).getType() + 1);
+                if (additionalComments.get(i).name().equals(additionalComments.get(j).parentId())) {
+                    additionalComments.set(j, additionalComments.get(j).withLevel(level + 1));
                 }
             }
         }
         return additionalComments;
     }
 
-    private static Comment formatCommentData(Comment comment) {
+    private static Comment formatCommentData(CommentResponse commentResponse, int level) {
+        CharSequence commentText = "";
+        CharSequence author = "";
+        Comment.kind kind = Comment.kind.MORE;
 
-        if (comment.getBodyHtml() != null) {
-            comment.setFormattedComment(formatTextToHtml(comment.getBodyHtml()));
+        if (commentResponse.bodyHtml() != null) {
+            kind = Comment.kind.DEFAULT;
+            commentText = formatTextToHtml(commentResponse.bodyHtml());
+        } else if (commentResponse.id().equals("_")) {
+            commentText = "Continue this thread ->";
+        } else if (commentResponse.children() != null) {
+            commentText = "Load more comments (" + commentResponse.count() + ")";
         }
 
-        String author = "";
-        if (comment.getAuthor() != null && comment.isStickied()) {
+        String responseAuthor = commentResponse.author();
+        if (responseAuthor != null && commentResponse.stickied()) {
             author = "<font color='#64FFDA'> Sticky post<font> &nbsp &nbsp";
-        } else if (comment.getAuthor() != null) {
-            author = comment.getAuthor();
+        } else if (responseAuthor != null) {
+            author = responseAuthor;
         }
 
-        comment.setFormatAuthor(fromHtml(author + " " + DateUtils.getRelativeTimeSpanString(comment.getCreatedUtc() * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)));
+        author = fromHtml(author + " " + DateUtils.getRelativeTimeSpanString(commentResponse.createdUtc() * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS));
 
-        comment.setFormatScore(formatScore(comment.getScore()));
-        return comment;
+        String formatScore = formatScore(commentResponse.score());
+
+
+        return Comment.builder()
+                .setId(commentResponse.id())
+                .setParentId(commentResponse.parentId())
+                .setName(commentResponse.name())
+                .setKind(kind)
+                .setAuthor(author)
+                .setChildCommentIds(commentResponse.children())
+                .setCommentLevel(level)
+                .setCommentLinkId(commentResponse.linkId())
+                .setCommentText(commentText)
+                .setFormattedTime("")
+                .setFormattedScore(formatScore)
+                .setReplies(null)
+                .build();
     }
 
-    private static Comment formatAdditionalCommentData(Comment comment) {
-
-        String text;
-        if (comment.getId().equals("_")) {
-            text = "Continue this thread ->";
-        } else {
-            text = "Load more comments (" + comment.getCount() + ")";
-        }
-        comment.setFormattedComment(text);
-
-        return comment;
-    }
-
-    private static List<CommentChild> flattenHelper(List<CommentChild> nestedList, List<CommentChild> flatList, int level) {
+    private static List<Comment> flattenHelper(List<CommentChild> nestedList, List<Comment> flatList, int level) {
 
         for (int i = 0, size = nestedList.size(); i < size; i++) {
-            CommentChild commentChild = nestedList.get(i);
-            Comment comment = commentChild.getData();
-            commentChild.setType(level);
 
+            CommentResponse commentResponse = nestedList.get(i).data();
+
+            Comment comment = formatCommentData(commentResponse, level);
             //check if its a normal comment or "load more comments" comment
-            if (commentChild.getData().getId().equals("_") || commentChild.getData().getChildren() != null) {
-                commentChild.setKind("more");
-                commentChild.setData(formatAdditionalCommentData(comment));
-            } else {
-                commentChild.setKind("t3");
-                commentChild.setData(formatCommentData(comment));
-            }
-
-            flatList.add(commentChild);
-            if (commentChild.getData().getReplies() != null) {
-                List<CommentChild> replyList = flattenHelper(commentChild.getData().getReplies().getCommentData().getCommentChildren(), flatList, level + 1);
-                commentChild.getData().getReplies().getCommentData().setCommentChildren(replyList);
+            flatList.add(comment);
+            CommentListing commentListing = commentResponse.replies();
+            if (commentListing!= null && commentListing.commentData() != null) {
+                List<Comment> replyList = flattenHelper(commentListing.commentData().commentChildren(), flatList, level + 1);
+                comment.withReplies(replyList);
             }
         }
         return flatList;
     }
 
-    public static List<Post> formatPosts(List<Post> posts) {
+    public static List<Post> formatPosts(List<PostResponse> posts) {
         List<Post> formattedPosts = new ArrayList<>(posts.size());
 
         for (int i = 0, size = posts.size(); i < size; i++) {
-            Post post = posts.get(i);
-            post.getPostDetails().setPreviewScore(TextHelper.formatScore(post.getPostDetails().getScore()));
+            PostDetails postDetails = posts.get(i).postDetails();
+            String formatScore = TextHelper.formatScore(postDetails.score());
 
-            if (post.getPostDetails().isStickied()) {
-                post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle() + "<font color='#64FFDA'> Stickied </font>"));
+            CharSequence title;
+            if (postDetails.stickied()) {
+                title = TextHelper.fromHtml(postDetails.title() + "<font color='#64FFDA'> Stickied </font>");
             } else {
-                post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle()));
+                title = TextHelper.fromHtml(postDetails.title());
             }
             // sometimes formatting title can result in empty if it has <----- at start
             // etc
-            if (post.getPostDetails().getPreviewTitle() != null &&
-                    post.getPostDetails().getPreviewTitle().length() == 0) {
-                SpannableString titleWithoutFormatting = SpannableString.valueOf(post.getPostDetails().getTitle());
-                post.getPostDetails().setPreviewTitle(titleWithoutFormatting);
+            if (title != null &&
+                    title.length() == 0) {
+                title = String.valueOf(postDetails.title());
             }
 
-            switch (post.getPostDetails().getThumbnail()) {
+            CharSequence selfText = null;
+            if (postDetails.selftextHtml() != null) {
+                selfText = formatTextToHtml(postDetails.selftextHtml());
+            }
+
+            String previewImageUrl;
+            String thumbnail = postDetails.thumbnail();
+            switch (thumbnail) {
                 case "default":
                 case "self":
                 case "":
                 case "image":
-                    post.getPostDetails().setPreviewImage("");
+                    previewImageUrl = "";
                     break;
                 case "nsfw":
-                    post.getPostDetails().setPreviewTitle(TextHelper.fromHtml(post.getPostDetails().getTitle() + "<font color='#FF1744'> NSFW</font>"));
-                    post.getPostDetails().setPreviewImage("");
+                    title = TextHelper.fromHtml(postDetails.title() + "<font color='#FF1744'> NSFW</font>");
+                    previewImageUrl = "";
                     break;
                 default:
-                    post.getPostDetails().setPreviewImage(DisplayHelper.getBestPreviewPicture(post.getPostDetails()));
+                    previewImageUrl = DisplayHelper.getBestPreviewPicture(postDetails);
             }
+            String numberOfComments = String.valueOf(postDetails.numberOfComments());
+
+            Post post = Post.builder()
+                    .setId(postDetails.name())
+                    .setThumbnail(thumbnail)
+                    .setDomain(postDetails.domain())
+                    .setUrl(postDetails.url())
+                    .setScore(formatScore)
+                    .setSelfText(selfText)
+                    .setIsSelf(postDetails.isSelf())
+                    .setNumberOfComments(numberOfComments)
+                    .setTitle(title)
+                    .setPreviewImage(previewImageUrl)
+                    .setPermaLink(postDetails.permalink())
+                    .setAuthor(postDetails.author())
+                    .setCreatedUtc(postDetails.createdUtc())
+                    .build();
+
             formattedPosts.add(post);
         }
 
         return formattedPosts;
     }
 
-    public static List<SubredditChildren> formatSubreddits(List<SubredditChildren> childrens) {
-        List<SubredditChildren> formattedChildren = new ArrayList<>(childrens.size());
-        for (int i = 0, size = childrens.size(); i < size; i++) {
-            SubredditChildren subredditChild = childrens.get(i);
-            Subreddit subreddit = subredditChild.getSubreddit();
+    public static Subreddit formatSubreddit(SubredditChildren subredditChildren) {
+        SubredditResponse subredditResponse = subredditChildren.subreddit();
 
-            final String info = subreddit.getSubscribers() + " subscribers, Community since "
-                    + DateUtils.getRelativeTimeSpanString(subreddit.getCreatedUtc() * 1000);
+        return Subreddit.builder()
+                .setUrl(subredditResponse.url())
+                .setBannerUrl(subredditResponse.banner())
+                .setId(subredditResponse.id())
+                .setKeyColor(subredditResponse.keyColor())
+                .setDisplayName(subredditResponse.displayName())
+                .build();
+    }
 
-            subreddit.setFormattedInfo(info);
+    public static List<Subreddit> formatSubreddits(List<SubredditChildren> results) {
+        List<Subreddit> subreddits = new ArrayList<>(results.size());
 
-            if (subreddit.isOver18()) {
-                subreddit.setFormattedTitle(TextHelper.fromHtml(subreddit.getUrl()
-                        + "<font color='#FF1744'> NSFW</font>"));
-            } else {
-                subreddit.setFormattedTitle(subreddit.getUrl());
-            }
-
-            if (subreddit.isSubscribed()) {
-                subreddit.setFormattedSubscription("Subscribed");
-            } else {
-                subreddit.setFormattedSubscription("Not subscribed");
-            }
-
-            if (subreddit.getDescriptionHtml() != null && !subreddit.getDescriptionHtml().isEmpty()) {
-                subreddit.setFormattedDescription(formatTextToHtml(subreddit.getDescriptionHtml()));
-            } else {
-                subreddit.setFormattedDescription("No description");
-            }
-            subredditChild.setSubreddit(subreddit);
-            formattedChildren.add(subredditChild);
+        for (int i = 0, size = results.size(); i < size; i++) {
+            SubredditChildren result = results.get(i);
+            subreddits.add(formatSubreddit(result));
         }
-        return formattedChildren;
+
+        // sort subreddits by name before callback
+        Collections.sort(subreddits, new Comparator<Subreddit>() {
+            @Override
+            public int compare(Subreddit o1, Subreddit o2) {
+                String name = o1.displayName();
+                String nameToCompare = o2.displayName();
+                if (name != null && nameToCompare != null) {
+                    return name
+                            .compareToIgnoreCase(nameToCompare);
+                }
+                return 0;
+            }
+        });
+        return subreddits;
+    }
+
+    public static List<SearchResult> formatSearchResults(List<SubredditChildren> hits) {
+        List<SearchResult> results = new ArrayList<>(hits.size());
+        for (int i = 0, size = hits.size(); i < size; i++) {
+            SubredditChildren subChild = hits.get(i);
+            SubredditResponse subredditResponse = subChild.subreddit();
+
+            CharSequence formattedTitle;
+            String formattedSubscription;
+            CharSequence formattedDescription;
+
+            final String infoText = subredditResponse.subscribers() + " subscribers, Community since "
+                    + DateUtils.getRelativeTimeSpanString(subredditResponse.createdUtc() * 1000);
+
+            if (subredditResponse.over18()) {
+                formattedTitle = TextHelper.fromHtml(subredditResponse.url()
+                        + "<font color='#FF1744'> NSFW</font>");
+            } else {
+                formattedTitle = subredditResponse.url();
+            }
+
+            if (subredditResponse.subscribed()) {
+                formattedSubscription = "Subscribed";
+            } else {
+                formattedSubscription = "Not subscribed";
+            }
+            String descriptionHtml = subredditResponse.descriptionHtml();
+            if (descriptionHtml != null && !descriptionHtml.isEmpty()) {
+                formattedDescription = formatTextToHtml(descriptionHtml);
+            } else {
+                formattedDescription = "No description";
+            }
+
+            Subreddit subreddit = formatSubreddit(subChild);
+
+            SearchResult result = SearchResult.builder()
+                    .setTitle(formattedTitle)
+                    .setDescription(formattedDescription)
+                    .setInfoText(infoText)
+                    .setSubscriptionInfo(formattedSubscription)
+                    .setSubreddit(subreddit)
+                    .build();
+
+            results.add(result);
+        }
+        return results;
     }
 
     /**

@@ -3,8 +3,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="-6dp"
-    android:background="@android:color/black">
+    android:layout_marginTop="-6dp">
 
     <me.relex.photodraweeview.PhotoDraweeView
         android:id="@+id/fullscreen_image"

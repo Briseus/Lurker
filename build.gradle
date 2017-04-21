@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+
     repositories {
         jcenter()
 
@@ -42,7 +43,8 @@ ext {
     runnerVersion = '0.5'
     rulesVersion = '0.5'
     espressoVersion = '2.2.2'
-    parcelerVersion = '1.1.6'
+    autoValueGsonVersion = '0.4.6'
+    autoValueParcelerVersion = '0.2.5'
     frescoVersion = '1.2.0'
     timberVersion = '4.5.1'
     photoDraweeViewVersion = '1.1.2'

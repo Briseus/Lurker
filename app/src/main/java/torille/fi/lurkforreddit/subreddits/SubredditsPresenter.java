@@ -4,9 +4,8 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.Subreddit;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
 import torille.fi.lurkforreddit.data.RedditRepository;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
 
 /**
@@ -43,7 +42,7 @@ public class SubredditsPresenter implements SubredditsContract.UserActionsListen
 
         mRedditRepository.getSubreddits(new RedditRepository.LoadSubredditsCallback() {
             @Override
-            public void onSubredditsLoaded(List<SubredditChildren> subreddits) {
+            public void onSubredditsLoaded(List<Subreddit> subreddits) {
                 EspressoIdlingResource.decrement(); // Set app as idle.
                 mSubredditsView.setProgressIndicator(false);
                 mSubredditsView.showSubreddits(subreddits);

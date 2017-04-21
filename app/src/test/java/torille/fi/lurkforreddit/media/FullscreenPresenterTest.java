@@ -1,26 +1,25 @@
 package torille.fi.lurkforreddit.media;
 
+
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
-import torille.fi.lurkforreddit.data.models.Post;
-
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for the implementation of {@link FullscreenPresenter}
  */
-
 public class FullscreenPresenterTest {
 
+    private static final String imgurGifv = "https://i.imgur.com/Uq5DRSk.gifv";
 
-    private static final Post mImagePost = new Post();
-    private static final Post videoPost = new Post();
-    private static final Post gfycatPost = new Post();
-    private static final Post imgurVideoPost = new Post();
+    private static final String imageUrl = "https://i.redd.it/qhmesl7h9wsy.jpg";
+
+    private static final String mp4link = "https://test.com/test.mp4";
+
+    private static final String previewImageUrl = null;
 
     @Mock
     private FullscreenContract.View mFullscreenView;
@@ -33,43 +32,23 @@ public class FullscreenPresenterTest {
         mFullscreenPresenter = new FullscreenPresenter(mFullscreenView);
     }
 
-    @Before
-    public void setupPosts() {
-        mImagePost.getPostDetails().setDomain("i.imgur.com");
-        mImagePost.getPostDetails().setUrl("https://i.imgur.com/dogs.jpg");
-
-        videoPost.getPostDetails().setDomain("somedomain");
-        videoPost.getPostDetails().setUrl("https://wwww.somegif.com/dogs.mp4");
-
-        gfycatPost.getPostDetails().setDomain("gfycat.com");
-        gfycatPost.getPostDetails().setUrl("https://wwww.gfycat.com/HorseBananaTest");
-
-        imgurVideoPost.getPostDetails().setDomain("i.imgur.com");
-        imgurVideoPost.getPostDetails().setUrl("https://i.imgur.com/cats.gifv");
-    }
-
     @Test
     public void loadImageIntoView() {
-        mFullscreenPresenter.checkDomain(mImagePost);
-        verify(mFullscreenView).showImage(anyString(), anyString());
-    }
-
-    @Test
-    public void loadGfycatIntoView() {
-        mFullscreenPresenter.checkDomain(gfycatPost);
-        verify(mFullscreenView).showGfycatVideo(anyString());
+        mFullscreenPresenter.checkType(imageUrl, previewImageUrl);
+        Mockito.verify(mFullscreenView).showImage(imageUrl, previewImageUrl);
     }
 
     @Test
     public void loadVideoIntoView() {
-        mFullscreenPresenter.checkDomain(videoPost);
-        verify(mFullscreenView).showVideo(anyString());
+        mFullscreenPresenter.checkType(mp4link, null);
+        Mockito.verify(mFullscreenView).showVideo(mp4link);
     }
 
     @Test
     public void loadImgurVideoIntoView() {
-        mFullscreenPresenter.checkDomain(imgurVideoPost);
-        verify(mFullscreenView).showVideo(anyString());
+        mFullscreenPresenter.checkType(imgurGifv, null);
+        Mockito.verify(mFullscreenView).showVideo(Matchers.anyString());
     }
+
 
 }

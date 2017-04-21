@@ -28,8 +28,6 @@ import com.facebook.imagepipeline.core.ImagePipeline;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 
-import org.parceler.Parcels;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,9 +36,8 @@ import torille.fi.lurkforreddit.Injection;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.comments.CommentActivity;
 import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper;
-import torille.fi.lurkforreddit.data.models.Post;
-import torille.fi.lurkforreddit.data.models.PostDetails;
-import torille.fi.lurkforreddit.data.models.Subreddit;
+import torille.fi.lurkforreddit.data.models.view.Post;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 import torille.fi.lurkforreddit.media.FullscreenActivity;
 import torille.fi.lurkforreddit.utils.DisplayHelper;
 import torille.fi.lurkforreddit.utils.MediaHelper;
@@ -75,7 +72,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     public static SubredditFragment newInstance(Subreddit subreddit) {
         SubredditFragment fragment = new SubredditFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARGUMENT_SUBREDDIT, Parcels.wrap(subreddit));
+        args.putParcelable(ARGUMENT_SUBREDDIT, subreddit);
         fragment.setArguments(args);
         return fragment;
     }
@@ -85,7 +82,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         super.onCreate(savedInstanceState);
         mActionsListener = new SubredditPresenter(Injection.provideRedditRepository(),
                 this);
-        mListAdapter = new PostsAdapter(new ArrayList<Post>(0),
+        mListAdapter = new PostsAdapter(new ArrayList<Post>(25),
                 mClickListener,
                 ContextCompat.getColor(getContext(), R.color.colorAccent),
                 Fresco.getImagePipeline());
@@ -171,22 +168,17 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
     public void onStop() {
         super.onStop();
         mCustomTabActivityHelper.unbindCustomTabsService(getActivity());
     }
 
     private String getSubredditUrl() {
-        Subreddit subreddit = Parcels.unwrap(getArguments().getParcelable(ARGUMENT_SUBREDDIT));
-        if (subreddit != null && subreddit.getUrl() != null) {
-            return subreddit.getUrl();
+        Subreddit subreddit = getArguments().getParcelable(ARGUMENT_SUBREDDIT);
+        if (subreddit != null && subreddit.url() != null) {
+            return subreddit.url();
         } else {
-            Toast.makeText(getContext(), "Subreddit id was null! ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "SubredditResponse id was null! ", Toast.LENGTH_SHORT).show();
             return "";
         }
     }
@@ -256,8 +248,9 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     @Override
     public void showCustomTabsUI(final String url) {
-        CustomTabActivityHelper.openCustomTab(getActivity(),
-                MediaHelper.createCustomTabIntent(getActivity(),
+        Activity activity = getActivity();
+        CustomTabActivityHelper.openCustomTab(activity,
+                MediaHelper.createCustomTabIntent(activity,
                         mCustomTabActivityHelper.getSession()),
                 url,
                 new CustomTabActivityHelper.CustomTabFallback() {
@@ -272,20 +265,20 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     @Override
     public void showMedia(Post post) {
         Intent intent = new Intent(getContext(), FullscreenActivity.class);
-        intent.putExtra(FullscreenActivity.EXTRA_POST, Parcels.wrap(post));
+        intent.putExtra(FullscreenActivity.EXTRA_POST, post);
         startActivity(intent);
     }
 
     @Override
     public void showCommentsUI(Post clickedPost) {
         Intent intent = new Intent(getContext(), CommentActivity.class);
-        intent.putExtra(CommentActivity.EXTRA_CLICKED_POST, Parcels.wrap(clickedPost));
+        intent.putExtra(CommentActivity.EXTRA_CLICKED_POST, clickedPost);
         startActivity(intent);
     }
 
     @Override
     public void launchCustomActivity(Post clickedPost) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickedPost.getPostDetails().getUrl()));
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickedPost.url()));
         startActivity(intent);
     }
 
@@ -328,7 +321,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof PostViewHolder) {
-                ((PostViewHolder) holder).bind(mPosts.get(position).getPostDetails());
+                ((PostViewHolder) holder).bind(mPosts.get(position));
             } else if (holder instanceof ProgressViewHolder) {
                 ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
             }
@@ -355,17 +348,17 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             final int toIndex = to > listMaxSize ? listMaxSize : to;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                final String url = mPosts.get(i).getPostDetails().getPreviewImage();
+                final String url = mPosts.get(i).previewImage();
                 imagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(url), null);
             }
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (mPosts.get(position).getKind().equals("t3")) {
-                return VIEW_ITEM;
-            } else {
+            if (mPosts.get(position).id().equals("Progressbar")) {
                 return VIEW_PROGRESS;
+            } else {
+                return VIEW_ITEM;
             }
 
         }
@@ -404,13 +397,24 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         void setRefreshing(boolean active) {
             final int index = mPosts.size() - 1;
             if (active) {
-                Post dummy = new Post();
-                PostDetails dummyDetails = new PostDetails();
-                dummyDetails.setId("Progressbar");
-                dummyDetails.setPreviewImage("");
-                dummy.setPostDetails(dummyDetails);
-                dummy.setKind("Progressbar");
+                Post dummy = Post.builder()
+                        .setDomain("")
+                        .setUrl("")
+                        .setId("Progressbar")
+                        .setScore("")
+                        .setSelfText(null)
+                        .setPreviewImage("")
+                        .setThumbnail("")
+                        .setTitle("")
+                        .setNumberOfComments("")
+                        .setIsSelf(false)
+                        .setPermaLink("")
+                        .setCreatedUtc(0)
+                        .setAuthor("")
+                        .build();
+
                 mPosts.add(dummy);
+
                 android.os.Handler handler = new android.os.Handler();
                 handler.post(new Runnable() {
                     @Override
@@ -434,7 +438,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
         @Override
         public long getItemId(int position) {
-            return mPosts.get(position).getPostDetails().getId().hashCode();
+            return mPosts.get(position).id().hashCode();
         }
 
         final Post getItem(int position) {
@@ -475,7 +479,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 openBrowser.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mClicklistener.onButtonClick(getItem(getAdapterPosition()).getPostDetails().getUrl());
+                        mClicklistener.onButtonClick(getItem(getAdapterPosition()).url());
                     }
                 });
                 comments.setOnClickListener(new View.OnClickListener() {
@@ -490,26 +494,27 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     public void onFailure(String id, Throwable throwable) {
                         super.onFailure(id, throwable);
                         Timber.e("Failed to load image id: " + id + " error " + throwable.getLocalizedMessage());
-                        image.setImageURI(getItem(getAdapterPosition()).getPostDetails().getThumbnail());
+                        image.setImageURI(getItem(getAdapterPosition()).thumbnail());
                     }
                 };
             }
 
-            final void bind(final PostDetails postDetails) {
+            final void bind(final Post postDetails) {
 
-                title.setText(postDetails.getPreviewTitle());
-                domain.setText(postDetails.getDomain());
-                score.setText(postDetails.getPreviewScore());
-                comments.setText(String.valueOf(postDetails.getNumberOfComments()));
+                title.setText(postDetails.title());
+                domain.setText(postDetails.domain());
+                score.setText(postDetails.score());
+                comments.setText(postDetails.numberOfComments());
 
-                if (postDetails.getPreviewImage() != null && postDetails.getPreviewImage().isEmpty()) {
+                String previewImage = postDetails.previewImage();
+                if (previewImage.isEmpty()) {
                     image.setVisibility(GONE);
                 } else {
                     image.setVisibility(View.VISIBLE);
 
                     DraweeController draweeController = Fresco.newDraweeControllerBuilder()
                             .setControllerListener(baseControllerListener)
-                            .setImageRequest(ImageRequest.fromUri(postDetails.getPreviewImage()))
+                            .setImageRequest(ImageRequest.fromUri(previewImage))
                             .setOldController(image.getController())
                             .build();
 

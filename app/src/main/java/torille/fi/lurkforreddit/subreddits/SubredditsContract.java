@@ -2,8 +2,7 @@ package torille.fi.lurkforreddit.subreddits;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.Subreddit;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 
 /**
  * Created by eva on 2/8/17.
@@ -15,7 +14,7 @@ public interface SubredditsContract {
 
         void setProgressIndicator(boolean active);
 
-        void showSubreddits(List<SubredditChildren> subreddits);
+        void showSubreddits(List<Subreddit> subreddits);
 
         void loadSelectedSubreddit(Subreddit subreddit);
 

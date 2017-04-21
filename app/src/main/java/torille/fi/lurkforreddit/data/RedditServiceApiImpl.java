@@ -7,8 +7,6 @@ import com.google.gson.stream.JsonReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -16,17 +14,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
-import torille.fi.lurkforreddit.data.models.CommentChild;
-import torille.fi.lurkforreddit.data.models.Post;
-import torille.fi.lurkforreddit.data.models.PostListing;
-import torille.fi.lurkforreddit.data.models.RedditToken;
-import torille.fi.lurkforreddit.data.models.SubredditChildren;
-import torille.fi.lurkforreddit.data.models.SubredditListing;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostListing;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostResponse;
+import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren;
+import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditListing;
+import torille.fi.lurkforreddit.data.models.view.Comment;
 import torille.fi.lurkforreddit.retrofit.RedditService;
 import torille.fi.lurkforreddit.utils.CommentsStreamingParser;
-import torille.fi.lurkforreddit.utils.NetworkHelper;
 import torille.fi.lurkforreddit.utils.SharedPreferencesHelper;
-import torille.fi.lurkforreddit.utils.TextHelper;
 
 /**
  * Actual implementation of the Api
@@ -39,6 +35,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                               final RedditRepository.ErrorCallback errorCallback) {
 
         Call<SubredditListing> call;
+
         if (SharedPreferencesHelper.isLoggedIn()) {
             Timber.d("Was logged in, getting personal subreddits");
             call = RedditService.getInstance().getMySubreddits(100);
@@ -50,22 +47,12 @@ public class RedditServiceApiImpl implements RedditServiceApi {
         call.enqueue(new Callback<SubredditListing>() {
             @Override
             public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
-                List<SubredditChildren> subreddits = response.body().getData().getChildren();
-                if (response.isSuccessful() && subreddits != null) {
-                    // sort subreddits by name before callback
-                    Collections.sort(subreddits, new Comparator<SubredditChildren>() {
-                        @Override
-                        public int compare(SubredditChildren o1, SubredditChildren o2) {
-                            return o1.getSubreddit()
-                                    .getDisplay_name()
-                                    .compareToIgnoreCase(o2.getSubreddit().getDisplay_name());
-                        }
-                    });
-                    callback.onLoaded(subreddits);
+                List<SubredditChildren> responseSubreddits = response.body().data().children();
+                if (response.isSuccessful() && responseSubreddits != null) {
+                    callback.onLoaded(responseSubreddits);
 
                 }
             }
-
 
             @Override
             public void onFailure(Call<SubredditListing> call, Throwable t) {
@@ -78,22 +65,18 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
     @Override
     public void getSubredditPosts(String subredditId,
-                                  final ServiceCallbackWithNextpage<List<Post>> callback,
+                                  final ServiceCallbackWithNextpage<List<PostResponse>> callback,
                                   final RedditRepository.ErrorCallback errorCallback) {
 
         Call<PostListing> call = RedditService.getInstance().getSubreddit(subredditId);
         call.enqueue(new Callback<PostListing>() {
             @Override
             public void onResponse(Call<PostListing> call, Response<PostListing> response) {
-                List<Post> posts = response.body().getData().getPosts();
+                List<PostResponse> posts = response.body().data().Posts();
                 if (response.isSuccessful() && posts != null) {
-
-                    List<Post> formattedPosts = getFormattedPosts(posts);
-                    String nextpage = response.body().getData().getNextPage();
-
-                    Timber.d("Got " + formattedPosts.size() + " posts");
-
-                    callback.onLoaded(formattedPosts, nextpage);
+                    String nextpage = response.body().data().nextPage();
+                    Timber.d("Got " + posts.size() + " posts");
+                    callback.onLoaded(posts, nextpage);
                 }
             }
 
@@ -108,14 +91,10 @@ public class RedditServiceApiImpl implements RedditServiceApi {
 
     }
 
-    private static List<Post> getFormattedPosts(List<Post> posts) {
-        return TextHelper.formatPosts(posts);
-    }
-
     @Override
     public void getMorePosts(String subredditUrl,
                              String nextpageId,
-                             final ServiceCallbackWithNextpage<List<Post>> callback,
+                             final ServiceCallbackWithNextpage<List<PostResponse>> callback,
                              final RedditRepository.ErrorCallback errorCallback) {
 
         Call<PostListing> call = RedditService
@@ -126,11 +105,10 @@ public class RedditServiceApiImpl implements RedditServiceApi {
             @Override
             public void onResponse(Call<PostListing> call, Response<PostListing> response) {
                 if (response.isSuccessful()) {
-                    List<Post> posts = response.body().getData().getPosts();
-                    List<Post> formattedPosts = getFormattedPosts(posts);
-                    String nextpage = response.body().getData().getNextPage();
+                    List<PostResponse> posts = response.body().data().Posts();
+                    String nextpage = response.body().data().nextPage();
 
-                    callback.onLoaded(formattedPosts, nextpage);
+                    callback.onLoaded(posts, nextpage);
                 }
             }
 
@@ -161,13 +139,10 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                         List<CommentChild> commentChildList = CommentsStreamingParser
                                 .readCommentListingArray(reader)
                                 .get(1)
-                                .getCommentData()
-                                .getCommentChildren();
+                                .commentData()
+                                .commentChildren();
 
-                        List<CommentChild> commentChildFlatList = TextHelper
-                                .flatten(commentChildList, 0);
-
-                        callback.onLoaded(commentChildFlatList);
+                        callback.onLoaded(commentChildList);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -184,7 +159,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
     }
 
     @Override
-    public void getMorePostComments(final CommentChild parentComment,
+    public void getMorePostComments(final Comment parentComment,
                                     String linkId,
                                     final int position,
                                     final CommentsServiceCallback<List<CommentChild>> callback,
@@ -194,7 +169,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                 .getInstance()
                 .getMoreComments(
                         linkId,
-                        TextUtils.join(",", parentComment.getData().getChildren()),
+                        TextUtils.join(",", parentComment.childCommentIds()),
                         "json");
 
         call.enqueue(new Callback<ResponseBody>() {
@@ -208,10 +183,7 @@ public class RedditServiceApiImpl implements RedditServiceApi {
                         List<CommentChild> additionalComments = CommentsStreamingParser
                                 .readMoreComments(reader);
 
-                        List<CommentChild> additionalFlattenedComments = TextHelper
-                                .flattenAdditionalComments(additionalComments, parentComment.getType());
-
-                        callback.onMoreLoaded(additionalFlattenedComments, position);
+                        callback.onMoreLoaded(additionalComments, position);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -239,9 +211,9 @@ public class RedditServiceApiImpl implements RedditServiceApi {
             @Override
             public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
                 if (response.isSuccessful()) {
-                    List<SubredditChildren> results = response.body().getData().getChildren();
-                    String after = response.body().getData().getAfter();
-                    callback.onLoaded(TextHelper.formatSubreddits(results), after);
+                    List<SubredditChildren> results = response.body().data().children();
+                    String after = response.body().data().after();
+                    callback.onLoaded(results, after);
                 }
             }
 
@@ -267,9 +239,9 @@ public class RedditServiceApiImpl implements RedditServiceApi {
             @Override
             public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
                 if (response.isSuccessful()) {
-                    List<SubredditChildren> results = response.body().getData().getChildren();
-                    String after = response.body().getData().getAfter();
-                    callback.onLoaded(TextHelper.formatSubreddits(results), after);
+                    List<SubredditChildren> results = response.body().data().children();
+                    String after = response.body().data().after();
+                    callback.onLoaded(results, after);
                 }
             }
 

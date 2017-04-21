@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.CommentChild;
 import torille.fi.lurkforreddit.data.RedditRepository;
+import torille.fi.lurkforreddit.data.models.view.Comment;
 
 /**
  * Created by eva on 2/13/17.
@@ -28,13 +28,13 @@ class CommentPresenter implements CommentContract.UserActionsListener {
         mCommentsView.setProgressIndicator(true);
         mRedditRepository.getCommentsForPost(permaLinkUrl, new RedditRepository.LoadPostCommentsCallback() {
             @Override
-            public void onCommentsLoaded(List<CommentChild> commentChildren) {
+            public void onCommentsLoaded(List<Comment> comments) {
                 mCommentsView.setProgressIndicator(false);
-                mCommentsView.showComments(commentChildren);
+                mCommentsView.showComments(comments);
             }
 
             @Override
-            public void onMoreCommentsLoaded(List<CommentChild> comments, int position) {
+            public void onMoreCommentsLoaded(List<Comment> comments, int position) {
 
             }
         }, new RedditRepository.ErrorCallback() {
@@ -47,18 +47,18 @@ class CommentPresenter implements CommentContract.UserActionsListener {
     }
 
     @Override
-    public void loadMoreCommentsAt(CommentChild parentComment, String linkId, final int position) {
-        final int level = parentComment.getType();
+    public void loadMoreCommentsAt(Comment parentComment, String linkId, final int position) {
+        final int level = parentComment.commentLevel();
         mCommentsView.showProgressbarAt(position, level);
 
         mRedditRepository.getMoreCommentsForPostAt(parentComment, linkId, position, new RedditRepository.LoadPostCommentsCallback() {
             @Override
-            public void onCommentsLoaded(List<CommentChild> commentChildren) {
+            public void onCommentsLoaded(List<Comment> comments) {
 
             }
 
             @Override
-            public void onMoreCommentsLoaded(List<CommentChild> comments, int position) {
+            public void onMoreCommentsLoaded(List<Comment> comments, int position) {
                 mCommentsView.hideProgressbarAt(position);
                 mCommentsView.addCommentsAt(comments, position);
             }

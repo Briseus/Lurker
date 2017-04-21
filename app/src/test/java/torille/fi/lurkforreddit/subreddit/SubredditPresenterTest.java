@@ -7,13 +7,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.Post;
-import torille.fi.lurkforreddit.data.models.PostDetails;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
 import torille.fi.lurkforreddit.data.RedditRepository;
-import torille.fi.lurkforreddit.data.models.Subreddit;
+import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditResponse;
+import torille.fi.lurkforreddit.data.models.view.Post;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
@@ -25,26 +24,80 @@ import static org.mockito.Mockito.verify;
 public class SubredditPresenterTest {
     private static final String AFTER = "t3_5tkppe";
 
-    private static final Subreddit SUBREDDIT_WORLDNEWS = new Subreddit("2qh13", "World News", "/r/worldnews", "t5_2qh13", "", "worldnews", "", false, 15325795, true, (long) 1201231119, null, null);
+    private static final SubredditResponse SUBREDDIT_WORLDNEWS = SubredditResponse.builder()
+            .setId("2qh13")
+            .setTitle("world news")
+            .setUrl("/r/worldnews")
+            .setOver18(false)
+            .setSubscribed(false)
+            .setSubscribers(1000000)
+            .setCreatedUtc(0)
+            .build();
 
-    private static final PostDetails POSTDETAILS_1_WORLDNEWS = new PostDetails();
-    private static final PostDetails POSTDETAILS_2_WORLDNEWS = new PostDetails();
-    private static Post POST_1_WORLDNEWS;
-    private static Post POST_2_WORLDNEWS;
+    private static final Post POST_SELFPOST = Post.builder()
+            .setIsSelf(true)
+            .setUrl("www.reddit.com/r/comments")
+            .setDomain("reddit.com")
+            .setId("")
+            .setThumbnail("")
+            .setNumberOfComments("")
+            .setSelfText("")
+            .setTitle("")
+            .setPermaLink("")
+            .setScore("")
+            .setPreviewImage("")
+            .build();
 
-    private static final Post POST_SELFPOST = new Post();
-    private static final PostDetails POSTDETAILS_SELFPOST = new PostDetails();
+    private static final Post POST_CUSTOMURL = Post.builder()
+            .setIsSelf(false)
+            .setUrl("reddit.com/test")
+            .setDomain("reddit.com")
+            .setId("")
+            .setThumbnail("")
+            .setNumberOfComments("")
+            .setSelfText("")
+            .setTitle("")
+            .setPermaLink("")
+            .setScore("")
+            .setPreviewImage("")
+            .build();
 
-    private static final Post POST_CUSTOMURL = new Post();
-    private static final PostDetails POSTDETAILS_CUSTOMURL = new PostDetails();
+    private static final Post POST_MEDIA = Post.builder()
+            .setIsSelf(false)
+            .setUrl("imagesomewhere.com/cats.jpg")
+            .setDomain("imagur")
+            .setId("")
+            .setThumbnail("")
+            .setNumberOfComments("")
+            .setSelfText("")
+            .setTitle("")
+            .setPermaLink("")
+            .setScore("")
+            .setPreviewImage("")
+            .build();
 
-    private static final Post POST_MEDIA = new Post();
-    private static final PostDetails POSTDETAILS_MEDIA = new PostDetails();
+    private static final Post POST_LAUNCH_ACTIVITY = Post.builder()
+            .setIsSelf(false)
+            .setUrl("youtube.com/videourl")
+            .setDomain("youtube.com")
+            .setId("")
+            .setThumbnail("")
+            .setNumberOfComments("")
+            .setSelfText("")
+            .setTitle("")
+            .setPermaLink("")
+            .setScore("")
+            .setPreviewImage("")
+            .build();
 
-    private static final Post POST_LAUNCH_ACTIVITY = new Post();
-    private static final PostDetails POSTDETAILS_LAUNCH_ACTIVITY = new PostDetails();
-
+    @Mock
     private static List<Post> POSTS;
+
+    @Mock
+    private Post clickedPost;
+
+    @Mock
+    private PostDetails DETAILS;
 
     @Mock
     private RedditRepository mRedditRepository;
@@ -66,37 +119,10 @@ public class SubredditPresenterTest {
         mSubredditPresenter = new SubredditPresenter(mRedditRepository, mSubredditView);
     }
 
-    @Before
-    public void setupPosts() {
-        POSTDETAILS_SELFPOST.setSelf(true);
-        POSTDETAILS_SELFPOST.setUrl("www.reddit.com/r/comments");
-        POSTDETAILS_SELFPOST.setDomain("reddit.com");
-        POST_SELFPOST.setPostDetails(POSTDETAILS_SELFPOST);
-
-        POSTDETAILS_CUSTOMURL.setSelf(false);
-        POSTDETAILS_CUSTOMURL.setDomain("reddit.com");
-        POSTDETAILS_CUSTOMURL.setUrl("reddit.com/test");
-        POST_CUSTOMURL.setPostDetails(POSTDETAILS_CUSTOMURL);
-
-        POSTDETAILS_LAUNCH_ACTIVITY.setDomain("youtube.com");
-        POSTDETAILS_LAUNCH_ACTIVITY.setUrl("youtube.com/video");
-        POST_LAUNCH_ACTIVITY.setPostDetails(POSTDETAILS_LAUNCH_ACTIVITY);
-
-        POSTDETAILS_MEDIA.setUrl("imagesomewhere.com/cats.jpg");
-        POSTDETAILS_MEDIA.setDomain("imagur");
-        POST_MEDIA.setPostDetails(POSTDETAILS_MEDIA);
-
-        POSTDETAILS_1_WORLDNEWS.setUrl("somesite dot com");
-        POSTDETAILS_2_WORLDNEWS.setUrl("somesite dot com");
-
-        POST_1_WORLDNEWS = new Post("t3", POSTDETAILS_1_WORLDNEWS);
-        POST_2_WORLDNEWS = new Post("t3", POSTDETAILS_2_WORLDNEWS);
-        POSTS = Arrays.asList(POST_1_WORLDNEWS, POST_2_WORLDNEWS);
-    }
 
     @Test
     public void loadPostsFromRepositoryAndLoadIntoView() {
-        mSubredditPresenter.loadPosts(SUBREDDIT_WORLDNEWS.getUrl());
+        mSubredditPresenter.loadPosts(SUBREDDIT_WORLDNEWS.url());
 
         verify(mRedditRepository).getSubredditPosts(any(String.class),
                 mLoadPostsCallbackArgumentCaptor.capture(),
@@ -109,7 +135,7 @@ public class SubredditPresenterTest {
 
     @Test
     public void loadMorePostsFromRepositoryAndLoadIntoView() {
-        mSubredditPresenter.loadMorePosts(SUBREDDIT_WORLDNEWS.getUrl(), AFTER);
+        mSubredditPresenter.loadMorePosts(SUBREDDIT_WORLDNEWS.url(), AFTER);
 
         verify(mRedditRepository).getMoreSubredditPosts(any(String.class),
                 any(String.class),
@@ -123,13 +149,13 @@ public class SubredditPresenterTest {
 
     @Test
     public void clickOnBrowser_ShowCustomTabsUi() {
-        mSubredditPresenter.openCustomTabs(POSTDETAILS_1_WORLDNEWS.getUrl());
+        mSubredditPresenter.openCustomTabs(DETAILS.url());
         verify(mSubredditView).showCustomTabsUI(any(String.class));
     }
 
     @Test
     public void clickOnComments_ShowCommentsUi() {
-        mSubredditPresenter.openComments(POST_1_WORLDNEWS);
+        mSubredditPresenter.openComments(clickedPost);
         verify(mSubredditView).showCommentsUI(any(Post.class));
     }
 
@@ -142,13 +168,13 @@ public class SubredditPresenterTest {
     @Test
     public void clickOnView_ShowCustomTabsUi() {
         mSubredditPresenter.openMedia(POST_CUSTOMURL);
-        verify(mSubredditView).showCustomTabsUI(POST_CUSTOMURL.getPostDetails().getUrl());
+        verify(mSubredditView).showCustomTabsUI(POST_CUSTOMURL.url());
     }
 
     @Test
     public void clickOnView_ShowActivity() {
         mSubredditPresenter.openMedia(POST_LAUNCH_ACTIVITY);
-        verify(mSubredditView).launchCustomActivity(any(Post.class));
+        verify(mSubredditView).launchCustomActivity(POST_LAUNCH_ACTIVITY);
     }
 
     @Test

@@ -7,7 +7,7 @@ import java.security.SecureRandom;
 import retrofit2.Call;
 import retrofit2.Response;
 import timber.log.Timber;
-import torille.fi.lurkforreddit.data.models.RedditToken;
+import torille.fi.lurkforreddit.data.models.jsonResponses.RedditToken;
 import torille.fi.lurkforreddit.retrofit.RedditAuthService;
 import torille.fi.lurkforreddit.retrofit.RedditClient;
 
@@ -43,10 +43,10 @@ final public class NetworkHelper {
             try {
                 Response<RedditToken> response = call.execute();
                 if (response.isSuccessful()) {
-                    SharedPreferencesHelper.setToken(response.body().getAccess_token());
+                    SharedPreferencesHelper.setToken(response.body().access_token());
                     Timber.d("Got response: " + response.body().toString());
-                    Timber.d("New token: " + response.body().getAccess_token());
-                    return response.body().getAccess_token();
+                    Timber.d("New token: " + response.body().access_token());
+                    return response.body().access_token();
                 } else {
                     Timber.e("Got something else as response " + response.errorBody().string());
                     return "";
@@ -64,7 +64,7 @@ final public class NetworkHelper {
             try {
                 Response<RedditToken> response = call.execute();
                 if (response.isSuccessful()) {
-                    final String access_token = response.body().getAccess_token();
+                    final String access_token = response.body().access_token();
                     SharedPreferencesHelper.setToken(access_token);
                     Timber.d("Got new token " + access_token);
                     return access_token;
@@ -91,7 +91,7 @@ final public class NetworkHelper {
         Timber.d("Getting token");
         Response<RedditToken> response = call.execute();
         if (response.isSuccessful()) {
-            final String access_token = response.body().getAccess_token();
+            final String access_token = response.body().access_token();
             SharedPreferencesHelper.setToken(access_token);
             Timber.d("Got new token " + access_token);
             return access_token;

@@ -1,6 +1,6 @@
 package torille.fi.lurkforreddit.retrofit;
 
-import android.support.annotation.NonNull;
+import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 
@@ -16,6 +16,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import timber.log.Timber;
 import torille.fi.lurkforreddit.BuildConfig;
+import torille.fi.lurkforreddit.data.models.jsonResponses.MyAdapterFactory;
 import torille.fi.lurkforreddit.utils.NetworkHelper;
 import torille.fi.lurkforreddit.utils.SharedPreferencesHelper;
 
@@ -28,6 +29,11 @@ public class RedditService {
     private static final String API_BASE_URL = "https://oauth.reddit.com/";
     private static RedditService instance;
     private final RedditClient redditClient;
+
+    private final static GsonConverterFactory gsonFactory = GsonConverterFactory.create(
+            new GsonBuilder()
+                    .registerTypeAdapterFactory(MyAdapterFactory.create())
+                    .create());
 
     private final static OkHttpClient okHttpClient = new OkHttpClient();
 
@@ -102,7 +108,7 @@ public class RedditService {
         };
         final Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(API_BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(gsonFactory)
                 .client(okHttpClient
                         .newBuilder()
                         .addNetworkInterceptor(logger)
@@ -124,6 +130,10 @@ public class RedditService {
 
     public static OkHttpClient getClient() {
         return okHttpClient;
+    }
+
+    public static GsonConverterFactory getGsonFactory() {
+        return gsonFactory;
     }
 
     private static int responseCount(Response response) {

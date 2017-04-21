@@ -22,8 +22,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper;
-import torille.fi.lurkforreddit.data.models.RedditToken;
-import torille.fi.lurkforreddit.data.models.Subreddit;
+import torille.fi.lurkforreddit.data.models.jsonResponses.RedditToken;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 import torille.fi.lurkforreddit.retrofit.RedditAuthService;
 import torille.fi.lurkforreddit.retrofit.RedditClient;
 import torille.fi.lurkforreddit.search.SearchFragment;
@@ -72,8 +72,14 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
     }
 
     private void initFrontpage() {
-        Subreddit frontpage = new Subreddit();
-        frontpage.setUrl("");
+        Subreddit frontpage = Subreddit.builder()
+                .setUrl("")
+                .setBannerUrl(null)
+                .setId(null)
+                .setDisplayName("Popular")
+                .setKeyColor(null)
+                .build();
+
         initFragment(SubredditFragment.newInstance(frontpage));
     }
 
@@ -144,8 +150,8 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
             public void onResponse(Call<RedditToken> call, Response<RedditToken> response) {
                 if (response.isSuccessful()) {
                     Timber.d("Got " + response.body().toString());
-                    SharedPreferencesHelper.setToken(response.body().getAccess_token());
-                    SharedPreferencesHelper.setRefreshToken(response.body().getRefresh_token());
+                    SharedPreferencesHelper.setToken(response.body().access_token());
+                    SharedPreferencesHelper.setRefreshToken(response.body().refresh_token());
                     SharedPreferencesHelper.loggedIn(true);
                     Toast.makeText(SubredditsActivity.this, R.string.toast_login_success, Toast.LENGTH_SHORT).show();
                 } else {

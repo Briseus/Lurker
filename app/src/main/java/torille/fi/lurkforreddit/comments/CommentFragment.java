@@ -24,18 +24,14 @@ import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.request.ImageRequest;
 
-import org.parceler.Parcels;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import timber.log.Timber;
 import torille.fi.lurkforreddit.Injection;
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.models.Comment;
-import torille.fi.lurkforreddit.data.models.CommentChild;
-import torille.fi.lurkforreddit.data.models.Post;
-import torille.fi.lurkforreddit.utils.TextHelper;
+import torille.fi.lurkforreddit.data.models.view.Comment;
+import torille.fi.lurkforreddit.data.models.view.Post;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,13 +49,13 @@ public class CommentFragment extends Fragment implements CommentContract.View {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param clickedPost the Post which comments are to be loaded
+     * @param clickedPost the PostResponse which comments are to be loaded
      * @return A new instance of fragment CommentFragment.
      */
     public static CommentFragment newInstance(Post clickedPost) {
         CommentFragment fragment = new CommentFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARGUMENT_CLICKED_POST, Parcels.wrap(clickedPost));
+        args.putParcelable(ARGUMENT_CLICKED_POST, clickedPost);
         fragment.setArguments(args);
         return fragment;
     }
@@ -67,19 +63,31 @@ public class CommentFragment extends Fragment implements CommentContract.View {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPost = Parcels.unwrap(getArguments().getParcelable(ARGUMENT_CLICKED_POST));
+        mPost = getArguments().getParcelable(ARGUMENT_CLICKED_POST);
         mCommentAdapter = new CommentRecyclerViewAdapter(mPost, addDummyComment(), mClickListener);
         mActionsListener = new CommentPresenter(Injection.provideRedditRepository(), this);
 
     }
 
-    private List<CommentChild> addDummyComment() {
+    private List<Comment> addDummyComment() {
 
-        Comment dummyComment = new Comment();
-        dummyComment.setId("og");
-        CommentChild dummyFirstCommentForPost = new CommentChild("og", dummyComment);
-        ArrayList<CommentChild> list = new ArrayList<>();
-        list.add(dummyFirstCommentForPost);
+        Comment comment = Comment.builder()
+                .setId("og")
+                .setKind(Comment.kind.OG)
+                .setName("")
+                .setParentId("")
+                .setCommentLevel(0)
+                .setCommentLinkId("")
+                .setCommentText("")
+                .setAuthor("")
+                .setFormattedTime("")
+                .setFormattedScore("")
+                .setChildCommentIds(null)
+                .setReplies(null)
+                .build();
+
+        ArrayList<Comment> list = new ArrayList<>();
+        list.add(comment);
         return list;
     }
 
@@ -91,13 +99,15 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
     private void loadIfEmpty() {
         if (mCommentAdapter.getItemCount() == 1) {
-            mActionsListener.loadComments(mPost.getPostDetails().getPermalink());
+            mActionsListener.loadComments(mPost.permaLink());
         }
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
 
         View root = inflater.inflate(R.layout.fragment_comments, container, false);
 
@@ -119,15 +129,15 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mActionsListener.loadComments(mPost.getPostDetails().getPermalink());
+                mActionsListener.loadComments(mPost.permaLink());
             }
         });
         return root;
     }
 
     @Override
-    public void showComments(List<CommentChild> commentChildren) {
-        mCommentAdapter.replaceData(commentChildren);
+    public void showComments(List<Comment> comments) {
+        mCommentAdapter.replaceData(comments);
     }
 
     @Override
@@ -141,7 +151,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
     }
 
     @Override
-    public void addCommentsAt(List<CommentChild> comments, int position) {
+    public void addCommentsAt(List<Comment> comments, int position) {
         if (!comments.isEmpty()) {
             mCommentAdapter.addAllCommentsTo(position, comments);
         }
@@ -177,7 +187,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
      */
     final CommentClickListener mClickListener = new CommentClickListener() {
         @Override
-        public void onClick(CommentChild parentComment, String linkId, int position) {
+        public void onClick(Comment parentComment, String linkId, int position) {
             mActionsListener.loadMoreCommentsAt(parentComment, linkId, position);
         }
     };
@@ -186,11 +196,11 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         private static final int COMMENT_ORIGINAL = -1;
         private static final int COMMENT_PROGRESSBAR = -2;
         private static final int COMMENT_LOAD_MORE = -3;
-        private final List<CommentChild> mComments;
+        private final List<Comment> mComments;
         private final Post mClickedPost;
         private final CommentClickListener mClickListener;
 
-        CommentRecyclerViewAdapter(Post clickedPost, List<CommentChild> commentChildren, CommentClickListener listener) {
+        CommentRecyclerViewAdapter(Post clickedPost, List<Comment> commentChildren, CommentClickListener listener) {
             mClickedPost = clickedPost;
             mComments = commentChildren;
             mClickListener = listener;
@@ -233,16 +243,16 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         //TODO When comment kind is "continue" return load more type
         @Override
         public int getItemViewType(int position) {
-
-            switch (mComments.get(position).getKind()) {
-                case "more":
+            Comment.kind kind = mComments.get(position).kind();
+            switch (kind) {
+                case MORE:
                     return COMMENT_LOAD_MORE;
-                case "Progressbar":
+                case PROGRESSBAR:
                     return COMMENT_PROGRESSBAR;
-                case "og":
+                case OG:
                     return COMMENT_ORIGINAL;
                 default:
-                    return mComments.get(position).getType();
+                    return mComments.get(position).commentLevel();
             }
 
 
@@ -255,24 +265,17 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
         @Override
         public long getItemId(int position) {
-            return mComments.get(position).getData().getId().hashCode();
+            return mComments.get(position).id().hashCode();
         }
 
-        void replaceData(List<CommentChild> commentChildren) {
+        void replaceData(List<Comment> comments) {
             int size = mComments.size();
-            int newSize = commentChildren.size();
+            int newSize = comments.size();
 
             mComments.removeAll(mComments.subList(1, size));
             notifyItemRangeRemoved(1, size);
-            mComments.addAll(commentChildren);
+            mComments.addAll(comments);
             notifyItemRangeInserted(1, newSize);
-
-        }
-
-        void addComments(final List<CommentChild> commentChildren) {
-            final int oldDataEnd = mComments.size();
-            mComments.addAll(commentChildren);
-            notifyItemRangeInserted(oldDataEnd, commentChildren.size());
 
         }
 
@@ -283,14 +286,22 @@ public class CommentFragment extends Fragment implements CommentContract.View {
          *              the bigger the level the bigger the left padding
          * @return progressbar with padding info
          */
-        CommentChild createProgressbar(int level) {
-            CommentChild dummyComment = new CommentChild();
-            Comment dummy = new Comment();
-            dummy.setId("Progressbar");
-            dummyComment.setData(dummy);
-            dummyComment.setKind("Progressbar");
-            dummyComment.setType(level);
-            return dummyComment;
+        Comment createProgressbar(int level) {
+
+            return Comment.builder()
+                    .setId("Progressbar")
+                    .setKind(Comment.kind.PROGRESSBAR)
+                    .setCommentLevel(level)
+                    .setName("")
+                    .setParentId("")
+                    .setCommentLinkId("")
+                    .setAuthor("")
+                    .setCommentText("")
+                    .setChildCommentIds(null)
+                    .setReplies(null)
+                    .setFormattedScore("")
+                    .setFormattedTime("")
+                    .build();
         }
 
         void addProgressbar(final int position, final int level) {
@@ -298,7 +309,6 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             if (position > 1) {
                 mComments.set(position, createProgressbar(level));
                 notifyItemChanged(position);
-
             } else {
                 mComments.add(position, createProgressbar(level));
                 notifyItemInserted(position);
@@ -307,11 +317,13 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
         }
 
-        void changeToErrorAt(final int position) {
-            final CommentChild error = mComments.get(position);
-            error.setKind("more");
-            error.getData().setFormattedComment("Retry");
-            error.getData().setId("retry");
+        void changeToErrorAt(int position) {
+            Comment error = mComments.get(position);
+            Comment comment = error.withKindIdTextAndLevel(Comment.kind.MORE,
+                    "Retry",
+                    "Retry",
+                    error.commentLevel());
+            mComments.set(position, comment);
             notifyItemChanged(position, error);
 
         }
@@ -322,7 +334,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
         }
 
-        void addAllCommentsTo(final int position, @NonNull final List<CommentChild> comments) {
+        void addAllCommentsTo(final int position, @NonNull final List<Comment> comments) {
             mComments.addAll(position, comments);
             notifyItemRangeInserted(position, comments.size());
 
@@ -348,23 +360,26 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             }
 
             void bind() {
-                String time = (String) DateUtils.getRelativeTimeSpanString(mClickedPost.getPostDetails().getCreatedUtc() * 1000);
-                String author = "Submitted " + time + " by " + mClickedPost.getPostDetails().getAuthor();
+                String author = "Submitted "
+                        + DateUtils.getRelativeTimeSpanString(mClickedPost.createdUtc() * 1000)
+                        + " by " + mClickedPost.author();
                 mAuthor.setText(author);
-                mScoreButton.setText(mClickedPost.getPostDetails().getPreviewScore());
-                mTitle.setText(mClickedPost.getPostDetails().getTitle());
-                if (mClickedPost.getPostDetails().getPreviewImage() != null && mClickedPost.getPostDetails().getPreviewImage().isEmpty()) {
+                mScoreButton.setText(mClickedPost.score());
+                mTitle.setText(mClickedPost.title());
+
+                if (mClickedPost.previewImage().isEmpty()) {
                     mImage.setVisibility(View.GONE);
                 } else {
+
                     DraweeController controller = Fresco.newDraweeControllerBuilder()
                             .setOldController(mImage.getController())
-                            .setImageRequest(ImageRequest.fromUri(mClickedPost.getPostDetails().getPreviewImage()))
+                            .setImageRequest(ImageRequest.fromUri(mClickedPost.previewImage()))
                             .build();
                     mImage.setController(controller);
                 }
-                String selftext = mClickedPost.getPostDetails().getSelftextHtml();
+                CharSequence selftext = mClickedPost.selfText();
                 if (selftext != null) {
-                    mSelftext.setText(TextHelper.formatTextToHtml(selftext));
+                    mSelftext.setText(selftext);
                 } else {
                     mSelftext.setVisibility(View.GONE);
                 }
@@ -386,18 +401,18 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 mCommentAuthor = (TextView) view.findViewById(R.id.comment_author);
             }
 
-            void bind(CommentChild commentChild) {
-                mComment = commentChild;
-                mCommentText.setText(mComment.getData().getFormattedComment());
-                mCommentAuthor.setText(mComment.getData().getFormatAuthor());
-                mCommentScore.setText(mComment.getData().getFormatScore());
+            void bind(Comment comment) {
+                mComment = comment;
+                mCommentText.setText(mComment.commentText());
+                mCommentAuthor.setText(mComment.author());
+                mCommentScore.setText(mComment.formattedScore());
             }
 
 
         }
 
         class CommentNormalViewHolder extends RecyclerView.ViewHolder {
-            CommentChild mComment;
+            Comment mComment;
 
             CommentNormalViewHolder(View itemView) {
                 super(itemView);
@@ -414,16 +429,16 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 view.setOnClickListener(this);
             }
 
-            void bind(CommentChild commentChild) {
+            void bind(Comment commentChild) {
                 mComment = commentChild;
-                mClickMore.setText(mComment.getData().getFormattedComment());
+                mClickMore.setText(mComment.commentText());
             }
 
             @Override
             public void onClick(View v) {
                 Timber.d(mComment.toString());
-                if (!mComment.getData().getId().equals("_")) {
-                    mClickListener.onClick(mComment, mClickedPost.getPostDetails().getName(), getAdapterPosition());
+                if (!mComment.id().equals("_")) {
+                    mClickListener.onClick(mComment, mClickedPost.id(), getAdapterPosition());
                 }
             }
 
@@ -438,14 +453,14 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
             }
 
-            void bind(CommentChild commentChild) {
+            void bind(Comment commentChild) {
                 mComment = commentChild;
             }
         }
     }
 
     interface CommentClickListener {
-        void onClick(CommentChild parentComment, String linkId, int position);
+        void onClick(Comment parentComment, String linkId, int position);
     }
 
 }

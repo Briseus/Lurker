@@ -4,11 +4,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import torille.fi.lurkforreddit.BuildConfig;
-import torille.fi.lurkforreddit.data.models.StreamableVideo;
+import torille.fi.lurkforreddit.data.models.jsonResponses.StreamableVideo;
 
 /**
  * Created by eva on 9.4.2017.
@@ -35,7 +34,7 @@ public class StreamableService {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(API_BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(RedditService.getGsonFactory())
                 .client(okHttpClient)
                 .build();
 

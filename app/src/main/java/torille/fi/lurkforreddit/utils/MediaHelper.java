@@ -1,13 +1,12 @@
 package torille.fi.lurkforreddit.utils;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
+import android.support.annotation.Nullable;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsSession;
 import android.support.v4.content.ContextCompat;
 
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.models.Post;
 
 /**
  * Helper class for parsing urls and media
@@ -15,7 +14,8 @@ import torille.fi.lurkforreddit.data.models.Post;
 
 final public class MediaHelper {
 
-    private MediaHelper() {}
+    private MediaHelper() {
+    }
 
     public static boolean isContentMedia(final String url) {
 
@@ -36,7 +36,7 @@ final public class MediaHelper {
         }
     }
 
-    public static boolean checkDomainForMedia(String domain) {
+    public static boolean checkDomainForMedia(@Nullable String domain) {
         if (domain == null) {
             return false;
         }
@@ -51,9 +51,9 @@ final public class MediaHelper {
         }
     }
 
-    public static boolean launchCustomActivity(Post post) {
-        String domain = post.getPostDetails().getDomain();
-        if (domain == null) {
+    public static boolean launchCustomActivity(@Nullable String domain) {
+
+        if (domain == null || domain.isEmpty()) {
             return false;
         }
         switch (domain) {
@@ -65,11 +65,14 @@ final public class MediaHelper {
         }
     }
 
-    public static CustomTabsIntent createCustomTabIntent(Context context, CustomTabsSession session) {
+    public static CustomTabsIntent createCustomTabIntent(Context context,
+                                                         CustomTabsSession session) {
         CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder(session);
 
-        intentBuilder.setToolbarColor(ContextCompat.getColor(context, R.color.colorPrimary));
-        intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
+        int toolbarColor = ContextCompat.getColor(context, R.color.colorPrimary);
+        int secondaryColor = ContextCompat.getColor(context, R.color.colorPrimaryDark);
+        intentBuilder.setToolbarColor(toolbarColor);
+        intentBuilder.setSecondaryToolbarColor(secondaryColor);
 
         intentBuilder.addDefaultShareMenuItem();
         intentBuilder.enableUrlBarHiding();
