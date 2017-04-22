@@ -15,10 +15,12 @@ public interface FullscreenContract {
         void showVideo(String url);
 
         void showStreamableVideo(String identifier);
+
+        void checkDomain(String url);
     }
 
     interface UserActionsListener {
-        void checkDomain(@NonNull String url,
+        void checkType(@NonNull String url,
                          @Nullable String previewImageUrl);
     }
 

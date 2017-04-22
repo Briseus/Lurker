@@ -148,13 +148,13 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
         String previewImageUrl = getArguments().getString(EXTRA_PREVIEWIMAGE);
         if (url != null) {
             Timber.d("Fragment got " + url + "" + previewImageUrl);
-            mActionsListener.checkDomain(url, previewImageUrl);
+            mActionsListener.checkType(url, previewImageUrl);
         }
 
     }
 
     @Override
-    public void showImage(String url, String previewImageUrl) {
+    public void showImage(@NonNull String url, @Nullable String previewImageUrl) {
         mProgressBar.setVisibility(View.INVISIBLE);
         mImageView.setVisibility(View.VISIBLE);
 
@@ -316,6 +316,30 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                 Toast.makeText(getContext(), t.toString(), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @Override
+    public void checkDomain(String url) {
+        Uri uri = Uri.parse(url);
+
+        switch (uri.getHost()) {
+            case "gfycat.com":
+                final String[] gfy = url.split("g", 2);
+                final String gfyUri = "https://thumbs.g" + gfy[1] + "-mobile.mp4";
+                showVideo(gfyUri);
+                break;
+            case "streamable.com":
+                String identifier = uri.getLastPathSegment();
+                Timber.d("Got identifier " + identifier + " from uri " + uri);
+               showStreamableVideo(identifier);
+                break;
+            case "i.imgur.com":
+            case "imgur.com":
+            default:
+                showImage(url + ".jpg", null);
+                break;
+        }
+
     }
 
 }
