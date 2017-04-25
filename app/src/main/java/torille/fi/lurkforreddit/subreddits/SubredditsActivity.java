@@ -16,21 +16,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import javax.inject.Inject;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
+import torille.fi.lurkforreddit.MyApplication;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper;
 import torille.fi.lurkforreddit.data.models.jsonResponses.RedditToken;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
-import torille.fi.lurkforreddit.retrofit.RedditAuthService;
-import torille.fi.lurkforreddit.retrofit.RedditClient;
+import torille.fi.lurkforreddit.data.RedditService;
 import torille.fi.lurkforreddit.search.SearchFragment;
 import torille.fi.lurkforreddit.subreddit.SubredditFragment;
 import torille.fi.lurkforreddit.utils.MediaHelper;
 import torille.fi.lurkforreddit.utils.NetworkHelper;
-import torille.fi.lurkforreddit.utils.SharedPreferencesHelper;
+import torille.fi.lurkforreddit.utils.Store;
 
 /**
  * Created by eva on 2/8/17.
@@ -45,10 +47,16 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
     private static final String SCOPE = "identity,mysubreddits,read,account";
     private String CLIENT_ID;
 
+    @Inject
+    Store store;
+    @Inject
+    RedditService.Auth mRedditAuthApi;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme_NoActionBar);
         super.onCreate(savedInstanceState);
+        ((MyApplication) getApplication()).getmRedditRepositoryComponent().inject(this);
         setContentView(R.layout.activity_main);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.appBarLayout);
@@ -57,9 +65,13 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
         final BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
-        if (savedInstanceState == null) {
-            initFrontpage();
+        SubredditFragment subredditFragment = (SubredditFragment) getSupportFragmentManager().findFragmentById(R.id.content);
+
+        if (subredditFragment == null) {
+            getFrontPageFragment();
+
         }
+
 
     }
 
@@ -71,16 +83,18 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
         transaction.commit();
     }
 
-    private void initFrontpage() {
+    private void getFrontPageFragment() {
         Subreddit frontpage = Subreddit.builder()
                 .setUrl("")
-                .setBannerUrl(null)
+                .setBannerUrl("")
                 .setId(null)
                 .setDisplayName("Popular")
                 .setKeyColor(null)
                 .build();
 
-        initFragment(SubredditFragment.newInstance(frontpage));
+        SubredditFragment subredditFragment = SubredditFragment.newInstance(frontpage);
+
+        initFragment(subredditFragment);
     }
 
     @Override
@@ -105,7 +119,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.action_login);
-        if (SharedPreferencesHelper.isLoggedIn()) {
+        if (store.isLoggedIn()) {
             item.setTitle(R.string.menu_item_login_logout);
         } else {
             item.setTitle(R.string.menu_item_login);
@@ -142,17 +156,15 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
 
     private void getToken(String code) {
         final String grant_type = "authorization_code";
-        CLIENT_ID = getResources().getString(R.string.client_id);
-        RedditClient redditClient = RedditAuthService.createService(RedditClient.class, CLIENT_ID, "");
-        Call<RedditToken> call = redditClient.getUserAuthToken(grant_type, code, REDIRECT_URI);
+        Call<RedditToken> call = mRedditAuthApi.getUserAuthToken(grant_type, code, REDIRECT_URI);
         call.enqueue(new Callback<RedditToken>() {
             @Override
             public void onResponse(Call<RedditToken> call, Response<RedditToken> response) {
                 if (response.isSuccessful()) {
                     Timber.d("Got " + response.body().toString());
-                    SharedPreferencesHelper.setToken(response.body().access_token());
-                    SharedPreferencesHelper.setRefreshToken(response.body().refresh_token());
-                    SharedPreferencesHelper.loggedIn(true);
+                    store.setToken(response.body().access_token());
+                    store.setRefreshToken(response.body().refresh_token());
+                    store.loggedIn(true);
                     Toast.makeText(SubredditsActivity.this, R.string.toast_login_success, Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(SubredditsActivity.this, R.string.toast_login_failed + "" + response.errorBody(), Toast.LENGTH_LONG).show();
@@ -171,7 +183,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_frontpage:
-                initFrontpage();
+                getFrontPageFragment();
                 return true;
             case R.id.action_subreddits:
                 initFragment(SubredditsFragment.newInstance());
@@ -188,7 +200,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
 
         switch (item.getItemId()) {
             case R.id.action_login:
-                if (SharedPreferencesHelper.isLoggedIn()) {
+                if (store.isLoggedIn()) {
                     logOut();
                 } else {
                     logIn();
@@ -200,16 +212,17 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
     }
 
     private void logOut() {
-        SharedPreferencesHelper.loggedIn(false);
-        SharedPreferencesHelper.setToken(null);
-        SharedPreferencesHelper.setRefreshToken(null);
+        store.loggedIn(false);
+        store.setToken(null);
+        store.setRefreshToken(null);
         Toast.makeText(this, R.string.toast_logout_success, Toast.LENGTH_SHORT).show();
     }
 
     private void logIn() {
         CLIENT_ID = getResources().getString(R.string.client_id);
 
-        final String url = RedditAuthService.API_BASE_URL
+        //TODO Switch to constant
+        final String url = "https://www.reddit.com/api/v1/"
                 + "authorize.compact?client_id=" + CLIENT_ID
                 + "&response_type=" + RESPONSE_TYPE
                 + "&state=" + STATE

@@ -45,16 +45,20 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
 
+import javax.inject.Inject;
+
+import dagger.Lazy;
 import me.relex.photodraweeview.PhotoDraweeView;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
+import torille.fi.lurkforreddit.MyApplication;
 import torille.fi.lurkforreddit.R;
+import torille.fi.lurkforreddit.data.StreamableService;
 import torille.fi.lurkforreddit.data.models.jsonResponses.ImageResolution;
 import torille.fi.lurkforreddit.data.models.jsonResponses.StreamableVideo;
-import torille.fi.lurkforreddit.retrofit.RedditService;
-import torille.fi.lurkforreddit.retrofit.StreamableService;
 
 import static android.view.View.GONE;
 
@@ -73,6 +77,12 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     private FullscreenPresenter mActionsListener;
     private View mView;
     private SimpleExoPlayer player;
+
+    @Inject
+    Lazy<StreamableService> mStreamableApi;
+
+    @Inject
+    Lazy<OkHttpClient> mOkHttpClient;
 
     /**
      * Use this factory method to create a new instance of
@@ -94,6 +104,9 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((MyApplication) getActivity().getApplication())
+                .getmNetComponent()
+                .inject(this);
         mActionsListener = new FullscreenPresenter(this);
     }
 
@@ -218,7 +231,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
         String userAgent = Util.getUserAgent(context, getString(R.string.app_name));
         // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new OkHttpDataSourceFactory(RedditService.getClient(),
+        DataSource.Factory dataSourceFactory = new OkHttpDataSourceFactory(mOkHttpClient.get(),
                 userAgent, bandwidthMeter);
 
         // Produces Extractor instances for parsing the media data.
@@ -286,7 +299,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
     @Override
     public void showStreamableVideo(String identifier) {
-        Call<StreamableVideo> call = StreamableService.getInstance().getVideo(identifier);
+        Call<StreamableVideo> call = mStreamableApi.get().getVideo(identifier);
 
         call.enqueue(new Callback<StreamableVideo>() {
             @Override
@@ -331,7 +344,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
             case "streamable.com":
                 String identifier = uri.getLastPathSegment();
                 Timber.d("Got identifier " + identifier + " from uri " + uri);
-               showStreamableVideo(identifier);
+                showStreamableVideo(identifier);
                 break;
             case "i.imgur.com":
             case "imgur.com":

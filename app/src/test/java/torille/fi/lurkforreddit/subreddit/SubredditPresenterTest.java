@@ -9,10 +9,12 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
 import torille.fi.lurkforreddit.data.RedditRepository;
+import torille.fi.lurkforreddit.data.RedditDataSource;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditResponse;
 import torille.fi.lurkforreddit.data.models.view.Post;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
@@ -46,6 +48,8 @@ public class SubredditPresenterTest {
             .setPermaLink("")
             .setScore("")
             .setPreviewImage("")
+            .setAuthor("tester")
+            .setCreatedUtc(10)
             .build();
 
     private static final Post POST_CUSTOMURL = Post.builder()
@@ -60,6 +64,8 @@ public class SubredditPresenterTest {
             .setPermaLink("")
             .setScore("")
             .setPreviewImage("")
+            .setAuthor("tester")
+            .setCreatedUtc(10)
             .build();
 
     private static final Post POST_MEDIA = Post.builder()
@@ -74,6 +80,8 @@ public class SubredditPresenterTest {
             .setPermaLink("")
             .setScore("")
             .setPreviewImage("")
+            .setAuthor("tester")
+            .setCreatedUtc(10)
             .build();
 
     private static final Post POST_LAUNCH_ACTIVITY = Post.builder()
@@ -88,6 +96,8 @@ public class SubredditPresenterTest {
             .setPermaLink("")
             .setScore("")
             .setPreviewImage("")
+            .setAuthor("tester")
+            .setCreatedUtc(10)
             .build();
 
     @Mock
@@ -100,23 +110,27 @@ public class SubredditPresenterTest {
     private PostDetails DETAILS;
 
     @Mock
+    private Subreddit subreddit;
+
+    @Mock
     private RedditRepository mRedditRepository;
 
     @Mock
     private SubredditContract.View mSubredditView;
 
     @Captor
-    private ArgumentCaptor<RedditRepository.LoadSubredditPostsCallback> mLoadPostsCallbackArgumentCaptor;
+    private ArgumentCaptor<RedditDataSource.LoadSubredditPostsCallback> mLoadPostsCallbackArgumentCaptor;
 
     @Captor
-    private ArgumentCaptor<RedditRepository.ErrorCallback> loadErrorCallbackArgumentCaptor;
+    private ArgumentCaptor<RedditDataSource.ErrorCallback> loadErrorCallbackArgumentCaptor;
 
     private SubredditPresenter mSubredditPresenter;
 
     @Before
     public void setupSubredditPresenter() {
         MockitoAnnotations.initMocks(this);
-        mSubredditPresenter = new SubredditPresenter(mRedditRepository, mSubredditView);
+        mSubredditPresenter = new SubredditPresenter(mRedditRepository, subreddit);
+        mSubredditPresenter.setView(mSubredditView);
     }
 
 

@@ -22,10 +22,12 @@ public class CommentActivity extends AppCompatActivity {
 
     public static final String EXTRA_CLICKED_POST = "post";
 
+    /*@Inject
+    CommentPresenter mCommentPresenter;*/
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_comments);
 
         Post originalPost = getIntent().getParcelableExtra(EXTRA_CLICKED_POST);
@@ -43,10 +45,20 @@ public class CommentActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (savedInstanceState == null) {
-            initFragment(CommentFragment.newInstance(originalPost));
-        }
+        CommentFragment commentFragment = (CommentFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.contentFrame);
 
+        if (commentFragment == null) {
+            commentFragment = CommentFragment.newInstance(originalPost);
+            initFragment(commentFragment);
+
+        }
+        /*DaggerCommentComponent.builder()
+                .commentPresenterModule(new CommentPresenterModule(originalPost))
+                .redditRepositoryComponent(((MyApplication) getApplicationContext()).getmRedditRepositoryComponent())
+                .build()
+                .inject(this);
+*/
     }
 
     private void initFragment(Fragment commentFragment) {

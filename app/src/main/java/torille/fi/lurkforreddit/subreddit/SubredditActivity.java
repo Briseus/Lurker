@@ -3,14 +3,12 @@ package torille.fi.lurkforreddit.subreddit;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,14 +16,18 @@ import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import javax.inject.Inject;
+
+import dagger.Lazy;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
+import torille.fi.lurkforreddit.MyApplication;
 import torille.fi.lurkforreddit.R;
+import torille.fi.lurkforreddit.data.RedditService;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
-import torille.fi.lurkforreddit.retrofit.RedditService;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
 import torille.fi.lurkforreddit.utils.TextHelper;
 
@@ -34,11 +36,17 @@ public class SubredditActivity extends AppCompatActivity {
     public static final String EXTRA_SUBREDDIT = "subreddit";
     public static final String EXTRA_SUBREDDITNAME = "subredditname";
 
+    @Inject
+    Lazy<RedditService.Reddit> mRedditApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subreddit);
+        ((MyApplication) getApplication()).getmNetComponent().inject(this);
+
+        Intent intent = getIntent();
+        Subreddit subreddit = intent.getParcelableExtra(EXTRA_SUBREDDIT);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.appBarLayout);
         setSupportActionBar(toolbar);
@@ -48,73 +56,74 @@ public class SubredditActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(getResources().getDrawable(R.drawable.ic_arrow_back_white_24px, null));
             actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-        Intent intent = getIntent();
-        Subreddit subreddit = intent.getParcelableExtra(EXTRA_SUBREDDIT);
+            if (subreddit != null) {
+                actionBar.setTitle(subreddit.displayName());
+            } else {
+                actionBar.setTitle(null);
+            }
 
-        if (subreddit != null) {
+        }
+
+        SubredditFragment subredditFragment = (SubredditFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.contentFrame);
+
+        if (subreddit == null) {
+            handleIntent(intent);
+        } else if (subredditFragment == null) {
             Timber.d(subreddit.toString());
-            initSubreddit(subreddit, savedInstanceState, actionBar);
-        } else {
-            handleIntent(intent, savedInstanceState);
+            loadBannerImage(subreddit.bannerUrl(), subreddit.keyColor());
+            subredditFragment = SubredditFragment.newInstance(subreddit);
+            initFragment(subredditFragment);
         }
 
 
     }
 
+    void searchForReddit(String subredditName) {
+        Timber.d("Searching for " + subredditName);
+        Call<SubredditChildren> call = mRedditApi.get().getSubredditInfo(subredditName);
 
-    public void initSubreddit(@NonNull Subreddit subreddit, @Nullable Bundle savedInstanceState,
-                              @Nullable ActionBar actionBar) {
-        loadBannerImage(subreddit.bannerUrl(), subreddit.keyColor());
+        call.enqueue(new Callback<SubredditChildren>() {
+            @Override
+            public void onResponse(Call<SubredditChildren> call, Response<SubredditChildren> response) {
 
-        if (actionBar != null) {
-            actionBar.setTitle(subreddit.displayName());
-        }
+                if (response.isSuccessful()) {
+                    Timber.d("Got " + response.body().toString());
+                    Subreddit subreddit = TextHelper.formatSubreddit(response.body());
 
-        if (savedInstanceState == null) {
-            initFragment(SubredditFragment.newInstance(subreddit));
-        }
+                    ActionBar actionBar = getSupportActionBar();
+                    if (actionBar != null) {
+                        getSupportActionBar().setTitle(subreddit.displayName());
+                    }
+
+                    loadBannerImage(subreddit.bannerUrl(), subreddit.keyColor());
+                    SubredditFragment fragment = SubredditFragment.newInstance(subreddit);
+                    initFragment(fragment);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SubredditChildren> call, Throwable t) {
+                Timber.e(t);
+                Toast.makeText(getApplicationContext(), "SubredditResponse not found", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    public void handleIntent(Intent intent, @Nullable final Bundle savedInstanceState) {
+    void handleIntent(Intent intent) {
         if (intent != null) {
-
             String subredditName = intent.getStringExtra(EXTRA_SUBREDDITNAME);
-
             if (subredditName != null) {
-
-                Call<SubredditChildren> call = RedditService
-                        .getInstance()
-                        .getSubredditInfo(subredditName);
-
-                call.enqueue(new Callback<SubredditChildren>() {
-                    @Override
-                    public void onResponse(Call<SubredditChildren> call, Response<SubredditChildren> response) {
-
-                        if (response.isSuccessful()) {
-                            Timber.d("Got " + response.body().toString());
-                            Subreddit subreddit = TextHelper.formatSubreddit(response.body());
-                            initSubreddit(subreddit, savedInstanceState, getSupportActionBar());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<SubredditChildren> call, Throwable t) {
-                        Timber.e(t);
-                        Toast.makeText(getApplicationContext(), "SubredditResponse not found", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
+                searchForReddit(subredditName);
             }
         }
-
 
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        handleIntent(intent, null);
+        handleIntent(intent);
 
     }
 
@@ -125,23 +134,15 @@ public class SubredditActivity extends AppCompatActivity {
     }
 
     private void loadBannerImage(@Nullable String bannerUrl, @Nullable String keyColor) {
-
         SimpleDraweeView banner = (SimpleDraweeView) findViewById(R.id.banner);
-        boolean hasBannerSource = (bannerUrl != null);
-        boolean hasCustomColor = (keyColor != null);
-        int color;
 
-        if (hasBannerSource) {
+        if (bannerUrl != null && !bannerUrl.isEmpty()) {
+            Timber.d("Setting bannerUrl to " + bannerUrl);
             banner.setImageURI(bannerUrl);
-        } else {
-            if (hasCustomColor) {
-                color = Color.parseColor(keyColor);
-            } else {
-                color = ContextCompat.getColor(this, R.color.colorAccent);
-            }
-            banner.setBackgroundColor(color);
+        } else if (keyColor != null && !keyColor.isEmpty()) {
+            Timber.d("Setting banner background to " + keyColor);
+            banner.setBackgroundColor(Color.parseColor(keyColor));
         }
-
 
     }
 

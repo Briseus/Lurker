@@ -4,7 +4,10 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
+import torille.fi.lurkforreddit.BasePresenter;
+import torille.fi.lurkforreddit.BaseView;
 import torille.fi.lurkforreddit.data.models.view.Post;
+import torille.fi.lurkforreddit.subreddits.SubredditsContract;
 
 /**
  * This specifies the contract between the view and the presenter.
@@ -12,7 +15,7 @@ import torille.fi.lurkforreddit.data.models.view.Post;
 
 public interface SubredditContract {
 
-    interface View {
+    interface View extends BaseView {
 
         void setProgressIndicator(boolean active);
 
@@ -33,7 +36,7 @@ public interface SubredditContract {
         void onError(String errorText);
     }
 
-    interface UserActionsListener {
+    interface Presenter<T extends BaseView> extends BasePresenter<View> {
 
         void openComments(@NonNull Post clickedPost);
 

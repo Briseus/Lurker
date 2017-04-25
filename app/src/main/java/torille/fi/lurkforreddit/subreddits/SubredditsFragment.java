@@ -2,6 +2,7 @@ package torille.fi.lurkforreddit.subreddits;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -20,7 +21,9 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import torille.fi.lurkforreddit.Injection;
+import javax.inject.Inject;
+
+import torille.fi.lurkforreddit.MyApplication;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
 import torille.fi.lurkforreddit.subreddit.SubredditActivity;
@@ -31,7 +34,10 @@ import torille.fi.lurkforreddit.subreddit.SubredditActivity;
 
 public class SubredditsFragment extends Fragment implements SubredditsContract.View {
 
-    private SubredditsContract.UserActionsListener mActionsListener;
+    SubredditsComponent subredditsComponent;
+
+    @Inject
+    SubredditsContract.Presenter<SubredditsContract.View> mActionsListener;
 
     private SubredditsAdapter mListAdapter;
 
@@ -42,14 +48,18 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mListAdapter = new SubredditsAdapter(new ArrayList<Subreddit>(10), mItemListener, ContextCompat.getColor(getContext(), R.color.colorAccent));
-        mActionsListener = new SubredditsPresenter(Injection.provideRedditRepository(), this);
+
+        subredditsComponent = DaggerSubredditsComponent.builder()
+                .redditRepositoryComponent(((MyApplication) getActivity().getApplication()).getmRedditRepositoryComponent())
+                .build();
+
+        mListAdapter = new SubredditsAdapter(new ArrayList<Subreddit>(20), mItemListener, ContextCompat.getColor(getContext(), R.color.colorAccent));
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mActionsListener.loadSubreddits(false);
+        mActionsListener.start();
     }
 
     @Nullable
@@ -57,7 +67,8 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_subreddits, container, false);
-
+        subredditsComponent.inject(this);
+        mActionsListener.setView(this);
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.subreddits_list);
         recyclerView.setAdapter(mListAdapter);
         recyclerView.setHasFixedSize(true);

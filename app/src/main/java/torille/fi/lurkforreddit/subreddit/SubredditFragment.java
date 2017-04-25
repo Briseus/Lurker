@@ -31,8 +31,10 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import timber.log.Timber;
-import torille.fi.lurkforreddit.Injection;
+import torille.fi.lurkforreddit.MyApplication;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.comments.CommentActivity;
 import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper;
@@ -54,7 +56,9 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARGUMENT_SUBREDDIT = "subreddit";
 
-    private SubredditContract.UserActionsListener mActionsListener;
+    @Inject
+    SubredditContract.Presenter<SubredditContract.View> mActionsListener;
+    SubredditComponent subredditComponent;
 
     private PostsAdapter mListAdapter;
     private LinearLayoutManager mLayoutManager;
@@ -80,8 +84,11 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActionsListener = new SubredditPresenter(Injection.provideRedditRepository(),
-                this);
+        Subreddit subreddit = getArguments().getParcelable(ARGUMENT_SUBREDDIT);
+        subredditComponent = DaggerSubredditComponent.builder()
+                .redditRepositoryComponent(((MyApplication)getActivity().getApplication()).getmRedditRepositoryComponent())
+                .subredditPresenterModule(new SubredditPresenterModule(subreddit))
+                .build();
         mListAdapter = new PostsAdapter(new ArrayList<Post>(25),
                 mClickListener,
                 ContextCompat.getColor(getContext(), R.color.colorAccent),
@@ -96,6 +103,8 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_subreddit, container, false);
+        subredditComponent.inject(this);
+        mActionsListener.setView(this);
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.posts_list);
 
         mLayoutManager = new LinearLayoutManager(getContext());
@@ -185,7 +194,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     private void loadIfEmpty() {
         if (mListAdapter.getItemCount() == 0) {
-            mActionsListener.loadPosts(getSubredditUrl());
+            mActionsListener.start();
         }
 
     }
@@ -287,6 +296,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         Toast.makeText(getContext(), errorText, Toast.LENGTH_SHORT).show();
 
     }
+
 
     private static class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final static int VIEW_ITEM = 1;

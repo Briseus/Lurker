@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import torille.fi.lurkforreddit.data.RedditRepository;
+import torille.fi.lurkforreddit.data.RedditDataSource;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
 
 import static org.mockito.Matchers.any;
@@ -29,7 +30,6 @@ public class SubredditsPresenterTest {
             .build();
 
 
-
     private static final List<Subreddit> SUBREDDITS = Arrays.asList(SUBREDDIT_PICS, SUBREDDIT_WORLDNEWS);
 
     @Mock
@@ -43,10 +43,10 @@ public class SubredditsPresenterTest {
      * perform further actions or assertions on them.
      */
     @Captor
-    private ArgumentCaptor<RedditRepository.LoadSubredditsCallback> loadSubredditsCallbackArgumentCaptor;
+    private ArgumentCaptor<RedditDataSource.LoadSubredditsCallback> loadSubredditsCallbackArgumentCaptor;
 
     @Captor
-    private ArgumentCaptor<RedditRepository.ErrorCallback> loadErrorCallbackArgumentCaptor;
+    private ArgumentCaptor<RedditDataSource.ErrorCallback> loadErrorCallbackArgumentCaptor;
 
     private SubredditsPresenter mSubredditsPresenter;
 
@@ -56,7 +56,8 @@ public class SubredditsPresenterTest {
         // inject the mocks in the test the initMocks method needs to be called.
         MockitoAnnotations.initMocks(this);
 
-        mSubredditsPresenter = new SubredditsPresenter(mRedditRepository, mSubredditsView);
+        mSubredditsPresenter = new SubredditsPresenter(mRedditRepository);
+        mSubredditsPresenter.setView(mSubredditsView);
     }
 
     @Test

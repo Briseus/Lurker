@@ -2,6 +2,8 @@ package torille.fi.lurkforreddit.subreddits;
 
 import java.util.List;
 
+import torille.fi.lurkforreddit.BasePresenter;
+import torille.fi.lurkforreddit.BaseView;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
 
 /**
@@ -10,7 +12,7 @@ import torille.fi.lurkforreddit.data.models.view.Subreddit;
 
 public interface SubredditsContract {
 
-    interface View {
+    interface View extends BaseView {
 
         void setProgressIndicator(boolean active);
 
@@ -21,7 +23,7 @@ public interface SubredditsContract {
         void onError(String errorText);
     }
 
-    interface UserActionsListener {
+    interface Presenter<T extends BaseView> extends BasePresenter<View> {
 
         void loadSubreddits(boolean b);
 

@@ -27,8 +27,10 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import timber.log.Timber;
-import torille.fi.lurkforreddit.Injection;
+import torille.fi.lurkforreddit.MyApplication;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.models.view.Comment;
 import torille.fi.lurkforreddit.data.models.view.Post;
@@ -41,7 +43,12 @@ import torille.fi.lurkforreddit.data.models.view.Post;
 public class CommentFragment extends Fragment implements CommentContract.View {
 
     private static final String ARGUMENT_CLICKED_POST = "post";
-    private CommentContract.UserActionsListener mActionsListener;
+
+    CommentComponent commentComponent;
+
+    @Inject
+    CommentContract.Presenter<CommentContract.View> mActionsListener;
+
     private CommentRecyclerViewAdapter mCommentAdapter;
     private Post mPost;
 
@@ -52,7 +59,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
      * @param clickedPost the PostResponse which comments are to be loaded
      * @return A new instance of fragment CommentFragment.
      */
-    public static CommentFragment newInstance(Post clickedPost) {
+    public static CommentFragment newInstance(@NonNull Post clickedPost) {
         CommentFragment fragment = new CommentFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARGUMENT_CLICKED_POST, clickedPost);
@@ -64,9 +71,13 @@ public class CommentFragment extends Fragment implements CommentContract.View {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPost = getArguments().getParcelable(ARGUMENT_CLICKED_POST);
-        mCommentAdapter = new CommentRecyclerViewAdapter(mPost, addDummyComment(), mClickListener);
-        mActionsListener = new CommentPresenter(Injection.provideRedditRepository(), this);
 
+        commentComponent = DaggerCommentComponent.builder()
+                .redditRepositoryComponent(((MyApplication) getActivity().getApplication()).getmRedditRepositoryComponent())
+                .commentPresenterModule(new CommentPresenterModule(mPost))
+                .build();
+
+        mCommentAdapter = new CommentRecyclerViewAdapter(mPost, addDummyComment(), mClickListener);
     }
 
     private List<Comment> addDummyComment() {
@@ -99,7 +110,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
     private void loadIfEmpty() {
         if (mCommentAdapter.getItemCount() == 1) {
-            mActionsListener.loadComments(mPost.permaLink());
+            mActionsListener.start();
         }
     }
 
@@ -110,7 +121,8 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                              @Nullable Bundle savedInstanceState) {
 
         View root = inflater.inflate(R.layout.fragment_comments, container, false);
-
+        commentComponent.inject(this);
+        mActionsListener.setView(this);
         Context context = getContext();
 
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.comments_list);

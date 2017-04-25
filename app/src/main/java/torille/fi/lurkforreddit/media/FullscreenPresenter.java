@@ -9,7 +9,7 @@ import torille.fi.lurkforreddit.utils.TextHelper;
  * Created by eva on 3/3/17.
  */
 
-public class FullscreenPresenter implements FullscreenContract.UserActionsListener {
+public class FullscreenPresenter implements FullscreenContract.Presenter {
 
     private final FullscreenContract.View mFullscreenView;
 

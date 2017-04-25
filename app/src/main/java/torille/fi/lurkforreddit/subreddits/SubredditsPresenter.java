@@ -4,25 +4,29 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import torille.fi.lurkforreddit.data.RedditRepository;
+import javax.inject.Inject;
+
+import timber.log.Timber;
+import torille.fi.lurkforreddit.data.RedditDataSource;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
+import torille.fi.lurkforreddit.data.RedditRepository;
 import torille.fi.lurkforreddit.utils.EspressoIdlingResource;
 
 /**
  * Created by eva on 2/8/17.
  */
 
-public class SubredditsPresenter implements SubredditsContract.UserActionsListener {
+public class SubredditsPresenter implements SubredditsContract.Presenter<SubredditsContract.View> {
 
     private final RedditRepository mRedditRepository;
-    private final SubredditsContract.View mSubredditsView;
+    private SubredditsContract.View mSubredditsView;
 
-    public SubredditsPresenter(@NonNull RedditRepository redditRepository, @NonNull SubredditsContract.View subredditsView) {
+    @Inject
+    public SubredditsPresenter(@NonNull RedditRepository redditRepository) {
         mRedditRepository = redditRepository;
-        mSubredditsView = subredditsView;
     }
 
-    private final RedditRepository.ErrorCallback errorCallback = new RedditRepository.ErrorCallback() {
+    private final RedditDataSource.ErrorCallback errorCallback = new RedditDataSource.ErrorCallback() {
         @Override
         public void onError(String errorText) {
             mSubredditsView.setProgressIndicator(false);
@@ -32,6 +36,7 @@ public class SubredditsPresenter implements SubredditsContract.UserActionsListen
 
     @Override
     public void loadSubreddits(boolean forceUpdate) {
+        Timber.d("Going to fetch subs!");
         mSubredditsView.setProgressIndicator(true);
         if (forceUpdate) {
             mRedditRepository.refreshData();
@@ -40,7 +45,7 @@ public class SubredditsPresenter implements SubredditsContract.UserActionsListen
         // that the appm is busy until the response is handled.
         EspressoIdlingResource.increment(); // App is busy until further notice
 
-        mRedditRepository.getSubreddits(new RedditRepository.LoadSubredditsCallback() {
+        mRedditRepository.getSubreddits(new RedditDataSource.LoadSubredditsCallback() {
             @Override
             public void onSubredditsLoaded(List<Subreddit> subreddits) {
                 EspressoIdlingResource.decrement(); // Set app as idle.
@@ -53,5 +58,15 @@ public class SubredditsPresenter implements SubredditsContract.UserActionsListen
     @Override
     public void openSubreddit(Subreddit subreddit) {
         mSubredditsView.loadSelectedSubreddit(subreddit);
+    }
+
+    @Override
+    public void setView(SubredditsContract.View view) {
+        mSubredditsView = view;
+    }
+
+    @Override
+    public void start() {
+        loadSubreddits(false);
     }
 }

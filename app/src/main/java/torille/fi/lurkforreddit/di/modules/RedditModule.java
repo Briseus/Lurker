@@ -1,10 +1,13 @@
-package torille.fi.lurkforreddit.retrofit;
-
-import com.google.gson.GsonBuilder;
+package torille.fi.lurkforreddit.di.modules;
 
 import java.io.IOException;
 
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
 import okhttp3.Authenticator;
+import okhttp3.Cache;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -15,36 +18,30 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import timber.log.Timber;
-import torille.fi.lurkforreddit.BuildConfig;
-import torille.fi.lurkforreddit.data.models.jsonResponses.MyAdapterFactory;
+import torille.fi.lurkforreddit.data.RedditService;
 import torille.fi.lurkforreddit.utils.NetworkHelper;
-import torille.fi.lurkforreddit.utils.SharedPreferencesHelper;
+import torille.fi.lurkforreddit.utils.Store;
 
 /**
- * Service to create calls to fetch data from Reddit with token refresh
+ * Created by eva on 22.4.2017.
  */
+@Module
+public class RedditModule {
 
-public class RedditService {
+    private final String mBaseUrl;
 
-    private static final String API_BASE_URL = "https://oauth.reddit.com/";
-    private static RedditService instance;
-    private final RedditClient redditClient;
+    public RedditModule(String baseUrl) {
+        this.mBaseUrl = baseUrl;
+    }
 
-    private final static GsonConverterFactory gsonFactory = GsonConverterFactory.create(
-            new GsonBuilder()
-                    .registerTypeAdapterFactory(MyAdapterFactory.create())
-                    .create());
-
-    private final static OkHttpClient okHttpClient = new OkHttpClient();
-
-    private RedditService() {
-
-        final HttpLoggingInterceptor logger = new HttpLoggingInterceptor();
-        if (BuildConfig.DEBUG) {
-            logger.setLevel(HttpLoggingInterceptor.Level.HEADERS);
-        } else {
-            logger.setLevel(HttpLoggingInterceptor.Level.NONE);
-        }
+    @Provides
+    @Singleton
+    public RedditService.Reddit providesRedditService(GsonConverterFactory gsonConverterFactory,
+                                                      OkHttpClient okHttpClient,
+                                                      final Store store,
+                                                      Cache cache,
+                                                      HttpLoggingInterceptor logger,
+                                                      final NetworkHelper networkHelper) {
 
 
         final Authenticator authenticator = new Authenticator() {
@@ -54,7 +51,8 @@ public class RedditService {
                     Timber.e("Too many retries");
                     return null;
                 }
-                String newAccessToken = NetworkHelper.authenticateApp();
+                String newAccessToken = networkHelper.authenticateApp();
+
                 if (newAccessToken.length() < 3) {
                     Timber.e("New token " + newAccessToken + " was too short");
                     return null;
@@ -62,6 +60,14 @@ public class RedditService {
                 return response.request().newBuilder()
                         .addHeader("Authorization", "bearer " + newAccessToken)
                         .build();
+            }
+
+            int responseCount(Response response) {
+                int result = 1;
+                while ((response = response.priorResponse()) != null) {
+                    result++;
+                }
+                return result;
             }
         };
         final Interceptor rawJsonInterceptor = new Interceptor() {
@@ -90,11 +96,11 @@ public class RedditService {
                     return chain.proceed(original);
                 }
 
-                String token = SharedPreferencesHelper.getToken();
+                String token = store.getToken();
 
                 if (token == null || token.isEmpty()) {
                     Timber.d("Token was not set, going to get token");
-                    token = NetworkHelper.getToken();
+                    token = networkHelper.getToken();
                     Timber.d("Got new token " + token);
                 }
 
@@ -106,42 +112,21 @@ public class RedditService {
                 return chain.proceed(request);
             }
         };
-        final Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(API_BASE_URL)
-                .addConverterFactory(gsonFactory)
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(mBaseUrl)
+                .addConverterFactory(gsonConverterFactory)
                 .client(okHttpClient
                         .newBuilder()
+                        .cache(cache)
                         .addNetworkInterceptor(logger)
                         .addNetworkInterceptor(rawJsonInterceptor)
                         .addNetworkInterceptor(tokenInterceptor)
-                        .authenticator(authenticator).build())
+                        .authenticator(authenticator)
+                        .build())
                 .build();
 
-        redditClient = retrofit.create(RedditClient.class);
-    }
-
-    public static RedditClient getInstance() {
-
-        if (instance == null) {
-            instance = new RedditService();
-        }
-        return instance.redditClient;
-    }
-
-    public static OkHttpClient getClient() {
-        return okHttpClient;
-    }
-
-    public static GsonConverterFactory getGsonFactory() {
-        return gsonFactory;
-    }
-
-    private static int responseCount(Response response) {
-        int result = 1;
-        while ((response = response.priorResponse()) != null) {
-            result++;
-        }
-        return result;
+        return retrofit.create(RedditService.Reddit.class);
     }
 
 }

@@ -93,22 +93,6 @@ android {
 dependencies {
 
     // App dependencies
-    annotationProcessor 'com.ryanharter.auto.value:auto-value-gson:0.4.6'
-    provided 'com.ryanharter.auto.value:auto-value-gson:0.4.6'
-    annotationProcessor 'com.ryanharter.auto.value:auto-value-parcel:0.2.5'
-    provided 'com.ryanharter.auto.value:auto-value-parcel-adapter:0.2.5'
-
-    compile 'com.google.code.gson:gson:2.8.0'
-
-    // Fresco dependencies
-    compile "com.facebook.fresco:fresco:$rootProject.ext.frescoVersion"
-    compile "com.facebook.fresco:animated-gif:$rootProject.ext.frescoVersion"
-    compile "com.facebook.fresco:animated-webp:$rootProject.ext.frescoVersion"
-    compile "com.facebook.fresco:webpsupport:$rootProject.ext.frescoVersion"
-    compile "com.facebook.fresco:imagepipeline-okhttp3:$rootProject.ext.frescoVersion"
-    compile "me.relex:photodraweeview:$rootProject.ext.photoDraweeViewVersion"
-
-    // Support libraries
     compile "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
     compile "com.android.support:design:$rootProject.supportLibraryVersion"
     compile "com.android.support:cardview-v7:$rootProject.supportLibraryVersion"
@@ -117,6 +101,25 @@ dependencies {
     compile "com.android.support:support-v4:$rootProject.supportLibraryVersion"
     compile "com.android.support.test.espresso:espresso-idling-resource:$rootProject.ext.espressoVersion"
     compile "com.android.support.constraint:constraint-layout:$rootProject.constraintVersion"
+
+    // Dagger dependencies
+    compile "com.google.dagger:dagger:$rootProject.ext.daggerVersion"
+    annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.ext.daggerVersion"
+
+    // Autovalue dependencies
+    annotationProcessor "com.ryanharter.auto.value:auto-value-gson:$rootProject.ext.autoValueGsonVersion"
+    provided "com.ryanharter.auto.value:auto-value-gson:$rootProject.ext.autoValueGsonVersion"
+    annotationProcessor "com.ryanharter.auto.value:auto-value-parcel:$rootProject.ext.autoValueParcelerVersion"
+    provided "com.ryanharter.auto.value:auto-value-parcel-adapter:$rootProject.ext.autoValueParcelerVersion"
+    compile "com.google.code.gson:gson:$rootProject.ext.gsonVersion"
+
+    // Fresco dependencies
+    compile "com.facebook.fresco:fresco:$rootProject.ext.frescoVersion"
+    compile "com.facebook.fresco:animated-gif:$rootProject.ext.frescoVersion"
+    compile "com.facebook.fresco:animated-webp:$rootProject.ext.frescoVersion"
+    compile "com.facebook.fresco:webpsupport:$rootProject.ext.frescoVersion"
+    compile "com.facebook.fresco:imagepipeline-okhttp3:$rootProject.ext.frescoVersion"
+    compile "me.relex:photodraweeview:$rootProject.ext.photoDraweeViewVersion"
 
     // Exoplayer
     compile "com.google.android.exoplayer:exoplayer:$rootProject.ext.exoplayerVersion"
@@ -127,14 +130,11 @@ dependencies {
     compile "com.squareup.retrofit2:converter-gson:$rootProject.ext.retrofitVersion"
     compile "com.squareup.okhttp3:logging-interceptor:$rootProject.ext.okHttpVersion"
 
+    // Timber and leak canary dependencies
     compile "com.jakewharton.timber:timber:$rootProject.ext.timberVersion"
-
     debugCompile "com.squareup.leakcanary:leakcanary-android:$rootProject.ext.leakCanaryVersion"
     releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:$rootProject.ext.leakCanaryVersion"
     testCompile "com.squareup.leakcanary:leakcanary-android-no-op:$rootProject.ext.leakCanaryVersion"
-
-
-
 
     // Dependencies for local unit tests
     testCompile "junit:junit:$rootProject.ext.junitVersion"
@@ -160,6 +160,7 @@ dependencies. This is required since Espresso internally has a dependency on sup
 */
 configurations.all {
     resolutionStrategy.force "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
+    resolutionStrategy.force 'com.google.code.findbugs:jsr305:3.0.1'
 }
 
 /*

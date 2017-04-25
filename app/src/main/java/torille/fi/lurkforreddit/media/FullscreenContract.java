@@ -19,7 +19,7 @@ public interface FullscreenContract {
         void checkDomain(String url);
     }
 
-    interface UserActionsListener {
+    interface Presenter {
         void checkType(@NonNull String url,
                          @Nullable String previewImageUrl);
     }

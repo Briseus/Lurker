@@ -21,8 +21,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import timber.log.Timber;
-import torille.fi.lurkforreddit.Injection;
+import torille.fi.lurkforreddit.MyApplication;
 import torille.fi.lurkforreddit.R;
 import torille.fi.lurkforreddit.data.models.view.SearchResult;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
@@ -34,7 +36,11 @@ import torille.fi.lurkforreddit.subreddit.SubredditActivity;
 
 public class SearchFragment extends Fragment implements SearchContract.View {
 
-    private SearchContract.UserActionsListener mActionsListener;
+    @Inject
+    SearchContract.Presenter<SearchContract.View> mActionsListener;
+
+    SearchComponent mSearchComponent;
+
     private SearchViewAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     private boolean loading;
@@ -46,8 +52,9 @@ public class SearchFragment extends Fragment implements SearchContract.View {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActionsListener = new SearchPresenter(Injection.provideRedditRepository(),
-                this);
+        mSearchComponent = DaggerSearchComponent.builder()
+                .redditRepositoryComponent(((MyApplication) getActivity().getApplication()).getmRedditRepositoryComponent())
+                .build();
         mAdapter = new SearchViewAdapter(
                 new ArrayList<SearchResult>(0),
                 searchClickListener);
@@ -57,7 +64,8 @@ public class SearchFragment extends Fragment implements SearchContract.View {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_search, container, false);
-
+        mSearchComponent.inject(this);
+        mActionsListener.setView(this);
         mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 

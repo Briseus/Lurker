@@ -10,7 +10,9 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 import torille.fi.lurkforreddit.data.RedditRepository;
+import torille.fi.lurkforreddit.data.RedditDataSource;
 import torille.fi.lurkforreddit.data.models.view.Comment;
+import torille.fi.lurkforreddit.data.models.view.Post;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
@@ -27,6 +29,9 @@ public class CommentPresenterTest {
     private List<Comment> mockComments;
 
     @Mock
+    private Post clickedPost;
+
+    @Mock
     private Comment mockParentComment;
 
     @Mock
@@ -36,10 +41,10 @@ public class CommentPresenterTest {
     private CommentContract.View mCommentView;
 
     @Captor
-    private ArgumentCaptor<RedditRepository.LoadPostCommentsCallback> loadPostCommentsCallbackArgumentCaptor;
+    private ArgumentCaptor<RedditDataSource.LoadPostCommentsCallback> loadPostCommentsCallbackArgumentCaptor;
 
     @Captor
-    private ArgumentCaptor<RedditRepository.ErrorCallback> loadErrorCallbackArgumentCaptor;
+    private ArgumentCaptor<RedditDataSource.ErrorCallback> loadErrorCallbackArgumentCaptor;
 
     private CommentPresenter mCommentPresenter;
 
@@ -47,7 +52,8 @@ public class CommentPresenterTest {
     public void setupCommentPresenter() {
         MockitoAnnotations.initMocks(this);
 
-        mCommentPresenter = new CommentPresenter(mRedditRepository, mCommentView);
+        mCommentPresenter = new CommentPresenter(mRedditRepository, clickedPost);
+        mCommentPresenter.setView(mCommentView);
     }
 
     @Test
