@@ -79,7 +79,7 @@ public class SubredditActivity extends AppCompatActivity {
 
     }
 
-    void searchForReddit(String subredditName) {
+    private void searchForReddit(String subredditName) {
         Timber.d("Searching for " + subredditName);
         Call<SubredditChildren> call = mRedditApi.get().getSubredditInfo(subredditName);
 
@@ -110,7 +110,7 @@ public class SubredditActivity extends AppCompatActivity {
         });
     }
 
-    void handleIntent(Intent intent) {
+    private void handleIntent(Intent intent) {
         if (intent != null) {
             String subredditName = intent.getStringExtra(EXTRA_SUBREDDITNAME);
             if (subredditName != null) {

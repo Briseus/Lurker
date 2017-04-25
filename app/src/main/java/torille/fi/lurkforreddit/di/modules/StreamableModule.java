@@ -18,7 +18,7 @@ import torille.fi.lurkforreddit.data.StreamableService;
 @Module
 public class StreamableModule {
 
-    private String mBaseUrl;
+    private final String mBaseUrl;
 
     public StreamableModule(@NonNull String baseUrl) {
         this.mBaseUrl = baseUrl;

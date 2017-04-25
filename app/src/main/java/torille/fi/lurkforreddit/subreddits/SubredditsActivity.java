@@ -45,10 +45,10 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
     private static final String RESPONSE_TYPE = "code";
     private static final String DURATION = "permanent";
     private static final String SCOPE = "identity,mysubreddits,read,account";
-    private String CLIENT_ID;
 
     @Inject
     Store store;
+
     @Inject
     RedditService.Auth mRedditAuthApi;
 
@@ -219,7 +219,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
     }
 
     private void logIn() {
-        CLIENT_ID = getResources().getString(R.string.client_id);
+        String CLIENT_ID = getResources().getString(R.string.client_id);
 
         //TODO Switch to constant
         final String url = "https://www.reddit.com/api/v1/"

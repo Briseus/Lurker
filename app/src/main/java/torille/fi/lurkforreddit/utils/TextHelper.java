@@ -311,7 +311,7 @@ public class TextHelper {
         return source.subSequence(0, i + 1);
     }
 
-    public static CharSequence formatTextToHtml(String bodyText) {
+    private static CharSequence formatTextToHtml(String bodyText) {
         if (bodyText == null) {
             return "";
         }

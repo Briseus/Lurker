@@ -39,7 +39,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
     @Inject
     SearchContract.Presenter<SearchContract.View> mActionsListener;
 
-    SearchComponent mSearchComponent;
+    private SearchComponent mSearchComponent;
 
     private SearchViewAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
@@ -138,7 +138,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         Toast.makeText(getContext(), errorText, Toast.LENGTH_SHORT).show();
     }
 
-    final SearchClickListener searchClickListener = new SearchClickListener() {
+    private final SearchClickListener searchClickListener = new SearchClickListener() {
         @Override
         public void onSearchClick(@NonNull Subreddit subreddit) {
             Intent intent = new Intent(getContext(), SubredditActivity.class);

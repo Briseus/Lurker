@@ -63,9 +63,6 @@ public class MyApplication extends Application {
 
         Fresco.initialize(this, config);
 
-
-        //SharedPreferencesHelper.init(this);
-
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }

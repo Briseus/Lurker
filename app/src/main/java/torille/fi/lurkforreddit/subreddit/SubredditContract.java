@@ -7,7 +7,6 @@ import java.util.List;
 import torille.fi.lurkforreddit.BasePresenter;
 import torille.fi.lurkforreddit.BaseView;
 import torille.fi.lurkforreddit.data.models.view.Post;
-import torille.fi.lurkforreddit.subreddits.SubredditsContract;
 
 /**
  * This specifies the contract between the view and the presenter.

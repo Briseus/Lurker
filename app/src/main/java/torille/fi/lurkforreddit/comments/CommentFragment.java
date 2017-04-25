@@ -44,7 +44,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
     private static final String ARGUMENT_CLICKED_POST = "post";
 
-    CommentComponent commentComponent;
+    private CommentComponent commentComponent;
 
     @Inject
     CommentContract.Presenter<CommentContract.View> mActionsListener;
@@ -197,7 +197,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
     /**
      * Listener for clicks on notes in the RecyclerView.
      */
-    final CommentClickListener mClickListener = new CommentClickListener() {
+    private final CommentClickListener mClickListener = new CommentClickListener() {
         @Override
         public void onClick(Comment parentComment, String linkId, int position) {
             mActionsListener.loadMoreCommentsAt(parentComment, linkId, position);

@@ -334,11 +334,11 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     @Override
     public void checkDomain(String url) {
         Uri uri = Uri.parse(url);
-
         switch (uri.getHost()) {
             case "gfycat.com":
                 final String[] gfy = url.split("g", 2);
                 final String gfyUri = "https://thumbs.g" + gfy[1] + "-mobile.mp4";
+
                 showVideo(gfyUri);
                 break;
             case "streamable.com":

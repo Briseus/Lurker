@@ -34,7 +34,7 @@ import torille.fi.lurkforreddit.subreddit.SubredditActivity;
 
 public class SubredditsFragment extends Fragment implements SubredditsContract.View {
 
-    SubredditsComponent subredditsComponent;
+    private SubredditsComponent subredditsComponent;
 
     @Inject
     SubredditsContract.Presenter<SubredditsContract.View> mActionsListener;
@@ -93,7 +93,7 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     /**
      * Listener for clicks on notes in the RecyclerView.
      */
-    final SubredditItemListener mItemListener = new SubredditItemListener() {
+    private final SubredditItemListener mItemListener = new SubredditItemListener() {
         @Override
         public void onSubredditClick(Subreddit subreddit) {
             mActionsListener.openSubreddit(subreddit);
@@ -137,12 +137,12 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
         private List<Subreddit> mSubreddits;
         private SubredditItemListener mItemListener;
-        private final int mDefaultColor;
+        private final ColorStateList mDefaultColor;
 
         SubredditsAdapter(List<Subreddit> subreddits, SubredditItemListener itemListener, int color) {
             setList(subreddits);
             mItemListener = itemListener;
-            mDefaultColor = color;
+            mDefaultColor = ColorStateList.valueOf(color);
             setHasStableIds(true);
         }
 
@@ -160,9 +160,9 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
             String keyColor = subreddit.keyColor();
             viewHolder.title.setText(subreddit.displayName());
             if (keyColor != null && !keyColor.isEmpty()) {
-                viewHolder.colorButton.getBackground().setTint(Color.parseColor(keyColor));
+                viewHolder.colorButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(keyColor)));
             } else {
-                viewHolder.colorButton.getBackground().setTint(mDefaultColor);
+                viewHolder.colorButton.setBackgroundTintList(mDefaultColor);
             }
 
         }

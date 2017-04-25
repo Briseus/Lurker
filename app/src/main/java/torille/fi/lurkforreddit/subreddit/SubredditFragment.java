@@ -58,7 +58,8 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     @Inject
     SubredditContract.Presenter<SubredditContract.View> mActionsListener;
-    SubredditComponent subredditComponent;
+
+    private SubredditComponent subredditComponent;
 
     private PostsAdapter mListAdapter;
     private LinearLayoutManager mLayoutManager;
@@ -202,7 +203,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     /**
      * Listeners for clicks in the Recyclerview
      */
-    final postClickListener mClickListener = new postClickListener() {
+    private final postClickListener mClickListener = new postClickListener() {
         @Override
         public void onButtonClick(String url) {
             mActionsListener.openCustomTabs(url);
