@@ -123,7 +123,6 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     @Override
     public void onPause() {
         super.onPause();
-        Fresco.getImagePipeline().clearMemoryCaches();
         Timber.d("Pausing");
     }
 
@@ -131,6 +130,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     public void onDestroy() {
         super.onDestroy();
         Timber.d("Destroying");
+        disposables.dispose();
     }
 
     @Override
@@ -145,7 +145,6 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
         if (player != null) {
             player.release();
         }
-        disposables.dispose();
     }
 
     @Nullable

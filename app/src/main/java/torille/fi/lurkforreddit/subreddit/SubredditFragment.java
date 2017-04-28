@@ -175,14 +175,13 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     @Override
     public void onStart() {
         super.onStart();
-        setProgressIndicator(false);
         mCustomTabActivityHelper.bindCustomTabsService(getActivity());
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        Fresco.getImagePipeline().clearMemoryCaches();
+        setProgressIndicator(false);
         mCustomTabActivityHelper.unbindCustomTabsService(getActivity());
     }
 

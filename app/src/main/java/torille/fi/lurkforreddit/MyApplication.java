@@ -1,6 +1,7 @@
 package torille.fi.lurkforreddit;
 
 import android.app.Application;
+import android.content.ComponentCallbacks2;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory;
@@ -67,6 +68,17 @@ public class MyApplication extends Application {
             Timber.plant(new Timber.DebugTree());
         }
 
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        // App went to background
+        if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+            Timber.d("App went to background, clearing fresco memory cache");
+            // Fresco recommends to clear bitmap cache when app is backgrounded
+            Fresco.getImagePipeline().clearMemoryCaches();
+        }
     }
 
     public RedditRepositoryComponent getmRedditRepositoryComponent() {
