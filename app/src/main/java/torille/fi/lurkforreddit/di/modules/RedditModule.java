@@ -42,7 +42,8 @@ public class RedditModule {
                                                       final Store store,
                                                       Cache cache,
                                                       HttpLoggingInterceptor logger,
-                                                      final NetworkHelper networkHelper) {
+                                                      final NetworkHelper networkHelper,
+                                                      RxJava2CallAdapterFactory rxJava2CallAdapterFactory) {
 
 
         final Authenticator authenticator = new Authenticator() {
@@ -117,7 +118,7 @@ public class RedditModule {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(mBaseUrl)
                 .addConverterFactory(gsonConverterFactory)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addCallAdapterFactory(rxJava2CallAdapterFactory)
                 .client(okHttpClient
                         .newBuilder()
                         .cache(cache)

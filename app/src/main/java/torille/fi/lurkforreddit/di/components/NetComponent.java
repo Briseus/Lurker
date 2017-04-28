@@ -6,13 +6,13 @@ import dagger.Component;
 import okhttp3.OkHttpClient;
 import torille.fi.lurkforreddit.MyApplication;
 import torille.fi.lurkforreddit.data.RedditService;
+import torille.fi.lurkforreddit.data.VideositeService;
 import torille.fi.lurkforreddit.di.modules.AppModule;
 import torille.fi.lurkforreddit.di.modules.NetModule;
 import torille.fi.lurkforreddit.di.modules.RedditAuthModule;
 import torille.fi.lurkforreddit.di.modules.RedditModule;
 import torille.fi.lurkforreddit.di.modules.StreamableModule;
 import torille.fi.lurkforreddit.media.FullscreenFragment;
-import torille.fi.lurkforreddit.data.StreamableService;
 import torille.fi.lurkforreddit.subreddit.SubredditActivity;
 import torille.fi.lurkforreddit.subreddits.SubredditsActivity;
 import torille.fi.lurkforreddit.utils.Store;
@@ -38,7 +38,7 @@ public interface NetComponent {
 
     RedditService.Reddit redditApi();
 
-    StreamableService streamableApi();
+    VideositeService.Streamable streamableApi();
 
     void inject(MyApplication application);
 

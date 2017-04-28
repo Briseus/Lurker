@@ -9,8 +9,9 @@ import dagger.Provides;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import torille.fi.lurkforreddit.data.StreamableService;
+import torille.fi.lurkforreddit.data.VideositeService;
 
 /**
  * Created by eva on 25.4.2017.
@@ -26,18 +27,20 @@ public class StreamableModule {
 
     @Singleton
     @Provides
-    StreamableService provideStreamableApi(OkHttpClient okHttpClient,
-                                           GsonConverterFactory gsonConverterFactory,
-                                           HttpLoggingInterceptor loggingInterceptor) {
+    VideositeService.Streamable provideStreamableApi(OkHttpClient okHttpClient,
+                                                     GsonConverterFactory gsonConverterFactory,
+                                                     HttpLoggingInterceptor loggingInterceptor,
+                                                     RxJava2CallAdapterFactory rxJava2CallAdapterFactory) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(mBaseUrl)
                 .addConverterFactory(gsonConverterFactory)
+                .addCallAdapterFactory(rxJava2CallAdapterFactory)
                 .client(okHttpClient.newBuilder()
                         .addNetworkInterceptor(loggingInterceptor)
                         .build())
                 .build();
 
-        return retrofit.create(StreamableService.class);
+        return retrofit.create(VideositeService.Streamable.class);
     }
 
 }

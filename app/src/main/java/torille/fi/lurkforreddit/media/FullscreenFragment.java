@@ -48,15 +48,16 @@ import com.google.android.exoplayer2.util.Util;
 import javax.inject.Inject;
 
 import dagger.Lazy;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 import me.relex.photodraweeview.PhotoDraweeView;
 import okhttp3.OkHttpClient;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import timber.log.Timber;
 import torille.fi.lurkforreddit.MyApplication;
 import torille.fi.lurkforreddit.R;
-import torille.fi.lurkforreddit.data.StreamableService;
+import torille.fi.lurkforreddit.data.VideositeService;
 import torille.fi.lurkforreddit.data.models.jsonResponses.ImageResolution;
 import torille.fi.lurkforreddit.data.models.jsonResponses.StreamableVideo;
 
@@ -78,8 +79,10 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     private View mView;
     private SimpleExoPlayer player;
 
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
     @Inject
-    Lazy<StreamableService> mStreamableApi;
+    Lazy<VideositeService.Streamable> mStreamableApi;
 
     @Inject
     Lazy<OkHttpClient> mOkHttpClient;
@@ -142,6 +145,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
         if (player != null) {
             player.release();
         }
+        disposables.dispose();
     }
 
     @Nullable
@@ -299,36 +303,37 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
     @Override
     public void showStreamableVideo(String identifier) {
-        Call<StreamableVideo> call = mStreamableApi.get().getVideo(identifier);
-
-        call.enqueue(new Callback<StreamableVideo>() {
-            @Override
-            public void onResponse(Call<StreamableVideo> call, Response<StreamableVideo> response) {
-                if (response.isSuccessful()) {
-                    // comes in
-                    Timber.d(response.toString());
-                    String videoUrl = "https:";
-                    ImageResolution mobileVideo = response.body().videos().mobileVideo();
-                    if (mobileVideo != null) {
-                        videoUrl = videoUrl + mobileVideo.url();
-                    } else {
-                        videoUrl = videoUrl + response.body().videos().video().url();
+        disposables.add(mStreamableApi.get().getVideo(identifier)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<StreamableVideo>() {
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull StreamableVideo streamableVideo) {
+                        String videoUrl = "https:";
+                        ImageResolution mobileVideo = streamableVideo.videos().mobileVideo();
+                        if (mobileVideo != null) {
+                            videoUrl = videoUrl + mobileVideo.url();
+                        } else {
+                            videoUrl = videoUrl + streamableVideo.videos().video().url();
+                        }
+                        Timber.d("Got streamable with url " + videoUrl);
+                        if (videoUrl.equals("https:")) {
+                            onError(new Throwable("No video found"));
+                        } else {
+                            showVideo(videoUrl);
+                        }
                     }
-                    Timber.d("Got streamable with url " + videoUrl);
-                    if (videoUrl.equals("https:")) {
-                        onFailure(call, new Throwable("No video found"));
-                    } else {
-                        showVideo(videoUrl);
+
+                    @Override
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                        Toast.makeText(getContext(), e.toString(), Toast.LENGTH_LONG).show();
                     }
 
-                }
-            }
+                    @Override
+                    public void onComplete() {
 
-            @Override
-            public void onFailure(Call<StreamableVideo> call, Throwable t) {
-                Toast.makeText(getContext(), t.toString(), Toast.LENGTH_LONG).show();
-            }
-        });
+                    }
+                }));
     }
 
     @Override

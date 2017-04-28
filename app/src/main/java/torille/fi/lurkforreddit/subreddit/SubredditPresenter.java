@@ -144,7 +144,6 @@ public class SubredditPresenter implements SubredditContract.Presenter<Subreddit
 
     @Override
     public void dispose() {
-        mSubredditsView.setProgressIndicator(false);
         disposables.dispose();
     }
 }

@@ -174,6 +174,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     @Override
     public void onStart() {
         super.onStart();
+        setProgressIndicator(false);
         mCustomTabActivityHelper.bindCustomTabsService(getActivity());
     }
 
@@ -181,14 +182,13 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     public void onStop() {
         super.onStop();
         Fresco.getImagePipeline().clearMemoryCaches();
-        mActionsListener.dispose();
         mCustomTabActivityHelper.unbindCustomTabsService(getActivity());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        mActionsListener.dispose();
     }
 
     private String getSubredditUrl() {
