@@ -62,6 +62,12 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
         mActionsListener.start();
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        mActionsListener.dispose();
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,18 +75,21 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
         View root = inflater.inflate(R.layout.fragment_subreddits, container, false);
         subredditsComponent.inject(this);
         mActionsListener.setView(this);
+
+        Context context = getContext();
+
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.subreddits_list);
         recyclerView.setAdapter(mListAdapter);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
         // Pull-to-refresh
         SwipeRefreshLayout swipeRefreshLayout =
                 (SwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
         swipeRefreshLayout.setColorSchemeColors(
-                ContextCompat.getColor(getActivity(), R.color.colorPrimary),
-                ContextCompat.getColor(getActivity(), R.color.colorAccent),
-                ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+                ContextCompat.getColor(context, R.color.colorPrimary),
+                ContextCompat.getColor(context, R.color.colorAccent),
+                ContextCompat.getColor(context, R.color.colorPrimaryDark));
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {

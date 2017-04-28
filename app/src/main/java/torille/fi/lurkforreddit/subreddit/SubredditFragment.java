@@ -87,7 +87,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         super.onCreate(savedInstanceState);
         Subreddit subreddit = getArguments().getParcelable(ARGUMENT_SUBREDDIT);
         subredditComponent = DaggerSubredditComponent.builder()
-                .redditRepositoryComponent(((MyApplication)getActivity().getApplication()).getmRedditRepositoryComponent())
+                .redditRepositoryComponent(((MyApplication) getActivity().getApplication()).getmRedditRepositoryComponent())
                 .subredditPresenterModule(new SubredditPresenterModule(subreddit))
                 .build();
         mListAdapter = new PostsAdapter(new ArrayList<Post>(25),
@@ -180,7 +180,15 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
     @Override
     public void onStop() {
         super.onStop();
+        Fresco.getImagePipeline().clearMemoryCaches();
+        mActionsListener.dispose();
         mCustomTabActivityHelper.unbindCustomTabsService(getActivity());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
     }
 
     private String getSubredditUrl() {
@@ -308,7 +316,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         private final int mDefaultAccentColor;
         private final ImagePipeline imagePipeline;
 
-        PostsAdapter(List<Post> posts, postClickListener listener, int color, ImagePipeline pipeline) {
+        PostsAdapter(@NonNull List<Post> posts, @NonNull postClickListener listener, int color, @NonNull ImagePipeline pipeline) {
             mPosts = posts;
             mClicklistener = listener;
             mDefaultAccentColor = color;

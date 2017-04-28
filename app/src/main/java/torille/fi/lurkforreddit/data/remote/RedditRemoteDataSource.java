@@ -1,30 +1,36 @@
 package torille.fi.lurkforreddit.data.remote;
 
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.google.gson.stream.JsonReader;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.BiFunction;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import timber.log.Timber;
 import torille.fi.lurkforreddit.data.RedditDataSource;
+import torille.fi.lurkforreddit.data.RedditService;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
+import torille.fi.lurkforreddit.data.models.jsonResponses.MultiredditListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostListing;
-import torille.fi.lurkforreddit.data.models.jsonResponses.PostResponse;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditListing;
 import torille.fi.lurkforreddit.data.models.view.Comment;
-import torille.fi.lurkforreddit.data.RedditService;
+import torille.fi.lurkforreddit.data.models.view.Post;
+import torille.fi.lurkforreddit.data.models.view.SearchResult;
+import torille.fi.lurkforreddit.data.models.view.Subreddit;
 import torille.fi.lurkforreddit.di.scope.RedditScope;
 import torille.fi.lurkforreddit.utils.CommentsStreamingParser;
 import torille.fi.lurkforreddit.utils.Store;
@@ -46,83 +52,98 @@ public class RedditRemoteDataSource implements RedditDataSource {
         mSettingsStore = store;
     }
 
+    Observable<List<Subreddit>> getUserMultireddits() {
+        return mRedditApi.getUserMultireddits()
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .map(new Function<MultiredditListing[], List<Subreddit>>() {
+                    @Override
+                    public List<Subreddit> apply(@io.reactivex.annotations.NonNull MultiredditListing[] multireddits) throws Exception {
+                        List<Subreddit> multies = new ArrayList<Subreddit>();
+                        for (MultiredditListing multireddit : multireddits) {
+                            Timber.d(multireddit.toString());
+                            multies.add(TextHelper.formatSubreddit(multireddit.multireddit()));
+                        }
+                        return multies;
+                    }
+                });
+    }
+
+    Observable<List<Subreddit>> getUserSubreddits() {
+        return mRedditApi.getMySubreddits(200)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .map(new Function<SubredditListing, List<Subreddit>>() {
+                    @Override
+                    public List<Subreddit> apply(@io.reactivex.annotations.NonNull SubredditListing subredditListing) throws Exception {
+                        return TextHelper.formatSubreddits(subredditListing.data().children());
+                    }
+                });
+    }
+
     @Override
-    public void getSubreddits(@NonNull final LoadSubredditsCallback callback, @NonNull final ErrorCallback errorCallback) {
+    public Observable<List<Subreddit>> getSubreddits() {
         Timber.d("Fetching subs!");
-        Call<SubredditListing> call;
+
 
         if (mSettingsStore.isLoggedIn()) {
             Timber.d("Was logged in, getting personal subreddits");
-            call = mRedditApi.getMySubreddits(100);
+            return Observable.zip(getUserSubreddits(), getUserMultireddits(),
+                    new BiFunction<List<Subreddit>, List<Subreddit>, List<Subreddit>>() {
+                        @Override
+                        public List<Subreddit> apply(@io.reactivex.annotations.NonNull List<Subreddit> subreddits, @io.reactivex.annotations.NonNull List<Subreddit> subreddits2) throws Exception {
+                            List<Subreddit> combinedList = new ArrayList<Subreddit>(subreddits.size() + subreddits2.size());
+                            combinedList.addAll(subreddits);
+                            combinedList.addAll(subreddits2);
+                            return combinedList;
+                        }
+                    })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread());
         } else {
             Timber.d("Was not logged in, getting default subreddits");
-            call = mRedditApi.getDefaultSubreddits(100);
+            return mRedditApi.getDefaultSubreddits(100)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.computation())
+                    .map(new Function<SubredditListing, List<Subreddit>>() {
+                        @Override
+                        public List<Subreddit> apply(@io.reactivex.annotations.NonNull SubredditListing subredditListing) throws Exception {
+                            return TextHelper.formatSubreddits(subredditListing.data().children());
+                        }
+                    });
         }
-
-        call.enqueue(new Callback<SubredditListing>() {
-            @Override
-            public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
-                List<SubredditChildren> responseSubreddits = response.body().data().children();
-                if (response.isSuccessful() && responseSubreddits != null) {
-                    callback.onSubredditsLoaded(TextHelper.formatSubreddits(responseSubreddits));
-
-                }
-            }
-
-            @Override
-            public void onFailure(Call<SubredditListing> call, Throwable t) {
-                Timber.e("Failed to get subreddits " + t.toString());
-                errorCallback.onError(t.toString());
-            }
-        });
     }
 
     @Override
-    public void getSubredditPosts(@NonNull String subredditUrl, @NonNull final LoadSubredditPostsCallback callback, @NonNull final ErrorCallback errorCallback) {
-        Call<PostListing> call = mRedditApi.getSubreddit(subredditUrl);
-        call.enqueue(new Callback<PostListing>() {
-            @Override
-            public void onResponse(Call<PostListing> call, Response<PostListing> response) {
-                List<PostResponse> posts = response.body().data().Posts();
-                if (response.isSuccessful() && posts != null) {
-                    String nextpage = response.body().data().nextPage();
-                    Timber.d("Got " + posts.size() + " posts");
+    public Observable<Pair<String, List<Post>>> getSubredditPosts(@NonNull String subredditUrl) {
 
-                    callback.onPostsLoaded(TextHelper.formatPosts(posts), nextpage);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PostListing> call, Throwable t) {
-                Timber.e("Failed to get subreddit posts " + t.toString());
-                errorCallback.onError(t.toString());
-            }
-        });
+        return mRedditApi
+                .getSubreddit(subredditUrl)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .map(new Function<PostListing, Pair<String, List<Post>>>() {
+                    @Override
+                    public Pair<String, List<Post>> apply(@io.reactivex.annotations.NonNull PostListing postListing) throws Exception {
+                        List<Post> results = TextHelper.formatPosts(postListing.data().Posts());
+                        String nextPageId = postListing.data().nextPage();
+                        return new Pair<String, List<Post>>(nextPageId, results);
+                    }
+                });
     }
 
     @Override
-    public void getMoreSubredditPosts(@NonNull String subredditUrl, @NonNull String nextpageId, @NonNull final LoadSubredditPostsCallback callback, @NonNull final ErrorCallback errorCallback) {
-        Timber.d("Getting more posts!");
-        Call<PostListing> call = mRedditApi.getSubredditNextPage(subredditUrl, nextpageId);
-
-        call.enqueue(new Callback<PostListing>() {
-            @Override
-            public void onResponse(Call<PostListing> call, Response<PostListing> response) {
-                List<PostResponse> posts = response.body().data().Posts();
-                if (response.isSuccessful() && posts != null) {
-                    String nextpage = response.body().data().nextPage();
-                    Timber.d("Got " + posts.size() + " posts");
-
-                    callback.onPostsLoaded(TextHelper.formatPosts(posts), nextpage);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PostListing> call, Throwable t) {
-                Timber.e("Failed to get subreddit posts " + t.toString());
-                errorCallback.onError(t.toString());
-            }
-        });
+    public Observable<Pair<String, List<Post>>> getMoreSubredditPosts(@NonNull String subredditUrl, @NonNull String nextpageId) {
+        return mRedditApi.getSubredditNextPage(subredditUrl, nextpageId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .map(new Function<PostListing, Pair<String, List<Post>>>() {
+                    @Override
+                    public Pair<String, List<Post>> apply(@io.reactivex.annotations.NonNull PostListing postListing) throws Exception {
+                        List<Post> results = TextHelper.formatPosts(postListing.data().Posts());
+                        String nextPageId = postListing.data().nextPage();
+                        return new Pair<String, List<Post>>(nextPageId, results);
+                    }
+                });
     }
 
     @Override
@@ -131,108 +152,81 @@ public class RedditRemoteDataSource implements RedditDataSource {
     }
 
     @Override
-    public void getCommentsForPost(@NonNull String permaLinkUrl, @NonNull final LoadPostCommentsCallback callback, @NonNull final ErrorCallback errorCallback) {
-        Call<ResponseBody> call = mRedditApi.getComments(permaLinkUrl);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try (InputStream stream = response.body().byteStream();
-                         InputStreamReader in = new InputStreamReader(stream, "UTF-8");
-                         JsonReader reader = new JsonReader(in)) {
+    public Observable<List<Comment>> getCommentsForPost(@NonNull String permaLinkUrl) {
+        return mRedditApi.getComments(permaLinkUrl)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .map(new Function<ResponseBody, List<Comment>>() {
+                    @Override
+                    public List<Comment> apply(@io.reactivex.annotations.NonNull ResponseBody responseBody) throws Exception {
+                        try (InputStream stream = responseBody.byteStream();
+                             InputStreamReader in = new InputStreamReader(stream, "UTF-8");
+                             JsonReader reader = new JsonReader(in)) {
 
-                        List<CommentChild> commentChildList = CommentsStreamingParser
-                                .readCommentListingArray(reader)
-                                .get(1)
-                                .commentData()
-                                .commentChildren();
-                        List<Comment> commentChildFlatList = TextHelper
-                                .flatten(commentChildList, 0);
-                        callback.onCommentsLoaded(commentChildFlatList);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                            List<CommentChild> commentChildList = CommentsStreamingParser
+                                    .readCommentListingArray(reader)
+                                    .get(1)
+                                    .commentData()
+                                    .commentChildren();
+
+                            return TextHelper.flatten(commentChildList, 0);
+                        }
                     }
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Timber.e("Something went wrong fetching comments " + t.toString());
-                errorCallback.onError(t.toString());
-            }
-        });
+                });
     }
 
     @Override
-    public void getMoreCommentsForPostAt(@NonNull final Comment parentComment, @NonNull String linkId, final int position, @NonNull final LoadPostCommentsCallback callback, @NonNull final ErrorCallback errorCallback) {
-        Call<ResponseBody> call = mRedditApi.getMoreComments(linkId,
-                TextUtils.join(",", parentComment.childCommentIds()),
-                "json");
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try (InputStream stream = response.body().byteStream();
-                     InputStreamReader in = new InputStreamReader(stream, "UTF-8");
-                     JsonReader reader = new JsonReader(in)) {
+    public Observable<List<Comment>> getMoreCommentsForPostAt(@NonNull List<String> childCommentIds,
+                                                              @NonNull String linkId,
+                                                              final int commentLevel) {
+        return mRedditApi.getMoreComments(linkId,
+                TextUtils.join(",", childCommentIds),
+                "json")
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .map(new Function<ResponseBody, List<Comment>>() {
+                    @Override
+                    public List<Comment> apply(@io.reactivex.annotations.NonNull ResponseBody responseBody) throws Exception {
+                        try (InputStream stream = responseBody.byteStream();
+                             InputStreamReader in = new InputStreamReader(stream, "UTF-8");
+                             JsonReader reader = new JsonReader(in)) {
 
-                    List<CommentChild> additionalComments = CommentsStreamingParser
-                            .readMoreComments(reader);
-                    List<Comment> additionalFlattenedComments = TextHelper
-                            .flattenAdditionalComments(additionalComments, parentComment.commentLevel());
-                    callback.onMoreCommentsLoaded(additionalFlattenedComments, position);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                errorCallback.onError(t.toString());
-            }
-        });
+                            List<CommentChild> additionalComments = CommentsStreamingParser
+                                    .readMoreComments(reader);
+                            return TextHelper
+                                    .flattenAdditionalComments(additionalComments, commentLevel);
+                        }
+                    }
+                });
     }
 
     @Override
-    public void getSearchResults(@NonNull String query, @NonNull final LoadCommentsCallback callback, @NonNull final ErrorCallback errorCallback) {
-        Call<SubredditListing> call = mRedditApi.searchSubreddits(query, "relevance");
-        call.enqueue(new Callback<SubredditListing>() {
-            @Override
-            public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
-                List<SubredditChildren> results = response.body().data().children();
-                String after = response.body().data().after();
-                callback.onSearchLoaded(TextHelper.formatSearchResults(results), after);
-            }
-
-            @Override
-            public void onFailure(Call<SubredditListing> call, Throwable t) {
-                Timber.e("Failed to load seach results " + t.toString());
-                errorCallback.onError(t.toString());
-            }
-        });
+    public Observable<Pair<String, List<SearchResult>>> getSearchResults(@NonNull String query) {
+        return mRedditApi.searchSubreddits(query, "relevance")
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .map(new Function<SubredditListing, Pair<String, List<SearchResult>>>() {
+                    @Override
+                    public Pair<String, List<SearchResult>> apply(@io.reactivex.annotations.NonNull SubredditListing subredditListing) throws Exception {
+                        List<SubredditChildren> results = subredditListing.data().children();
+                        String after = subredditListing.data().after();
+                        return new Pair<String, List<SearchResult>>(after, TextHelper.formatSearchResults(results));
+                    }
+                });
     }
 
     @Override
-    public void getMoreSearchResults(@NonNull String query, @NonNull String after, @NonNull final LoadCommentsCallback callback, @NonNull final ErrorCallback errorCallback) {
-        Call<SubredditListing> call = mRedditApi.searchSubredditsNextPage(query,
-                "relevance",
-                after);
-        call.enqueue(new Callback<SubredditListing>() {
-            @Override
-            public void onResponse(Call<SubredditListing> call, Response<SubredditListing> response) {
-                if (response.isSuccessful()) {
-                    List<SubredditChildren> results = response.body().data().children();
-                    String after = response.body().data().after();
-                    callback.onSearchLoaded(TextHelper.formatSearchResults(results), after);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<SubredditListing> call, Throwable t) {
-                Timber.e("Failed to load more seach results " + t.toString());
-                errorCallback.onError(t.toString());
-            }
-        });
+    public Observable<Pair<String, List<SearchResult>>> getMoreSearchResults(@NonNull String query, @NonNull String afterId) {
+        return mRedditApi.searchSubredditsNextPage(query, "relevance", afterId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .map(new Function<SubredditListing, Pair<String, List<SearchResult>>>() {
+                    @Override
+                    public Pair<String, List<SearchResult>> apply(@io.reactivex.annotations.NonNull SubredditListing subredditListing) throws Exception {
+                        List<SubredditChildren> results = subredditListing.data().children();
+                        String after = subredditListing.data().after();
+                        return new Pair<String, List<SearchResult>>(after, TextHelper.formatSearchResults(results));
+                    }
+                });
     }
 }

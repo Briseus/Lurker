@@ -38,16 +38,6 @@ public class SubredditsPresenterTest {
     @Mock
     private SubredditsContract.View mSubredditsView;
 
-    /**
-     * {@link ArgumentCaptor} is a powerful Mockito API to capture argument values and use them to
-     * perform further actions or assertions on them.
-     */
-    @Captor
-    private ArgumentCaptor<RedditDataSource.LoadSubredditsCallback> loadSubredditsCallbackArgumentCaptor;
-
-    @Captor
-    private ArgumentCaptor<RedditDataSource.ErrorCallback> loadErrorCallbackArgumentCaptor;
-
     private SubredditsPresenter mSubredditsPresenter;
 
     @Before
@@ -64,8 +54,8 @@ public class SubredditsPresenterTest {
     public void loadSubredditsFromRepositoryAndLoadIntoView() {
         mSubredditsPresenter.loadSubreddits(true);
 
-        verify(mRedditRepository).getSubreddits(loadSubredditsCallbackArgumentCaptor.capture(), loadErrorCallbackArgumentCaptor.capture());
-        loadSubredditsCallbackArgumentCaptor.getValue().onSubredditsLoaded(SUBREDDITS);
+        //verify(mRedditRepository).getSubreddits(loadSubredditsCallbackArgumentCaptor.capture(), loadErrorCallbackArgumentCaptor.capture());
+        //loadSubredditsCallbackArgumentCaptor.getValue().onSubredditsLoaded(SUBREDDITS);
 
         verify(mSubredditsView).setProgressIndicator(false);
         verify(mSubredditsView).showSubreddits(SUBREDDITS);

@@ -65,9 +65,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
         final BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
-        SubredditFragment subredditFragment = (SubredditFragment) getSupportFragmentManager().findFragmentById(R.id.content);
-
-        if (subredditFragment == null) {
+        if (savedInstanceState == null) {
             getFrontPageFragment();
 
         }
@@ -84,6 +82,7 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
     }
 
     private void getFrontPageFragment() {
+
         Subreddit frontpage = Subreddit.builder()
                 .setUrl("")
                 .setBannerUrl("")

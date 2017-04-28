@@ -118,6 +118,12 @@ public class SearchFragment extends Fragment implements SearchContract.View {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mActionsListener.dispose();
+    }
+
+    @Override
     public void showResults(@NonNull List<SearchResult> results) {
         loading = false;
         mAdapter.addResults(results);
@@ -214,6 +220,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         void addProgressBar() {
             Subreddit subreddit = Subreddit.builder()
                     .build();
+
             SearchResult dummy = SearchResult.builder()
                     .setSubscriptionInfo("")
                     .setInfoText("")

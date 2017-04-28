@@ -22,9 +22,6 @@ public class CommentActivity extends AppCompatActivity {
 
     public static final String EXTRA_CLICKED_POST = "post";
 
-    /*@Inject
-    CommentPresenter mCommentPresenter;*/
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,12 +50,7 @@ public class CommentActivity extends AppCompatActivity {
             initFragment(commentFragment);
 
         }
-        /*DaggerCommentComponent.builder()
-                .commentPresenterModule(new CommentPresenterModule(originalPost))
-                .redditRepositoryComponent(((MyApplication) getApplicationContext()).getmRedditRepositoryComponent())
-                .build()
-                .inject(this);
-*/
+
     }
 
     private void initFragment(Fragment commentFragment) {

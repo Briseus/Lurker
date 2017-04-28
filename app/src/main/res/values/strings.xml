@@ -30,4 +30,7 @@
     <string name="toast_login_success">Logged in</string>
     <string name="toast_login_failed">Failed to log in </string>
     <string name="toast_logout_success">Logged out</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

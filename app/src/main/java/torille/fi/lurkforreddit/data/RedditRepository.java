@@ -1,11 +1,16 @@
 package torille.fi.lurkforreddit.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import torille.fi.lurkforreddit.data.models.view.Comment;
 import torille.fi.lurkforreddit.data.models.view.Post;
 import torille.fi.lurkforreddit.data.models.view.SearchResult;
@@ -20,6 +25,7 @@ public class RedditRepository implements RedditDataSource {
 
     private final RedditDataSource mRedditRemoteApi;
 
+    @Nullable
     private List<Subreddit> mCachedSubreddits;
 
     @Inject
@@ -28,38 +34,34 @@ public class RedditRepository implements RedditDataSource {
     }
 
     @Override
-    public void getSubreddits(@NonNull final LoadSubredditsCallback callback, @NonNull ErrorCallback errorCallback) {
+    public Observable<List<Subreddit>> getSubreddits() {
         if (mCachedSubreddits == null) {
-            mRedditRemoteApi.getSubreddits(new LoadSubredditsCallback() {
-                @Override
-                public void onSubredditsLoaded(List<Subreddit> subreddits) {
-                    mCachedSubreddits = subreddits;
-                    callback.onSubredditsLoaded(mCachedSubreddits);
-                }
-            }, errorCallback);
+            return mRedditRemoteApi.getSubreddits()
+                    .flatMap(new Function<List<Subreddit>, Observable<List<Subreddit>>>() {
+                        @Override
+                        public Observable<List<Subreddit>> apply(@io.reactivex.annotations.NonNull List<Subreddit> subreddits) throws Exception {
+                            return Observable.fromArray(subreddits)
+                                    .doOnNext(new Consumer<List<Subreddit>>() {
+                                        @Override
+                                        public void accept(@io.reactivex.annotations.NonNull List<Subreddit> subreddits) throws Exception {
+                                            mCachedSubreddits = subreddits;
+                                        }
+                                    });
+                        }
+                    });
         } else {
-            callback.onSubredditsLoaded(mCachedSubreddits);
+            return  Observable.fromArray(mCachedSubreddits);
         }
     }
 
     @Override
-    public void getSubredditPosts(@NonNull String subredditUrl, @NonNull final LoadSubredditPostsCallback callback, @NonNull final ErrorCallback errorCallback) {
-        mRedditRemoteApi.getSubredditPosts(subredditUrl, new LoadSubredditPostsCallback() {
-            @Override
-            public void onPostsLoaded(List<Post> posts, String nextpage) {
-                callback.onPostsLoaded(posts, nextpage);
-            }
-        }, errorCallback);
+    public Observable<Pair<String, List<Post>>> getSubredditPosts(@NonNull String subredditUrl) {
+        return mRedditRemoteApi.getSubredditPosts(subredditUrl);
     }
 
     @Override
-    public void getMoreSubredditPosts(@NonNull String subredditUrl, @NonNull String nextpageId, @NonNull final LoadSubredditPostsCallback callback, @NonNull ErrorCallback errorCallback) {
-        mRedditRemoteApi.getMoreSubredditPosts(subredditUrl, nextpageId, new LoadSubredditPostsCallback() {
-            @Override
-            public void onPostsLoaded(List<Post> posts, String nextpage) {
-                callback.onPostsLoaded(posts, nextpage);
-            }
-        }, errorCallback);
+    public Observable<Pair<String, List<Post>>> getMoreSubredditPosts(@NonNull String subredditUrl, @NonNull String nextpageId) {
+        return mRedditRemoteApi.getMoreSubredditPosts(subredditUrl, nextpageId);
     }
 
     @Override
@@ -68,52 +70,24 @@ public class RedditRepository implements RedditDataSource {
     }
 
     @Override
-    public void getCommentsForPost(@NonNull String permaLinkUrl, @NonNull final LoadPostCommentsCallback callback, @NonNull ErrorCallback errorCallback) {
-        mRedditRemoteApi.getCommentsForPost(permaLinkUrl, new LoadPostCommentsCallback() {
-            @Override
-            public void onCommentsLoaded(List<Comment> comments) {
-                callback.onCommentsLoaded(comments);
-            }
-
-            @Override
-            public void onMoreCommentsLoaded(List<Comment> comments, int position) {
-
-            }
-        }, errorCallback);
+    public Observable<List<Comment>> getCommentsForPost(@NonNull String permaLinkUrl) {
+        return mRedditRemoteApi.getCommentsForPost(permaLinkUrl);
     }
 
     @Override
-    public void getMoreCommentsForPostAt(@NonNull Comment parentComment, @NonNull String linkId, int position, @NonNull final LoadPostCommentsCallback callback, @NonNull ErrorCallback errorCallback) {
-        mRedditRemoteApi.getMoreCommentsForPostAt(parentComment, linkId, position, new LoadPostCommentsCallback() {
-            @Override
-            public void onCommentsLoaded(List<Comment> comments) {
-
-            }
-
-            @Override
-            public void onMoreCommentsLoaded(List<Comment> comments, int position) {
-                callback.onMoreCommentsLoaded(comments, position);
-            }
-        }, errorCallback);
+    public Observable<List<Comment>> getMoreCommentsForPostAt(@NonNull List<String> childCommentIds,
+                                                              @NonNull String linkId,
+                                                              int commentLevel) {
+        return mRedditRemoteApi.getMoreCommentsForPostAt(childCommentIds, linkId, commentLevel);
     }
 
     @Override
-    public void getSearchResults(@NonNull String query, @NonNull final LoadCommentsCallback callback, @NonNull ErrorCallback errorCallback) {
-        mRedditRemoteApi.getSearchResults(query, new LoadCommentsCallback() {
-            @Override
-            public void onSearchLoaded(List<SearchResult> results, String after) {
-                callback.onSearchLoaded(results, after);
-            }
-        }, errorCallback);
+    public Observable<Pair<String, List<SearchResult>>> getSearchResults(@NonNull String query) {
+        return mRedditRemoteApi.getSearchResults(query);
     }
 
     @Override
-    public void getMoreSearchResults(@NonNull String query, @NonNull String after, @NonNull final LoadCommentsCallback callback, @NonNull ErrorCallback errorCallback) {
-        mRedditRemoteApi.getMoreSearchResults(query, after, new LoadCommentsCallback() {
-            @Override
-            public void onSearchLoaded(List<SearchResult> results, String after) {
-                callback.onSearchLoaded(results, after);
-            }
-        }, errorCallback);
+    public Observable<Pair<String, List<SearchResult>>> getMoreSearchResults(@NonNull String query, @NonNull String afterId) {
+        return mRedditRemoteApi.getMoreSearchResults(query, afterId);
     }
 }

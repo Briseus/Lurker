@@ -6,7 +6,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import torille.fi.lurkforreddit.data.RedditDataSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 import torille.fi.lurkforreddit.data.RedditRepository;
 import torille.fi.lurkforreddit.data.models.view.Comment;
 import torille.fi.lurkforreddit.data.models.view.Post;
@@ -23,6 +27,8 @@ public class CommentPresenter implements CommentContract.Presenter<CommentContra
 
     private final Post mPost;
 
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
     @Inject
     CommentPresenter(@NonNull RedditRepository redditRepository,
                      @NonNull Post clickedPost) {
@@ -33,49 +39,59 @@ public class CommentPresenter implements CommentContract.Presenter<CommentContra
     @Override
     public void loadComments(@NonNull String permaLinkUrl) {
         mCommentsView.setProgressIndicator(true);
-        mRedditRepository.getCommentsForPost(permaLinkUrl, new RedditDataSource.LoadPostCommentsCallback() {
-            @Override
-            public void onCommentsLoaded(List<Comment> comments) {
-                mCommentsView.setProgressIndicator(false);
-                mCommentsView.showComments(comments);
-            }
+        disposables.add(mRedditRepository.getCommentsForPost(permaLinkUrl)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<List<Comment>>() {
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull List<Comment> comments) {
+                        mCommentsView.showComments(comments);
+                    }
 
-            @Override
-            public void onMoreCommentsLoaded(List<Comment> comments, int position) {
+                    @Override
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                        Timber.e(e);
+                        mCommentsView.showError(e.toString());
+                    }
 
-            }
-        }, new RedditDataSource.ErrorCallback() {
-            @Override
-            public void onError(String errorText) {
-                mCommentsView.setProgressIndicator(false);
-                mCommentsView.showError(errorText);
-            }
-        });
+                    @Override
+                    public void onComplete() {
+                        Timber.d("Fetched comments");
+                        mCommentsView.setProgressIndicator(false);
+                    }
+                }));
     }
 
     @Override
     public void loadMoreCommentsAt(Comment parentComment, String linkId, final int position) {
         final int level = parentComment.commentLevel();
         mCommentsView.showProgressbarAt(position, level);
+        List<String> childCommentIds = parentComment.childCommentIds();
+        if (childCommentIds != null) {
+            disposables.add(mRedditRepository.getMoreCommentsForPostAt(childCommentIds, linkId, parentComment.commentLevel())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableObserver<List<Comment>>() {
+                        @Override
+                        public void onNext(@io.reactivex.annotations.NonNull List<Comment> comments) {
+                            mCommentsView.hideProgressbarAt(position);
+                            mCommentsView.addCommentsAt(comments, position);
+                        }
 
-        mRedditRepository.getMoreCommentsForPostAt(parentComment, linkId, position, new RedditDataSource.LoadPostCommentsCallback() {
-            @Override
-            public void onCommentsLoaded(List<Comment> comments) {
+                        @Override
+                        public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                            Timber.e(e);
+                            mCommentsView.showErrorAt(position);
+                        }
 
-            }
-
-            @Override
-            public void onMoreCommentsLoaded(List<Comment> comments, int position) {
-                mCommentsView.hideProgressbarAt(position);
-                mCommentsView.addCommentsAt(comments, position);
-            }
-        }, new RedditDataSource.ErrorCallback() {
-            @Override
-            public void onError(String errorText) {
-                mCommentsView.showError(errorText);
-                mCommentsView.showErrorAt(position);
-            }
-        });
+                        @Override
+                        public void onComplete() {
+                            Timber.d("Fetching more comments completed");
+                        }
+                    }));
+        } else {
+            mCommentsView.showError("How did you get here?");
+        }
     }
 
     @Override
@@ -86,5 +102,10 @@ public class CommentPresenter implements CommentContract.Presenter<CommentContra
     @Override
     public void start() {
         loadComments(mPost.permaLink());
+    }
+
+    @Override
+    public void dispose() {
+        disposables.dispose();
     }
 }

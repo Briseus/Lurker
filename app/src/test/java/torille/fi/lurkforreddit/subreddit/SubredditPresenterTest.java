@@ -1,23 +1,26 @@
 package torille.fi.lurkforreddit.subreddit;
 
+import android.util.Pair;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
 import torille.fi.lurkforreddit.data.RedditRepository;
-import torille.fi.lurkforreddit.data.RedditDataSource;
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditResponse;
 import torille.fi.lurkforreddit.data.models.view.Post;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the implementation of {@link SubredditPresenter}
@@ -100,8 +103,8 @@ public class SubredditPresenterTest {
             .setCreatedUtc(10)
             .build();
 
-    @Mock
-    private static List<Post> POSTS;
+
+    private List<Post> POSTS = new ArrayList<>();
 
     @Mock
     private Post clickedPost;
@@ -118,12 +121,6 @@ public class SubredditPresenterTest {
     @Mock
     private SubredditContract.View mSubredditView;
 
-    @Captor
-    private ArgumentCaptor<RedditDataSource.LoadSubredditPostsCallback> mLoadPostsCallbackArgumentCaptor;
-
-    @Captor
-    private ArgumentCaptor<RedditDataSource.ErrorCallback> loadErrorCallbackArgumentCaptor;
-
     private SubredditPresenter mSubredditPresenter;
 
     @Before
@@ -136,13 +133,11 @@ public class SubredditPresenterTest {
 
     @Test
     public void loadPostsFromRepositoryAndLoadIntoView() {
+
+
+        Pair<String, List<Post>> posts = new Pair<String, List<Post>>(AFTER, POSTS);
+        //when(mRedditRepository.getSubredditPosts(anyString())).thenReturn(posts);
         mSubredditPresenter.loadPosts(SUBREDDIT_WORLDNEWS.url());
-
-        verify(mRedditRepository).getSubredditPosts(any(String.class),
-                mLoadPostsCallbackArgumentCaptor.capture(),
-                loadErrorCallbackArgumentCaptor.capture());
-        mLoadPostsCallbackArgumentCaptor.getValue().onPostsLoaded(POSTS, AFTER);
-
         verify(mSubredditView).setProgressIndicator(false);
         verify(mSubredditView).showPosts(POSTS, AFTER);
     }
@@ -151,11 +146,11 @@ public class SubredditPresenterTest {
     public void loadMorePostsFromRepositoryAndLoadIntoView() {
         mSubredditPresenter.loadMorePosts(SUBREDDIT_WORLDNEWS.url(), AFTER);
 
-        verify(mRedditRepository).getMoreSubredditPosts(any(String.class),
-                any(String.class),
-                mLoadPostsCallbackArgumentCaptor.capture(),
-                loadErrorCallbackArgumentCaptor.capture());
-        mLoadPostsCallbackArgumentCaptor.getValue().onPostsLoaded(POSTS, AFTER);
+        // verify(mRedditRepository).getMoreSubredditPosts(any(String.class),
+        //        any(String.class),
+        //        mLoadPostsCallbackArgumentCaptor.capture(),
+        //        loadErrorCallbackArgumentCaptor.capture());
+        // mLoadPostsCallbackArgumentCaptor.getValue().onPostsLoaded(POSTS, AFTER);
 
         verify(mSubredditView).setListProgressIndicator(false);
         verify(mSubredditView).addMorePosts(POSTS, AFTER);

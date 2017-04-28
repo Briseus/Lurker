@@ -16,9 +16,5 @@ public interface RedditRepositoryComponent {
 
     RedditRepository provideRedditRepository();
 
-    Store provideSettingsStore();
-
-    RedditService.Reddit redditApi();
-
     void inject(SubredditsActivity activity);
 }

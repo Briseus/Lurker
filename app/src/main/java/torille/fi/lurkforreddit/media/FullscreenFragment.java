@@ -120,8 +120,8 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     @Override
     public void onPause() {
         super.onPause();
+        Fresco.getImagePipeline().clearMemoryCaches();
         Timber.d("Pausing");
-        releaseVideoPlayer();
     }
 
     @Override

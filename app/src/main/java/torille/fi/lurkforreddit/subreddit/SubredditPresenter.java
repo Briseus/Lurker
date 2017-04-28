@@ -1,13 +1,17 @@
 package torille.fi.lurkforreddit.subreddit;
 
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
-import torille.fi.lurkforreddit.data.RedditDataSource;
 import torille.fi.lurkforreddit.data.RedditRepository;
 import torille.fi.lurkforreddit.data.models.view.Post;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
@@ -25,6 +29,8 @@ public class SubredditPresenter implements SubredditContract.Presenter<Subreddit
     private SubredditContract.View mSubredditsView;
 
     private final Subreddit mSubreddit;
+
+    private final CompositeDisposable disposables = new CompositeDisposable();
 
     @Inject
     SubredditPresenter(@NonNull RedditRepository redditRepository,
@@ -65,22 +71,31 @@ public class SubredditPresenter implements SubredditContract.Presenter<Subreddit
         // The network request might be handled in a different thread so make sure Espresso knows
         // that the appm is busy until the response is handled.
         EspressoIdlingResource.increment(); // App is busy until further notice
+        disposables.add(mRedditRepository.getSubredditPosts(subredditUrl)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Pair<String, List<Post>>>() {
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull Pair<String, List<Post>> posts) {
+                        Timber.d("Got posts to presenter");
+                        mSubredditsView.showPosts(posts.second, posts.first);
+                    }
 
-        mRedditRepository.getSubredditPosts(subredditUrl,
-                new RedditDataSource.LoadSubredditPostsCallback() {
                     @Override
-                    public void onPostsLoaded(List<Post> posts, String nextpage) {
-                        EspressoIdlingResource.decrement(); // Set app as idle.
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                        Timber.d("Got error");
+                        mSubredditsView.onError(e.toString());
                         mSubredditsView.setProgressIndicator(false);
-                        mSubredditsView.showPosts(posts, nextpage);
                     }
-                }, new RedditDataSource.ErrorCallback() {
+
                     @Override
-                    public void onError(String errorText) {
+                    public void onComplete() {
+                        Timber.d("Completed");
+                        EspressoIdlingResource.decrement();
                         mSubredditsView.setProgressIndicator(false);
-                        mSubredditsView.onError(errorText);
                     }
-                });
+                })
+        );
 
     }
 
@@ -90,23 +105,30 @@ public class SubredditPresenter implements SubredditContract.Presenter<Subreddit
 
         EspressoIdlingResource.increment();
         Timber.d("Fetching more posts at " + subredditUrl + " id " + nextpage);
-        mRedditRepository.getMoreSubredditPosts(subredditUrl,
-                nextpage,
-                new RedditDataSource.LoadSubredditPostsCallback() {
+        disposables.add(mRedditRepository.getMoreSubredditPosts(subredditUrl, nextpage)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Pair<String, List<Post>>>() {
                     @Override
-                    public void onPostsLoaded(List<Post> posts, String nextpage) {
-                        EspressoIdlingResource.decrement();
+                    public void onNext(@io.reactivex.annotations.NonNull Pair<String, List<Post>> postsPair) {
+                        Timber.d("Completed22");
                         mSubredditsView.setListProgressIndicator(false);
-                        mSubredditsView.addMorePosts(posts, nextpage);
+                        mSubredditsView.addMorePosts(postsPair.second, postsPair.first);
                     }
 
-                }, new RedditDataSource.ErrorCallback() {
                     @Override
-                    public void onError(String errorText) {
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                        mSubredditsView.onError(e.toString());
                         mSubredditsView.setListProgressIndicator(false);
-                        mSubredditsView.onError(errorText);
                     }
-                });
+
+                    @Override
+                    public void onComplete() {
+                        Timber.d("Completed2222222");
+                        EspressoIdlingResource.decrement();
+                    }
+                }));
+
     }
 
     @Override
@@ -118,5 +140,11 @@ public class SubredditPresenter implements SubredditContract.Presenter<Subreddit
     @Override
     public void start() {
         loadPosts(mSubreddit.url());
+    }
+
+    @Override
+    public void dispose() {
+        mSubredditsView.setProgressIndicator(false);
+        disposables.dispose();
     }
 }

@@ -108,6 +108,12 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         loadIfEmpty();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mActionsListener.dispose();
+    }
+
     private void loadIfEmpty() {
         if (mCommentAdapter.getItemCount() == 1) {
             mActionsListener.start();

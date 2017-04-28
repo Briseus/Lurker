@@ -12,6 +12,7 @@ import java.util.List;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentResponse;
+import torille.fi.lurkforreddit.data.models.jsonResponses.MultiredditListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostResponse;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren;
@@ -127,7 +128,7 @@ public class TextHelper {
             //check if its a normal comment or "load more comments" comment
             flatList.add(comment);
             CommentListing commentListing = commentResponse.replies();
-            if (commentListing!= null && commentListing.commentData() != null) {
+            if (commentListing != null && commentListing.commentData() != null) {
                 List<Comment> replyList = flattenHelper(commentListing.commentData().commentChildren(), flatList, level + 1);
                 comment.withReplies(replyList);
             }
@@ -198,6 +199,17 @@ public class TextHelper {
         }
 
         return formattedPosts;
+    }
+
+    public static Subreddit formatSubreddit(MultiredditListing.Multireddit multireddit) {
+
+        return Subreddit.builder()
+                .setUrl(multireddit.pathUrl())
+                .setBannerUrl(null)
+                .setId(multireddit.name())
+                .setKeyColor(multireddit.keyColor())
+                .setDisplayName(multireddit.displayName())
+                .build();
     }
 
     public static Subreddit formatSubreddit(SubredditChildren subredditChildren) {

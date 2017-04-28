@@ -68,6 +68,7 @@ public class SubredditActivity extends AppCompatActivity {
                 .findFragmentById(R.id.contentFrame);
 
         if (subreddit == null) {
+            initFragment(ProgressFragment.newInstance());
             handleIntent(intent);
         } else if (subredditFragment == null) {
             Timber.d(subreddit.toString());
@@ -150,7 +151,7 @@ public class SubredditActivity extends AppCompatActivity {
         // Add the NotesDetailFragment to the layout
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.contentFrame, fragment);
+        transaction.replace(R.id.contentFrame, fragment);
         transaction.commit();
     }
 

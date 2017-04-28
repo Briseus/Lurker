@@ -1,5 +1,6 @@
 package torille.fi.lurkforreddit.data;
 
+import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Field;
@@ -8,6 +9,7 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import torille.fi.lurkforreddit.data.models.jsonResponses.MultiredditListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.RedditToken;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren;
@@ -36,28 +38,37 @@ public interface RedditService {
 
     interface Reddit {
         @GET("subreddits/mine/subscriber")
-        Call<SubredditListing> getMySubreddits(@Query("limit") int count);
+        Observable<SubredditListing> getMySubreddits(@Query("limit") int count);
 
         @GET("subreddits/default")
-        Call<SubredditListing> getDefaultSubreddits(@Query("limit") int count);
+        Observable<SubredditListing> getDefaultSubreddits(@Query("limit") int count);
+
+        @GET("/api/multi/mine")
+        Observable<MultiredditListing[]> getUserMultireddits();
+
+        @GET("me/m/{multipath}")
+        Call<ResponseBody> getMultiRedditData(@Path(value = "multipath", encoded = true) String multiPath);
+
+        @GET("me/m/{multipath}")
+        Call<ResponseBody> getMultiRedditDataNextPage(@Path(value = "multipath", encoded = true) String multiPath, @Query("after") String afterPage);
 
         @GET("{subreddit}")
-        Call<PostListing> getSubreddit(@Path(value = "subreddit", encoded = true) String subredditUrl);
+        Observable<PostListing> getSubreddit(@Path(value = "subreddit", encoded = true) String subredditUrl);
 
         @GET("{subreddit}")
-        Call<PostListing> getSubredditNextPage(@Path(value = "subreddit", encoded = true) String subredditUrl, @Query("after") String afterPage);
+        Observable<PostListing> getSubredditNextPage(@Path(value = "subreddit", encoded = true) String subredditUrl, @Query("after") String afterPageId);
 
         @GET("{comments}")
-        Call<ResponseBody> getComments(@Path(value = "comments", encoded = true) String commentUrl);
+        Observable<ResponseBody> getComments(@Path(value = "comments", encoded = true) String commentUrl);
 
         @GET("api/morechildren")
-        Call<ResponseBody> getMoreComments(@Query(value = "link_id") String parentId, @Query(value = "children") String childId, @Query(value = "api_type") String json);
+        Observable<ResponseBody> getMoreComments(@Query(value = "link_id") String parentId, @Query(value = "children") String childId, @Query(value = "api_type") String json);
 
         @GET("subreddits/search")
-        Call<SubredditListing> searchSubreddits(@Query(value = "q") String searchQuery, @Query(value = "sort") String sortBy);
+        Observable<SubredditListing> searchSubreddits(@Query(value = "q") String searchQuery, @Query(value = "sort") String sortBy);
 
         @GET("subreddits/search")
-        Call<SubredditListing> searchSubredditsNextPage(@Query(value = "q") String searchQuery, @Query(value = "sort") String sortBy, @Query(value = "after") String after);
+        Observable<SubredditListing> searchSubredditsNextPage(@Query(value = "q") String searchQuery, @Query(value = "sort") String sortBy, @Query(value = "after") String after);
 
         @GET("{subreddit}/about")
         Call<SubredditChildren> getSubredditInfo(@Path(value = "subreddit", encoded = true) String subredditName);
