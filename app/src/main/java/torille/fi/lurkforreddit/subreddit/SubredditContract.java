@@ -33,6 +33,8 @@ public interface SubredditContract {
         void launchCustomActivity(Post clickedPost);
 
         void onError(String errorText);
+
+        void setListErrorButton(boolean active);
     }
 
     interface Presenter<T extends BaseView> extends BasePresenter<View> {
@@ -46,5 +48,7 @@ public interface SubredditContract {
         void loadPosts(@NonNull String subredditUrl);
 
         void loadMorePosts(@NonNull String subredditUrl, @NonNull String nextpage);
+
+        void retry();
     }
 }

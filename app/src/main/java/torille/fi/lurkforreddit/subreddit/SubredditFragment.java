@@ -45,6 +45,7 @@ import torille.fi.lurkforreddit.utils.DisplayHelper;
 import torille.fi.lurkforreddit.utils.MediaHelper;
 
 import static android.view.View.GONE;
+import static android.view.View.resolveSize;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -226,6 +227,11 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         public void onMediaClick(Post post) {
             mActionsListener.openMedia(post);
         }
+
+        @Override
+        public void onRetryClick() {
+            mActionsListener.retry();
+        }
     };
 
     @Override
@@ -306,10 +312,19 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
     }
 
+    @Override
+    public void setListErrorButton(boolean active) {
+        mListAdapter.setListLoadingError(active);
+    }
+
 
     private static class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final static int VIEW_ITEM = 1;
         private final static int VIEW_PROGRESS = 0;
+        private final static int VIEW_ERROR = 2;
+
+        private final static String PROGRESSBAR = "progressbar";
+        private final static String ERROR = "error";
 
         private final List<Post> mPosts;
         private final postClickListener mClicklistener;
@@ -330,6 +345,9 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 case VIEW_ITEM:
                     return new PostViewHolder(LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.item_post, parent, false));
+                case VIEW_ERROR:
+                    return new ErrorViewHolder(LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.item_error, parent, false));
                 case VIEW_PROGRESS:
                 default:
                     return new ProgressViewHolder(LayoutInflater.from(parent.getContext())
@@ -374,8 +392,10 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
         @Override
         public int getItemViewType(int position) {
-            if (mPosts.get(position).id().equals("Progressbar")) {
+            if (mPosts.get(position).id().equals(PROGRESSBAR)) {
                 return VIEW_PROGRESS;
+            } else if (mPosts.get(position).id().equals(ERROR)) {
+                return VIEW_ERROR;
             } else {
                 return VIEW_ITEM;
             }
@@ -416,24 +436,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         void setRefreshing(boolean active) {
             final int index = mPosts.size() - 1;
             if (active) {
-                Post dummy = Post.builder()
-                        .setDomain("")
-                        .setUrl("")
-                        .setId("Progressbar")
-                        .setScore("")
-                        .setSelfText(null)
-                        .setPreviewImage("")
-                        .setThumbnail("")
-                        .setTitle("")
-                        .setNumberOfComments("")
-                        .setIsSelf(false)
-                        .setPermaLink("")
-                        .setCreatedUtc(0)
-                        .setAuthor("")
-                        .build();
-
-                mPosts.add(dummy);
-
+                mPosts.add(createPost(PROGRESSBAR));
                 android.os.Handler handler = new android.os.Handler();
                 handler.post(new Runnable() {
                     @Override
@@ -448,6 +451,36 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
             }
 
+        }
+
+        void setListLoadingError(boolean active) {
+            final int index = mPosts.size() - 1;
+            if (active) {
+                mPosts.set(index, createPost(ERROR));
+                notifyItemChanged(index);
+            } else {
+                mPosts.remove(index);
+                notifyItemRemoved(index);
+            }
+
+        }
+
+        private Post createPost(@NonNull String id) {
+            return Post.builder()
+                    .setDomain("")
+                    .setUrl("")
+                    .setId(id)
+                    .setScore("")
+                    .setSelfText(null)
+                    .setPreviewImage("")
+                    .setThumbnail("")
+                    .setTitle("")
+                    .setNumberOfComments("")
+                    .setIsSelf(false)
+                    .setPermaLink("")
+                    .setCreatedUtc(0)
+                    .setAuthor("")
+                    .build();
         }
 
         @Override
@@ -546,6 +579,21 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
         }
 
+        private class ErrorViewHolder extends RecyclerView.ViewHolder {
+            final Button retryButton;
+
+            ErrorViewHolder(View v) {
+                super(v);
+                retryButton = (Button) v.findViewById(R.id.button);
+                retryButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mClicklistener.onRetryClick();
+                    }
+                });
+            }
+        }
+
         private static class ProgressViewHolder extends RecyclerView.ViewHolder {
             final ProgressBar progressBar;
 
@@ -564,5 +612,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
         void onMediaClick(Post post);
 
+        void onRetryClick();
     }
 }

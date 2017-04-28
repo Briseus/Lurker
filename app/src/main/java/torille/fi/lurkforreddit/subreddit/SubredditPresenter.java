@@ -29,7 +29,8 @@ public class SubredditPresenter implements SubredditContract.Presenter<Subreddit
     private SubredditContract.View mSubredditsView;
 
     private final Subreddit mSubreddit;
-
+    private String nextPageId;
+    
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     @Inject
@@ -78,6 +79,7 @@ public class SubredditPresenter implements SubredditContract.Presenter<Subreddit
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull Pair<String, List<Post>> posts) {
                         Timber.d("Got posts to presenter");
+                        nextPageId = posts.first;
                         mSubredditsView.showPosts(posts.second, posts.first);
                     }
 
@@ -100,7 +102,7 @@ public class SubredditPresenter implements SubredditContract.Presenter<Subreddit
     }
 
     @Override
-    public void loadMorePosts(@NonNull String subredditUrl, @NonNull String nextpage) {
+    public void loadMorePosts(@NonNull String subredditUrl, @NonNull final String nextpage) {
         mSubredditsView.setListProgressIndicator(true);
 
         EspressoIdlingResource.increment();
@@ -111,24 +113,30 @@ public class SubredditPresenter implements SubredditContract.Presenter<Subreddit
                 .subscribeWith(new DisposableObserver<Pair<String, List<Post>>>() {
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull Pair<String, List<Post>> postsPair) {
-                        Timber.d("Completed22");
+                        nextPageId = postsPair.first;
                         mSubredditsView.setListProgressIndicator(false);
                         mSubredditsView.addMorePosts(postsPair.second, postsPair.first);
+
                     }
 
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
                         mSubredditsView.onError(e.toString());
-                        mSubredditsView.setListProgressIndicator(false);
+                        mSubredditsView.setListErrorButton(true);
                     }
 
                     @Override
                     public void onComplete() {
-                        Timber.d("Completed2222222");
                         EspressoIdlingResource.decrement();
                     }
                 }));
 
+    }
+
+    @Override
+    public void retry() {
+        mSubredditsView.setListErrorButton(false);
+        loadMorePosts(mSubreddit.url(), nextPageId);
     }
 
     @Override
