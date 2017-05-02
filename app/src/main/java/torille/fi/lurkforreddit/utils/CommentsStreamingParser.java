@@ -1,5 +1,7 @@
 package torille.fi.lurkforreddit.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 
@@ -7,10 +9,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentResponse;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentData;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing;
+import torille.fi.lurkforreddit.data.models.jsonResponses.MyAdapterFactory;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostResponse;
 
 /**
  * Utility classes to stream parse {@link CommentListing} Json and nested models
@@ -18,6 +24,9 @@ import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing;
 
 public final class CommentsStreamingParser {
 
+    private static Gson gson = new GsonBuilder()
+            .registerTypeAdapterFactory(MyAdapterFactory.create())
+            .create();
     /**
      * End point to read more comment api response
      *
@@ -96,12 +105,7 @@ public final class CommentsStreamingParser {
             String name = reader.nextName();
             if (name.equals("kind")) {
                 kind = reader.nextString();
-                /*
-                 * Return null for kind that are not really comments
-                 */
-                if (kind.equals("t3")) {
-                    return null;
-                }
+
             } else if (name.equals("data") && reader.peek() != JsonToken.NULL) {
                 commentData = readCommentData(reader);
             } else {
@@ -158,6 +162,7 @@ public final class CommentsStreamingParser {
     private static CommentChild readCommentChild(JsonReader reader) throws IOException {
         String kind = null;
         CommentResponse comment = null;
+        PostDetails postDetails = null;
 
         reader.beginObject();
         while (reader.hasNext()) {
@@ -167,7 +172,11 @@ public final class CommentsStreamingParser {
                     kind = reader.nextString();
                     break;
                 case "data":
-                    comment = readComment(reader);
+                    if (kind != null && kind.equals("t3")) {
+                        postDetails = gson.fromJson(reader, PostDetails.class);
+                    } else {
+                        comment = readComment(reader);
+                    }
                     break;
                 default:
                     reader.skipValue();
@@ -175,7 +184,7 @@ public final class CommentsStreamingParser {
             }
         }
         reader.endObject();
-        return CommentChild.create(kind, comment);
+        return CommentChild.create(kind, comment, postDetails);
 
     }
 

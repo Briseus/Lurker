@@ -13,15 +13,18 @@ import torille.fi.lurkforreddit.data.models.view.Post;
 public class CommentPresenterModule {
 
     private final Post mPost;
+    private final boolean mIsSingleCommentThread;
 
-    public CommentPresenterModule(Post post) {
+    public CommentPresenterModule(Post post, boolean isSingleCommentThread) {
         mPost = post;
+        mIsSingleCommentThread = isSingleCommentThread;
     }
 
     @Provides
     CommentContract.Presenter<CommentContract.View> provideCommentContractPresenter(RedditRepository repository,
-                                                                                    Post post) {
-        return new CommentPresenter(repository, post);
+                                                                                    Post post,
+                                                                                    boolean isSingleCommentThread) {
+        return new CommentPresenter(repository, post, isSingleCommentThread);
     }
 
     @Provides
@@ -29,4 +32,6 @@ public class CommentPresenterModule {
         return mPost;
     }
 
+    @Provides
+    boolean provideIsSingleCommentThread() { return mIsSingleCommentThread;}
 }

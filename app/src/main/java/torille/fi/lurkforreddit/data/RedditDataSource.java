@@ -8,6 +8,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import torille.fi.lurkforreddit.data.models.view.Comment;
 import torille.fi.lurkforreddit.data.models.view.Post;
+import torille.fi.lurkforreddit.data.models.view.PostAndComments;
 import torille.fi.lurkforreddit.data.models.view.SearchResult;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
 
@@ -25,7 +26,7 @@ public interface RedditDataSource {
 
     void refreshData();
 
-    Observable<List<Comment>> getCommentsForPost(@NonNull String permaLinkUrl);
+    Observable<PostAndComments> getCommentsForPost(@NonNull String permaLinkUrl, boolean isSingleCommentThread);
 
     Observable<List<Comment>> getMoreCommentsForPostAt(@NonNull List<String> childCommentIds,
                                                        @NonNull String linkId,

@@ -23,12 +23,15 @@ import timber.log.Timber;
 import torille.fi.lurkforreddit.data.RedditDataSource;
 import torille.fi.lurkforreddit.data.RedditService;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.MultiredditListing;
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditListing;
 import torille.fi.lurkforreddit.data.models.view.Comment;
 import torille.fi.lurkforreddit.data.models.view.Post;
+import torille.fi.lurkforreddit.data.models.view.PostAndComments;
 import torille.fi.lurkforreddit.data.models.view.SearchResult;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
 import torille.fi.lurkforreddit.di.scope.RedditScope;
@@ -52,7 +55,7 @@ public class RedditRemoteDataSource implements RedditDataSource {
         mSettingsStore = store;
     }
 
-    Observable<List<Subreddit>> getUserMultireddits() {
+    private Observable<List<Subreddit>> getUserMultireddits() {
         return mRedditApi.getUserMultireddits()
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
@@ -69,7 +72,7 @@ public class RedditRemoteDataSource implements RedditDataSource {
                 });
     }
 
-    Observable<List<Subreddit>> getUserSubreddits() {
+    private Observable<List<Subreddit>> getUserSubreddits() {
         return mRedditApi.getMySubreddits(200)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
@@ -152,24 +155,38 @@ public class RedditRemoteDataSource implements RedditDataSource {
     }
 
     @Override
-    public Observable<List<Comment>> getCommentsForPost(@NonNull String permaLinkUrl) {
+    public Observable<PostAndComments> getCommentsForPost(@NonNull String permaLinkUrl,
+                                                          final boolean isSingleCommentThread) {
         return mRedditApi.getComments(permaLinkUrl)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
-                .map(new Function<ResponseBody, List<Comment>>() {
+                .map(new Function<ResponseBody, PostAndComments>() {
                     @Override
-                    public List<Comment> apply(@io.reactivex.annotations.NonNull ResponseBody responseBody) throws Exception {
+                    public PostAndComments apply(@io.reactivex.annotations.NonNull ResponseBody responseBody) throws Exception {
                         try (InputStream stream = responseBody.byteStream();
                              InputStreamReader in = new InputStreamReader(stream, "UTF-8");
                              JsonReader reader = new JsonReader(in)) {
 
-                            List<CommentChild> commentChildList = CommentsStreamingParser
-                                    .readCommentListingArray(reader)
+                            List<CommentListing> commentListings = CommentsStreamingParser
+                                    .readCommentListingArray(reader);
+
+                            PostDetails postDetails = commentListings.get(0)
+                                    .commentData()
+                                    .commentChildren().get(0)
+                                    .originalPost();
+
+                            Post post = TextHelper.formatPost(postDetails);
+
+                            List<CommentChild> commentChildList = commentListings
                                     .get(1)
                                     .commentData()
                                     .commentChildren();
 
-                            return TextHelper.flatten(commentChildList, 0);
+                            List<Comment> comments = TextHelper.flatten(commentChildList, 0);
+                            if (isSingleCommentThread) {
+                                comments.set(0, comments.get(0).withKind(Comment.kind.SINGLECOMMENTTOP));
+                            }
+                            return PostAndComments.create(post, comments);
                         }
                     }
                 });

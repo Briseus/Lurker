@@ -136,66 +136,69 @@ public class TextHelper {
         return flatList;
     }
 
+    public static Post formatPost(PostDetails postDetails) {
+        String formatScore = TextHelper.formatScore(postDetails.score());
+
+        CharSequence title;
+        if (postDetails.stickied()) {
+            title = TextHelper.fromHtml(postDetails.title() + "<font color='#64FFDA'> Stickied </font>");
+        } else {
+            title = TextHelper.fromHtml(postDetails.title());
+        }
+        // sometimes formatting title can result in empty if it has <----- at start
+        // etc
+        if (title != null &&
+                title.length() == 0) {
+            title = String.valueOf(postDetails.title());
+        }
+
+        CharSequence selfText = null;
+        if (postDetails.selftextHtml() != null) {
+            selfText = formatTextToHtml(postDetails.selftextHtml());
+        }
+
+        String previewImageUrl;
+        String thumbnail = postDetails.thumbnail();
+        switch (thumbnail) {
+            case "default":
+            case "self":
+            case "":
+            case "image":
+                previewImageUrl = "";
+                break;
+            case "nsfw":
+                title = TextHelper.fromHtml(postDetails.title() + "<font color='#FF1744'> NSFW</font>");
+                previewImageUrl = "";
+                break;
+            default:
+                previewImageUrl = DisplayHelper.getBestPreviewPicture(postDetails);
+        }
+        String numberOfComments = String.valueOf(postDetails.numberOfComments());
+
+        return Post.builder()
+                .setId(postDetails.name())
+                .setThumbnail(thumbnail)
+                .setDomain(postDetails.domain())
+                .setUrl(postDetails.url())
+                .setScore(formatScore)
+                .setSelfText(selfText)
+                .setIsSelf(postDetails.isSelf())
+                .setNumberOfComments(numberOfComments)
+                .setTitle(title)
+                .setPreviewImage(previewImageUrl)
+                .setPermaLink(postDetails.permalink())
+                .setAuthor(postDetails.author())
+                .setCreatedUtc(postDetails.createdUtc())
+                .build();
+
+    }
+
     public static List<Post> formatPosts(List<PostResponse> posts) {
         List<Post> formattedPosts = new ArrayList<>(posts.size());
 
         for (int i = 0, size = posts.size(); i < size; i++) {
             PostDetails postDetails = posts.get(i).postDetails();
-            String formatScore = TextHelper.formatScore(postDetails.score());
-
-            CharSequence title;
-            if (postDetails.stickied()) {
-                title = TextHelper.fromHtml(postDetails.title() + "<font color='#64FFDA'> Stickied </font>");
-            } else {
-                title = TextHelper.fromHtml(postDetails.title());
-            }
-            // sometimes formatting title can result in empty if it has <----- at start
-            // etc
-            if (title != null &&
-                    title.length() == 0) {
-                title = String.valueOf(postDetails.title());
-            }
-
-            CharSequence selfText = null;
-            if (postDetails.selftextHtml() != null) {
-                selfText = formatTextToHtml(postDetails.selftextHtml());
-            }
-
-            String previewImageUrl;
-            String thumbnail = postDetails.thumbnail();
-            switch (thumbnail) {
-                case "default":
-                case "self":
-                case "":
-                case "image":
-                    previewImageUrl = "";
-                    break;
-                case "nsfw":
-                    title = TextHelper.fromHtml(postDetails.title() + "<font color='#FF1744'> NSFW</font>");
-                    previewImageUrl = "";
-                    break;
-                default:
-                    previewImageUrl = DisplayHelper.getBestPreviewPicture(postDetails);
-            }
-            String numberOfComments = String.valueOf(postDetails.numberOfComments());
-
-            Post post = Post.builder()
-                    .setId(postDetails.name())
-                    .setThumbnail(thumbnail)
-                    .setDomain(postDetails.domain())
-                    .setUrl(postDetails.url())
-                    .setScore(formatScore)
-                    .setSelfText(selfText)
-                    .setIsSelf(postDetails.isSelf())
-                    .setNumberOfComments(numberOfComments)
-                    .setTitle(title)
-                    .setPreviewImage(previewImageUrl)
-                    .setPermaLink(postDetails.permalink())
-                    .setAuthor(postDetails.author())
-                    .setCreatedUtc(postDetails.createdUtc())
-                    .build();
-
-            formattedPosts.add(post);
+            formattedPosts.add(formatPost(postDetails));
         }
 
         return formattedPosts;

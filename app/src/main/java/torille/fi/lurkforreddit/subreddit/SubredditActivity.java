@@ -2,7 +2,9 @@ package torille.fi.lurkforreddit.subreddit;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.test.espresso.IdlingResource;
@@ -77,10 +79,9 @@ public class SubredditActivity extends AppCompatActivity {
             initFragment(subredditFragment);
         }
 
-
     }
 
-    private void searchForReddit(String subredditName) {
+    private void searchForReddit(@NonNull String subredditName) {
         Timber.d("Searching for " + subredditName);
         Call<SubredditChildren> call = mRedditApi.get().getSubredditInfo(subredditName);
 
@@ -111,11 +112,15 @@ public class SubredditActivity extends AppCompatActivity {
         });
     }
 
-    private void handleIntent(Intent intent) {
+    private void handleIntent(@Nullable Intent intent) {
         if (intent != null) {
             String subredditName = intent.getStringExtra(EXTRA_SUBREDDITNAME);
             if (subredditName != null) {
                 searchForReddit(subredditName);
+            } else {
+                Uri appLinkData = intent.getData();
+                Timber.d("Got uri " + appLinkData);
+                searchForReddit("/r/"+appLinkData.getLastPathSegment());
             }
         }
 

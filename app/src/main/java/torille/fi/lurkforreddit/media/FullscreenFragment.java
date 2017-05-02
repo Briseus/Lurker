@@ -114,16 +114,16 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        Timber.d("Stopping");
-        releaseVideoPlayer();
+    public void onStart() {
+        super.onStart();
+        startStuff();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         Timber.d("Pausing");
+        releaseVideoPlayer();
     }
 
     @Override
@@ -131,13 +131,6 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
         super.onDestroy();
         Timber.d("Destroying");
         disposables.dispose();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Timber.d("Resuming");
-        startStuff();
     }
 
     private void releaseVideoPlayer() {

@@ -2,6 +2,7 @@ package torille.fi.lurkforreddit.comments;
 
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import timber.log.Timber;
 import torille.fi.lurkforreddit.data.RedditRepository;
 import torille.fi.lurkforreddit.data.models.view.Comment;
 import torille.fi.lurkforreddit.data.models.view.Post;
+import torille.fi.lurkforreddit.data.models.view.PostAndComments;
 
 /**
  * Created by eva on 2/13/17.
@@ -26,25 +28,32 @@ public class CommentPresenter implements CommentContract.Presenter<CommentContra
     private CommentContract.View mCommentsView;
 
     private final Post mPost;
+    private final boolean mIsSingleCommentThread;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     @Inject
     CommentPresenter(@NonNull RedditRepository redditRepository,
-                     @NonNull Post clickedPost) {
+                     @NonNull Post clickedPost,
+                     boolean isSingleCommentThread) {
         mRedditRepository = redditRepository;
         mPost = clickedPost;
+        mIsSingleCommentThread = isSingleCommentThread;
     }
 
     @Override
-    public void loadComments(@NonNull String permaLinkUrl) {
+    public void loadComments(@NonNull String permaLinkUrl, boolean isSingleCommentThread) {
+        Timber.d("Got perma " + permaLinkUrl);
         mCommentsView.setProgressIndicator(true);
-        disposables.add(mRedditRepository.getCommentsForPost(permaLinkUrl)
+        disposables.add(mRedditRepository.getCommentsForPost(permaLinkUrl, isSingleCommentThread)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<List<Comment>>() {
+                .subscribeWith(new DisposableObserver<PostAndComments>() {
                     @Override
-                    public void onNext(@io.reactivex.annotations.NonNull List<Comment> comments) {
+                    public void onNext(@io.reactivex.annotations.NonNull PostAndComments postAndComments) {
+                        List<Object> comments = new ArrayList<>(postAndComments.comments().size() + 1);
+                        comments.add(postAndComments.originalPost());
+                        comments.addAll(postAndComments.comments());
                         mCommentsView.showComments(comments);
                     }
 
@@ -101,7 +110,7 @@ public class CommentPresenter implements CommentContract.Presenter<CommentContra
 
     @Override
     public void start() {
-        loadComments(mPost.permaLink());
+        loadComments(mPost.permaLink(), mIsSingleCommentThread);
     }
 
     @Override

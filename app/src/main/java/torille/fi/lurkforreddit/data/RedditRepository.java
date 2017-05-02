@@ -13,6 +13,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import torille.fi.lurkforreddit.data.models.view.Comment;
 import torille.fi.lurkforreddit.data.models.view.Post;
+import torille.fi.lurkforreddit.data.models.view.PostAndComments;
 import torille.fi.lurkforreddit.data.models.view.SearchResult;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
 import torille.fi.lurkforreddit.di.scope.RedditScope;
@@ -70,8 +71,8 @@ public class RedditRepository implements RedditDataSource {
     }
 
     @Override
-    public Observable<List<Comment>> getCommentsForPost(@NonNull String permaLinkUrl) {
-        return mRedditRemoteApi.getCommentsForPost(permaLinkUrl);
+    public Observable<PostAndComments> getCommentsForPost(@NonNull String permaLinkUrl, boolean isSingleCommentThread) {
+        return mRedditRemoteApi.getCommentsForPost(permaLinkUrl, isSingleCommentThread);
     }
 
     @Override

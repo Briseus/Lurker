@@ -5,6 +5,7 @@ import java.util.List;
 import torille.fi.lurkforreddit.BasePresenter;
 import torille.fi.lurkforreddit.BaseView;
 import torille.fi.lurkforreddit.data.models.view.Comment;
+import torille.fi.lurkforreddit.data.models.view.Post;
 
 /**
  * Created by eva on 2/13/17.
@@ -13,7 +14,8 @@ import torille.fi.lurkforreddit.data.models.view.Comment;
 public interface CommentContract {
 
     interface View extends BaseView {
-        void showComments(List<Comment> commentChildren);
+
+        void showComments(List<Object> comments);
 
         void showProgressbarAt(int position, int level);
 
@@ -29,7 +31,8 @@ public interface CommentContract {
     }
 
     interface Presenter<T extends BaseView> extends BasePresenter<CommentContract.View> {
-        void loadComments(String permaLinkUrl);
+
+        void loadComments(String permaLinkUrl, boolean isSingleCommentThread);
 
         void loadMoreCommentsAt(Comment parentComment, String linkId, int position);
     }

@@ -63,8 +63,8 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroy() {
+        super.onDestroy();
         mActionsListener.dispose();
     }
 

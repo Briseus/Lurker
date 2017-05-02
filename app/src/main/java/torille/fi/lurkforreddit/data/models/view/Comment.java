@@ -15,7 +15,7 @@ public abstract class Comment {
     public enum kind {
         MORE,
         PROGRESSBAR,
-        OG,
+        SINGLECOMMENTTOP,
         DEFAULT
     }
 
@@ -58,6 +58,10 @@ public abstract class Comment {
 
     public Comment withKindIdTextAndLevel(Comment.kind kind, String id, String text, int level) {
         return toBuilder().setKind(kind).setId(id).setCommentText(text).setCommentLevel(level).build();
+    }
+
+    public Comment withKind(Comment.kind kind) {
+        return toBuilder().setKind(kind).build();
     }
 
     public static Builder builder() {

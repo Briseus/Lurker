@@ -20,7 +20,7 @@ public class FullscreenPresenter implements FullscreenContract.Presenter {
     public void checkType(@NonNull String urlString, @Nullable String previewImageUrl) {
         switch (TextHelper.getLastFourChars(urlString)) {
             case ".gif":
-            case "webm":
+            case "webp":
             case ".png":
             case ".jpg":
             case "jpeg": {
@@ -31,6 +31,7 @@ public class FullscreenPresenter implements FullscreenContract.Presenter {
                 mFullscreenView.showVideo(urlString.substring(0, urlString.length() - 4) + "mp4");
                 break;
             }
+            case "webm":
             case ".mp4": {
                 mFullscreenView.showVideo(urlString);
                 break;
