@@ -93,7 +93,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:ellipsize="end"
-            android:maxLines="3"
+            android:maxLines="2"
             android:text="A super long title that basically tells everything you need to know about the post and beyond to reach like 4 lines or something "
             android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse"
             android:textSize="14sp"

@@ -61,6 +61,7 @@ public class CommentActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        Timber.d("Got new intent");
         handleIntent(intent);
     }
 
@@ -72,7 +73,7 @@ public class CommentActivity extends AppCompatActivity {
             //TODO add indicator if malformed url
             //Normal comment threads if 5 or 6 segments
             if (size == 5 || size == 6) {
-                Timber.d("Got normal comment thread");
+                Timber.d("Got comment thread");
                 Post post = Post.builder()
                         .setUrl("")
                         .setPreviewImage("")

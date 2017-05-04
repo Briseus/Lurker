@@ -1,5 +1,7 @@
 package torille.fi.lurkforreddit.utils;
 
+import android.support.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
@@ -9,6 +11,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import timber.log.Timber;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentResponse;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
@@ -17,16 +22,21 @@ import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.MyAdapterFactory;
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostResponse;
+import torille.fi.lurkforreddit.di.scope.RedditScope;
 
 /**
  * Utility classes to stream parse {@link CommentListing} Json and nested models
  */
-
+@RedditScope
 public final class CommentsStreamingParser {
 
-    private static Gson gson = new GsonBuilder()
-            .registerTypeAdapterFactory(MyAdapterFactory.create())
-            .create();
+    private static Gson gson;
+
+    @Inject
+    public CommentsStreamingParser(@NonNull Gson gson) {
+        CommentsStreamingParser.gson = gson;
+    }
+
     /**
      * End point to read more comment api response
      *
@@ -84,7 +94,7 @@ public final class CommentsStreamingParser {
         return comments;
     }
 
-    public static List<CommentListing> readCommentListingArray(JsonReader reader) throws IOException {
+    public List<CommentListing> readCommentListingArray(JsonReader reader) throws IOException {
         List<CommentListing> list = new ArrayList<>();
 
         reader.beginArray();

@@ -2,6 +2,7 @@ package torille.fi.lurkforreddit.di.modules;
 
 import android.app.Application;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import javax.inject.Singleton;
@@ -15,6 +16,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import torille.fi.lurkforreddit.BuildConfig;
 import torille.fi.lurkforreddit.data.models.jsonResponses.MyAdapterFactory;
+import torille.fi.lurkforreddit.utils.CommentsStreamingParser;
 import torille.fi.lurkforreddit.utils.Store;
 
 /**
@@ -68,11 +70,22 @@ public class NetModule {
 
     @Provides
     @Singleton
-    GsonConverterFactory provideGsonTypeAdapter() {
-        return GsonConverterFactory.create(
-                new GsonBuilder()
-                        .registerTypeAdapterFactory(MyAdapterFactory.create())
-                        .create());
+    Gson provideGson() {
+        return new GsonBuilder()
+                .registerTypeAdapterFactory(MyAdapterFactory.create())
+                .create();
+    }
+
+    @Provides
+    @Singleton
+    GsonConverterFactory provideGsonTypeAdapter(Gson gson) {
+        return GsonConverterFactory.create(gson);
+    }
+
+    @Provides
+    @Singleton
+    CommentsStreamingParser provideCommentsStreamingParser(Gson gson) {
+        return new CommentsStreamingParser(gson);
     }
 
 

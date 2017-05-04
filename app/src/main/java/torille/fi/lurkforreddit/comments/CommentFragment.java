@@ -202,7 +202,7 @@ public class CommentFragment extends Fragment implements CommentContract.View {
         @Override
         public void onContinueThreadClick(String permaLinkurl) {
 
-            Intent intent = new Intent();
+            Intent intent = new Intent(getContext(), CommentActivity.class);
             intent.setAction(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(permaLinkurl));
             startActivity(intent);

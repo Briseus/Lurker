@@ -2,6 +2,7 @@ package torille.fi.lurkforreddit.subreddit;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -107,9 +108,11 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         View root = inflater.inflate(R.layout.fragment_subreddit, container, false);
         subredditComponent.inject(this);
         mActionsListener.setView(this);
+        Context context = getContext();
+
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.posts_list);
 
-        mLayoutManager = new LinearLayoutManager(getContext());
+        mLayoutManager = new LinearLayoutManager(context);
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setHasFixedSize(true);
@@ -151,9 +154,9 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         SwipeRefreshLayout swipeRefreshLayout =
                 (SwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
         swipeRefreshLayout.setColorSchemeColors(
-                ContextCompat.getColor(getActivity(), R.color.colorPrimary),
-                ContextCompat.getColor(getActivity(), R.color.colorAccent),
-                ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+                ContextCompat.getColor(context, R.color.colorPrimary),
+                ContextCompat.getColor(context, R.color.colorAccent),
+                ContextCompat.getColor(context, R.color.colorPrimaryDark));
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -335,7 +338,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             mClicklistener = listener;
             mDefaultAccentColor = color;
             imagePipeline = pipeline;
-            setHasStableIds(true);
         }
 
         @Override
@@ -419,12 +421,10 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         }
 
         void clear() {
-            if (mPosts != null) {
-                final int oldSize = mPosts.size();
-                mPosts.clear();
-                notifyItemRangeRemoved(0, oldSize);
+            final int oldSize = mPosts.size();
+            mPosts.clear();
+            notifyItemRangeRemoved(0, oldSize);
 
-            }
         }
 
         /**
@@ -487,11 +487,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             return mPosts.size();
         }
 
-        @Override
-        public long getItemId(int position) {
-            return mPosts.get(position).id().hashCode();
-        }
-
         final Post getItem(int position) {
             return mPosts.get(position);
         }
@@ -506,7 +501,12 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             final ImageButton openBrowser;
             final SimpleDraweeView image;
             final BaseControllerListener<ImageInfo> baseControllerListener;
-
+            final View.OnClickListener mOnMediaClickListerner = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mClicklistener.onMediaClick(getItem(getAdapterPosition()));
+                }
+            };
             PostViewHolder(View postView) {
                 super(postView);
                 title = (TextView) postView.findViewById(R.id.post_title);
@@ -515,18 +515,8 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 comments = (Button) postView.findViewById(R.id.post_messages);
                 openBrowser = (ImageButton) postView.findViewById(R.id.post_open_browser);
                 image = (SimpleDraweeView) postView.findViewById(R.id.post_image);
-                postView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mClicklistener.onMediaClick(getItem(getAdapterPosition()));
-                    }
-                });
-                image.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mClicklistener.onMediaClick(getItem(getAdapterPosition()));
-                    }
-                });
+                postView.setOnClickListener(mOnMediaClickListerner);
+                image.setOnClickListener(mOnMediaClickListerner);
                 openBrowser.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -572,10 +562,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     image.setController(draweeController);
 
                 }
-
-
             }
-
         }
 
         private class ErrorViewHolder extends RecyclerView.ViewHolder {

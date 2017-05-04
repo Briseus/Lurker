@@ -85,7 +85,7 @@ public class TextHelper {
             kind = Comment.kind.DEFAULT;
             commentText = formatTextToHtml(commentResponse.bodyHtml());
         } else if (commentResponse.id().equals("_")) {
-            commentText = "Continue this thread ->";
+            commentText = "Continue this thread";
         } else if (commentResponse.children() != null) {
             commentText = "Load more comments (" + commentResponse.count() + ")";
         }

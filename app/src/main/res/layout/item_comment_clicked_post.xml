@@ -37,18 +37,17 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="-38dp"
         android:fontFamily="sans-serif"
         android:text="Here is an example of a selftext thats is found in some reddit posts"
         android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/comment_post_author"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        app:layout_constraintLeft_toRightOf="@+id/comment_post_score"
+        android:layout_marginLeft="8dp" />
 
     <TextView
         android:id="@+id/comment_post_author"

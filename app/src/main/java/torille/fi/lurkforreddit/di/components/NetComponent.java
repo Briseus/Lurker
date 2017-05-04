@@ -1,5 +1,7 @@
 package torille.fi.lurkforreddit.di.components;
 
+import com.google.gson.Gson;
+
 import javax.inject.Singleton;
 
 import dagger.Component;
@@ -32,6 +34,8 @@ public interface NetComponent {
 
     OkHttpClient okHttpClient();
 
+    Gson gson();
+
     Store store();
 
     RedditService.Auth redditAuthApi();
@@ -39,6 +43,7 @@ public interface NetComponent {
     RedditService.Reddit redditApi();
 
     VideositeService.Streamable streamableApi();
+
 
     void inject(MyApplication application);
 

@@ -46,13 +46,16 @@ import torille.fi.lurkforreddit.utils.TextHelper;
 public class RedditRemoteDataSource implements RedditDataSource {
 
     private final RedditService.Reddit mRedditApi;
-
     private final Store mSettingsStore;
+    private final CommentsStreamingParser mCommentsStreamingParser;
 
     @Inject
-    public RedditRemoteDataSource(@NonNull RedditService.Reddit api, @NonNull Store store) {
+    RedditRemoteDataSource(@NonNull RedditService.Reddit api,
+                           @NonNull Store store,
+                           @NonNull CommentsStreamingParser commentsStreamingParser) {
         mRedditApi = api;
         mSettingsStore = store;
+        mCommentsStreamingParser = commentsStreamingParser;
     }
 
     private Observable<List<Subreddit>> getUserMultireddits() {
@@ -167,7 +170,7 @@ public class RedditRemoteDataSource implements RedditDataSource {
                              InputStreamReader in = new InputStreamReader(stream, "UTF-8");
                              JsonReader reader = new JsonReader(in)) {
 
-                            List<CommentListing> commentListings = CommentsStreamingParser
+                            List<CommentListing> commentListings = mCommentsStreamingParser
                                     .readCommentListingArray(reader);
 
                             PostDetails postDetails = commentListings.get(0)
