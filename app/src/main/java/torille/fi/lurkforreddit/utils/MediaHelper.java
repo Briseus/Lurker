@@ -58,6 +58,7 @@ final public class MediaHelper {
         }
         switch (domain) {
             case "youtube.com":
+            case "reddit.com":
             case "youtu.be":
                 return true;
             default:

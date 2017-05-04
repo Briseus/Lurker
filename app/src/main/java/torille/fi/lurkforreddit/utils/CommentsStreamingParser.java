@@ -44,7 +44,7 @@ public final class CommentsStreamingParser {
      * @return a list of {@link CommentChild}
      * @throws IOException
      */
-    public static List<CommentChild> readMoreComments(JsonReader reader) throws IOException {
+    public List<CommentChild> readMoreComments(JsonReader reader) throws IOException {
 
         List<CommentChild> comments = new ArrayList<>();
         reader.beginObject();

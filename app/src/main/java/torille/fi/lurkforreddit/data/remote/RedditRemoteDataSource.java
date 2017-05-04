@@ -211,7 +211,7 @@ public class RedditRemoteDataSource implements RedditDataSource {
                              InputStreamReader in = new InputStreamReader(stream, "UTF-8");
                              JsonReader reader = new JsonReader(in)) {
 
-                            List<CommentChild> additionalComments = CommentsStreamingParser
+                            List<CommentChild> additionalComments = mCommentsStreamingParser
                                     .readMoreComments(reader);
                             return TextHelper
                                     .flattenAdditionalComments(additionalComments, commentLevel);
