@@ -92,12 +92,16 @@ public class TextHelper {
 
         String responseAuthor = commentResponse.author();
         if (responseAuthor != null && commentResponse.stickied()) {
-            author = "<font color='#64FFDA'> Sticky post<font> &nbsp &nbsp";
+            author = "<font color='#64FFDA'> Sticky post </font>" + responseAuthor;
         } else if (responseAuthor != null) {
             author = responseAuthor;
         }
 
         author = fromHtml(author + " " + DateUtils.getRelativeTimeSpanString(commentResponse.createdUtc() * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS));
+
+        if (commentResponse.edited()) {
+            author = author + " (edited)";
+        }
 
         String formatScore = formatScore(commentResponse.score());
 
@@ -127,11 +131,14 @@ public class TextHelper {
             Comment comment = formatCommentData(commentResponse, level);
             //check if its a normal comment or "load more comments" comment
             flatList.add(comment);
-            CommentListing commentListing = commentResponse.replies();
-            if (commentListing != null && commentListing.commentData() != null) {
-                List<Comment> replyList = flattenHelper(commentListing.commentData().commentChildren(), flatList, level + 1);
-                comment.withReplies(replyList);
+            if (commentResponse != null) {
+                CommentListing commentListing = commentResponse.replies();
+                if (commentListing != null && commentListing.commentData() != null) {
+                    List<Comment> replyList = flattenHelper(commentListing.commentData().commentChildren(), flatList, level + 1);
+                    comment.withReplies(replyList);
+                }
             }
+
         }
         return flatList;
     }
@@ -139,12 +146,8 @@ public class TextHelper {
     public static Post formatPost(PostDetails postDetails) {
         String formatScore = TextHelper.formatScore(postDetails.score());
 
-        CharSequence title;
-        if (postDetails.stickied()) {
-            title = TextHelper.fromHtml(postDetails.title() + "<font color='#64FFDA'> Stickied </font>");
-        } else {
-            title = TextHelper.fromHtml(postDetails.title());
-        }
+        CharSequence title = TextHelper.fromHtml(postDetails.title());
+
         // sometimes formatting title can result in empty if it has <----- at start
         // etc
         if (title != null &&
@@ -157,22 +160,36 @@ public class TextHelper {
             selfText = formatTextToHtml(postDetails.selftextHtml());
         }
 
+        CharSequence flair = "";
+        if (postDetails.stickied()) {
+            flair = TextHelper.fromHtml("Stickied");
+        }
+        if (postDetails.linkFlairText() != null) {
+            flair = TextHelper.fromHtml(flair + " " + postDetails.linkFlairText());
+        }
         String previewImageUrl;
         String thumbnail = postDetails.thumbnail();
         switch (thumbnail) {
             case "default":
             case "self":
             case "":
+            case "spoiler":
             case "image":
                 previewImageUrl = "";
                 break;
             case "nsfw":
-                title = TextHelper.fromHtml(postDetails.title() + "<font color='#FF1744'> NSFW</font>");
+                flair = TextHelper.fromHtml("<font color='#FF1744'>NSFW </font>" + flair);
                 previewImageUrl = "";
                 break;
             default:
                 previewImageUrl = DisplayHelper.getBestPreviewPicture(postDetails);
         }
+
+
+        /*if (postDetails.isOver18()) {
+            title = TextHelper.fromHtml("<font color='#FF1744'> NSFW </font>" + postDetails.title());
+        }*/
+
         String numberOfComments = String.valueOf(postDetails.numberOfComments());
 
         return Post.builder()
@@ -181,6 +198,7 @@ public class TextHelper {
                 .setDomain(postDetails.domain())
                 .setUrl(postDetails.url())
                 .setScore(formatScore)
+                .setFlairText(flair)
                 .setSelfText(selfText)
                 .setIsSelf(postDetails.isSelf())
                 .setNumberOfComments(numberOfComments)

@@ -214,6 +214,7 @@ public final class CommentsStreamingParser {
         boolean stickied = false;
         String subreddit = null;
         boolean scoreHidden = false;
+        boolean edited = false;
         String name = null;
         long createdUtc = 0;
         String authorFlairText = null;
@@ -274,6 +275,14 @@ public final class CommentsStreamingParser {
                 case "score_hidden":
                     scoreHidden = reader.nextBoolean();
                     break;
+                case "edited":
+                    if (reader.peek() == JsonToken.NUMBER) {
+                        edited = true;
+                        reader.skipValue();
+                    } else {
+                        edited = reader.nextBoolean();
+                    }
+                    break;
                 case "name":
                     name = reader.nextString();
                     break;
@@ -323,6 +332,7 @@ public final class CommentsStreamingParser {
                 .setStickied(stickied)
                 .setSubreddit(subreddit)
                 .setScoreHidden(scoreHidden)
+                .setEdited(edited)
                 .setName(name)
                 .setAuthorFlairText(authorFlairText)
                 .setCreatedUtc(createdUtc)

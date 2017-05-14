@@ -46,20 +46,20 @@ public class CommentPresenterTest {
     public void setupCommentPresenter() {
         MockitoAnnotations.initMocks(this);
 
-        mCommentPresenter = new CommentPresenter(mRedditRepository, clickedPost);
+       // mCommentPresenter = new CommentPresenter(mRedditRepository, clickedPost);
         mCommentPresenter.setView(mCommentView);
     }
 
     @Test
     public void loadCommentsFromRepositoryAndLoadIntoView() {
-        mCommentPresenter.loadComments(mockLinkId);
+       // mCommentPresenter.loadComments(mockLinkId);
         verify(mCommentView).setProgressIndicator(true);
         //verify(mRedditRepository).getCommentsForPost(any(String.class),
         //        loadPostCommentsCallbackArgumentCaptor.capture(),
         //        loadErrorCallbackArgumentCaptor.capture());
         //loadPostCommentsCallbackArgumentCaptor.getValue().onCommentsLoaded(mockComments);
         verify(mCommentView).setProgressIndicator(false);
-        verify(mCommentView).showComments(mockComments);
+        //verify(mCommentView).showComments(mockComments);
     }
 
     @Test

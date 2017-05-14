@@ -2,6 +2,7 @@ package torille.fi.lurkforreddit.comments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,14 +17,15 @@ import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.controller.BaseControllerListener;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 
 import java.util.ArrayList;
@@ -250,28 +252,22 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            switch (holder.getItemViewType()) {
-                case COMMENT_PROGRESSBAR:
-                    ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
-                    ((ProgressViewHolder) holder).bind((Comment) mComments.get(position));
-                    break;
-                case COMMENT_LOAD_MORE:
-                    ((CommentLoadMoreViewHolder) holder).bind((Comment) mComments.get(position));
-                    break;
-                case COMMENT_ORIGINAL:
-                    ((PostViewHolder) holder).bind((Post) mComments.get(position));
-                    break;
-                case COMMENT_NORMAL:
-                default:
-                    ((CommentViewHolder) holder).bind((Comment) mComments.get(position));
+            if (holder instanceof CommentViewHolder) {
+                ((CommentViewHolder) holder).bind((Comment) mComments.get(position));
+            } else if (holder instanceof ProgressViewHolder) {
+                ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
+                ((ProgressViewHolder) holder).bind((Comment) mComments.get(position));
+            } else if (holder instanceof CommentLoadMoreViewHolder) {
+                ((CommentLoadMoreViewHolder) holder).bind((Comment) mComments.get(position));
+            } else if (holder instanceof PostViewHolder) {
+                ((PostViewHolder) holder).bind((Post) mComments.get(position));
             }
-
         }
 
         @Override
         public int getItemViewType(int position) {
 
-            if (mComments.get(position) instanceof Post) {
+            if (position == 0) {
                 return COMMENT_ORIGINAL;
             } else if (mComments.get(position) instanceof Comment) {
                 Comment.kind kind = ((Comment) mComments.get(position)).kind();
@@ -368,8 +364,8 @@ public class CommentFragment extends Fragment implements CommentContract.View {
             final TextView mAuthor;
             final TextView mSelftext;
             final TextView mTitle;
+            final TextView mFlairText;
             final SimpleDraweeView mImage;
-            final Button mScoreButton;
 
             PostViewHolder(View view) {
                 super(view);
@@ -377,42 +373,55 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                 mAuthor = (TextView) view.findViewById(R.id.comment_post_author);
                 mSelftext = (TextView) view.findViewById(R.id.comment_post_selftext);
                 mTitle = (TextView) view.findViewById(R.id.comment_post_title);
+                mFlairText = (TextView) view.findViewById(R.id.comment_post_flair);
                 mImage = (SimpleDraweeView) view.findViewById(R.id.comment_post_image);
-                mScoreButton = (Button) view.findViewById(R.id.comment_post_score);
                 mSelftext.setTransformationMethod(new CustomLinkTransformationMethod());
                 mSelftext.setMovementMethod(LinkMovementMethod.getInstance());
                 mSelftext.setLinksClickable(true);
             }
 
             void bind(Post mClickedPost) {
-                if (mClickedPost.score().isEmpty()) {
-                    view.setVisibility(View.INVISIBLE);
-                } else {
-                    view.setVisibility(View.VISIBLE);
-                    String author = "Submitted "
+
+                if (mClickedPost.title().length() != 0) {
+                    final String author = mClickedPost.score() + " points | "
+                            + "Submitted "
                             + DateUtils.getRelativeTimeSpanString(mClickedPost.createdUtc() * 1000)
                             + " by " + mClickedPost.author();
                     mAuthor.setText(author);
-                    mScoreButton.setText(mClickedPost.score());
                     mTitle.setText(mClickedPost.title());
-
-                    if (mClickedPost.previewImage().isEmpty()) {
-                        mImage.setVisibility(View.GONE);
-                    } else {
-
-                        DraweeController controller = Fresco.newDraweeControllerBuilder()
-                                .setOldController(mImage.getController())
-                                .setImageRequest(ImageRequest.fromUri(mClickedPost.previewImage()))
-                                .build();
-                        mImage.setController(controller);
-                    }
-                    CharSequence selftext = mClickedPost.selfText();
-                    if (selftext != null) {
-                        mSelftext.setText(selftext);
-                    } else {
-                        mSelftext.setVisibility(View.GONE);
-                    }
                 }
+                if (mClickedPost.flairText().length() == 0) {
+                    mFlairText.setVisibility(View.GONE);
+                } else {
+                    mFlairText.setVisibility(View.VISIBLE);
+                    mFlairText.setText(mClickedPost.flairText());
+                }
+
+                if (mClickedPost.previewImage().isEmpty()) {
+                    mImage.setVisibility(View.GONE);
+                } else {
+                    mImage.setVisibility(View.VISIBLE);
+                    DraweeController controller = Fresco.newDraweeControllerBuilder()
+                            .setOldController(mImage.getController())
+                            .setImageRequest(ImageRequest.fromUri(mClickedPost.previewImage()))
+                            .setControllerListener(new BaseControllerListener<ImageInfo>() {
+                                @Override
+                                public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
+                                    super.onFinalImageSet(id, imageInfo, animatable);
+                                    float ap = ((float) imageInfo.getWidth() / imageInfo.getHeight());
+                                    mImage.setAspectRatio(ap);
+                                }
+                            })
+                            .build();
+                    mImage.setController(controller);
+                }
+                CharSequence selftext = mClickedPost.selfText();
+                if (selftext != null) {
+                    mSelftext.setText(selftext);
+                } else {
+                    mSelftext.setVisibility(View.GONE);
+                }
+
 
             }
         }

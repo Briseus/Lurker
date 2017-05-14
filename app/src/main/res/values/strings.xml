@@ -15,7 +15,7 @@
     <string name="post_unsub">Unsubscribe</string>
     <string name="post_sub">Subscribe</string>
     <string name="post_no_description">No description</string>
-    <string name="post_open_browser">Open link in browser</string>
+    <string name="post_open_browser">Open</string>
 
     <string name="navigation_bottom_frontpage">Frontpage</string>
     <string name="navigation_bottom_search">Search</string>

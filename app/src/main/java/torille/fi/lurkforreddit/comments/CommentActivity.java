@@ -79,6 +79,7 @@ public class CommentActivity extends AppCompatActivity {
                         .setPreviewImage("")
                         .setId("")
                         .setScore("")
+                        .setFlairText("")
                         .setIsSelf(false)
                         .setDomain("")
                         .setTitle("")

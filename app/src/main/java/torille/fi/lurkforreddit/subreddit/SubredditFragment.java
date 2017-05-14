@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,7 +45,6 @@ import torille.fi.lurkforreddit.utils.DisplayHelper;
 import torille.fi.lurkforreddit.utils.MediaHelper;
 
 import static android.view.View.GONE;
-import static android.view.View.resolveSize;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -345,7 +343,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             switch (viewType) {
                 case VIEW_ITEM:
                     return new PostViewHolder(LayoutInflater.from(parent.getContext())
-                            .inflate(R.layout.item_post, parent, false));
+                            .inflate(R.layout.item_post_small, parent, false));
                 case VIEW_ERROR:
                     return new ErrorViewHolder(LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.item_error, parent, false));
@@ -470,6 +468,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     .setUrl("")
                     .setId(id)
                     .setScore("")
+                    .setFlairText("")
                     .setSelfText(null)
                     .setPreviewImage("")
                     .setThumbnail("")
@@ -496,9 +495,10 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
             final TextView title;
             final TextView domain;
-            final Button score;
+            //final Button score;
+            final TextView flair;
             final Button comments;
-            final ImageButton openBrowser;
+            final Button openBrowser;
             final SimpleDraweeView image;
             final BaseControllerListener<ImageInfo> baseControllerListener;
             final View.OnClickListener mOnMediaClickListerner = new View.OnClickListener() {
@@ -507,13 +507,15 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     mClicklistener.onMediaClick(getItem(getAdapterPosition()));
                 }
             };
+
             PostViewHolder(View postView) {
                 super(postView);
                 title = (TextView) postView.findViewById(R.id.post_title);
                 domain = (TextView) postView.findViewById(R.id.post_domain);
-                score = (Button) postView.findViewById(R.id.post_likes);
+                //score = (Button) postView.findViewById(R.id.post_likes);
+                flair = (TextView) postView.findViewById(R.id.post_flair);
                 comments = (Button) postView.findViewById(R.id.post_messages);
-                openBrowser = (ImageButton) postView.findViewById(R.id.post_open_browser);
+                openBrowser = (Button) postView.findViewById(R.id.post_open_browser);
                 image = (SimpleDraweeView) postView.findViewById(R.id.post_image);
                 postView.setOnClickListener(mOnMediaClickListerner);
                 image.setOnClickListener(mOnMediaClickListerner);
@@ -529,7 +531,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                         mClicklistener.onPostClick(getItem(getAdapterPosition()));
                     }
                 });
-                score.getBackground().setTint(mDefaultAccentColor);
+                //score.getBackground().setTint(mDefaultAccentColor);
                 baseControllerListener = new BaseControllerListener<ImageInfo>() {
                     @Override
                     public void onFailure(String id, Throwable throwable) {
@@ -538,18 +540,28 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                         image.setImageURI(getItem(getAdapterPosition()).thumbnail());
                     }
                 };
+
             }
 
             final void bind(final Post postDetails) {
 
                 title.setText(postDetails.title());
-                domain.setText(postDetails.domain());
-                score.setText(postDetails.score());
+                domain.setText(postDetails.score() + " |  " + postDetails.domain());
+                //score.setText(postDetails.score());
                 comments.setText(postDetails.numberOfComments());
+
+                CharSequence flairText = postDetails.flairText();
+                if (flairText.length() == 0) {
+                    flair.setVisibility(GONE);
+                } else {
+                    flair.setVisibility(View.VISIBLE);
+                    flair.setText(flairText);
+                }
 
                 String previewImage = postDetails.previewImage();
                 if (previewImage.isEmpty()) {
                     image.setVisibility(GONE);
+
                 } else {
                     image.setVisibility(View.VISIBLE);
 

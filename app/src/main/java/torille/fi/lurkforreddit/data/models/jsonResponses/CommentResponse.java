@@ -62,6 +62,8 @@ public abstract class CommentResponse {
     @SerializedName("score_hidden")
     public abstract boolean scoreHidden();
 
+    public abstract boolean edited();
+
     @SerializedName("name")
     public abstract String name();
 
@@ -118,6 +120,8 @@ public abstract class CommentResponse {
         public abstract Builder setSubreddit(String subreddit);
 
         public abstract Builder setScoreHidden(boolean scoreHidden);
+
+        public abstract Builder setEdited(boolean edited);
 
         public abstract Builder setName(String name);
 

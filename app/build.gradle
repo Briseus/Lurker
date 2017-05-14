@@ -122,7 +122,8 @@ dependencies {
     compile "me.relex:photodraweeview:$rootProject.ext.photoDraweeViewVersion"
 
     // Exoplayer
-    compile "com.google.android.exoplayer:exoplayer:$rootProject.ext.exoplayerVersion"
+    compile "com.google.android.exoplayer:exoplayer-core:$rootProject.ext.exoplayerVersion"
+    compile "com.google.android.exoplayer:exoplayer-ui:$rootProject.ext.exoplayerVersion"
     compile "com.google.android.exoplayer:extension-okhttp:$rootProject.ext.exoplayerVersion"
 
     // Retrofit

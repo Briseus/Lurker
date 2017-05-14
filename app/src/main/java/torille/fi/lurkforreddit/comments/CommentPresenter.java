@@ -60,6 +60,7 @@ public class CommentPresenter implements CommentContract.Presenter<CommentContra
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
                         Timber.e(e);
+                        mCommentsView.setProgressIndicator(false);
                         mCommentsView.showError(e.toString());
                     }
 

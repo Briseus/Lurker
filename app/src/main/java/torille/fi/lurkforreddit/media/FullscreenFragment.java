@@ -26,6 +26,7 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory;
@@ -175,7 +176,6 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
         }
 
         ImageRequest lowResRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(previewImageUrl))
-                .setProgressiveRenderingEnabled(true)
                 .build();
 
         ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
@@ -236,12 +236,9 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
         MediaSource videoSource = new ExtractorMediaSource(Uri.parse(url),
                 dataSourceFactory, extractorsFactory, null, null);
 
-
         LoopingMediaSource loopingSource = new LoopingMediaSource(videoSource);
 
-        LoadControl loadControl = new DefaultLoadControl();
-
-        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector, loadControl);
+        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
 
         player.addListener(new ExoPlayer.EventListener() {
             @Override
@@ -272,11 +269,16 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 Timber.e(error);
-                Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Failed to find video", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onPositionDiscontinuity() {
+
+            }
+
+            @Override
+            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
 
             }
         });

@@ -26,6 +26,8 @@ public abstract class Post implements Parcelable {
 
     public abstract String score();
 
+    public abstract CharSequence flairText();
+
     @Nullable
     public abstract CharSequence selfText();
 
@@ -58,6 +60,8 @@ public abstract class Post implements Parcelable {
         public abstract Builder setUrl(String url);
 
         public abstract Builder setScore(String score);
+
+        public abstract Builder setFlairText(CharSequence flairText);
 
         public abstract Builder setSelfText(CharSequence selfText);
 
