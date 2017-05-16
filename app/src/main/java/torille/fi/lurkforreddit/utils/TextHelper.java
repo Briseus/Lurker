@@ -253,19 +253,6 @@ public class TextHelper {
             subreddits.add(formatSubreddit(result));
         }
 
-        // sort subreddits by name before callback
-        Collections.sort(subreddits, new Comparator<Subreddit>() {
-            @Override
-            public int compare(Subreddit o1, Subreddit o2) {
-                String name = o1.displayName();
-                String nameToCompare = o2.displayName();
-                if (name != null && nameToCompare != null) {
-                    return name
-                            .compareToIgnoreCase(nameToCompare);
-                }
-                return 0;
-            }
-        });
         return subreddits;
     }
 

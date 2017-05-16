@@ -2,13 +2,14 @@ package torille.fi.lurkforreddit.search;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.util.SortedListAdapterCallback;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -55,9 +56,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         mSearchComponent = DaggerSearchComponent.builder()
                 .redditRepositoryComponent(((MyApplication) getActivity().getApplication()).getmRedditRepositoryComponent())
                 .build();
-        mAdapter = new SearchViewAdapter(
-                new ArrayList<SearchResult>(0),
-                searchClickListener);
+        mAdapter = new SearchViewAdapter(searchClickListener);
     }
 
     @Nullable
@@ -87,7 +86,13 @@ public class SearchFragment extends Fragment implements SearchContract.View {
                     if (!loading && (visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                         loading = true;
                         Timber.d("Last item reached, getting more!");
-                        mActionsListener.searchMoreSubreddits();
+                        recyclerView.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mActionsListener.searchMoreSubreddits();
+                            }
+                        });
+
                     }
 
                 }
@@ -156,14 +161,31 @@ public class SearchFragment extends Fragment implements SearchContract.View {
     private static class SearchViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final static int VIEW_ITEM = 1;
         private final static int VIEW_PROGRESS = 0;
-        private final List<SearchResult> mResults;
+        private final SortedList<SearchResult> mResults;
         private final SearchClickListener mClickListener;
-        private final Handler mHandler = new Handler();
 
-        SearchViewAdapter(List<SearchResult> results, SearchClickListener clickListener) {
-            this.mResults = results;
+        SearchViewAdapter(SearchClickListener clickListener) {
+            this.mResults = new SortedList<SearchResult>(SearchResult.class, new SortedListAdapterCallback<SearchResult>(this) {
+                @Override
+                public int compare(SearchResult o1, SearchResult o2) {
+                    if (o1.title().equals(o2.title())) {
+                        Timber.d(o1.title().toString());
+                        return 0;
+                    }
+                    return -1;
+                }
+
+                @Override
+                public boolean areContentsTheSame(SearchResult oldItem, SearchResult newItem) {
+                    return oldItem.equals(newItem);
+                }
+
+                @Override
+                public boolean areItemsTheSame(SearchResult item1, SearchResult item2) {
+                    return item1.title().equals(item2.title());
+                }
+            });
             this.mClickListener = clickListener;
-            setHasStableIds(true);
         }
 
         @Override
@@ -203,18 +225,18 @@ public class SearchFragment extends Fragment implements SearchContract.View {
             return mResults.size();
         }
 
-        @Override
-        public long getItemId(int position) {
-            return mResults.get(position).title().hashCode();
-        }
-
-
         void addResults(@NonNull List<SearchResult> results) {
             int position = mResults.size() - 1;
-            mResults.remove(position);
-            notifyItemRemoved(position);
-            mResults.addAll(results);
-            notifyItemRangeInserted(position, results.size());
+            mResults.removeItemAt(position);
+            addAll(results);
+        }
+
+        void addAll(@NonNull List<SearchResult> results) {
+            mResults.beginBatchedUpdates();
+            for (SearchResult result : results) {
+                mResults.add(result);
+            }
+            mResults.endBatchedUpdates();
         }
 
         void addProgressBar() {
@@ -229,26 +251,12 @@ public class SearchFragment extends Fragment implements SearchContract.View {
                     .setSubreddit(subreddit)
                     .build();
 
-            mResults.add(dummy);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    notifyItemInserted(mResults.size() - 1);
-                }
-            });
+            addAll(Collections.singletonList(dummy));
 
         }
 
         void clear() {
-            final int index = mResults.size();
             mResults.clear();
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    notifyItemRangeRemoved(0, index);
-                }
-            });
-
         }
 
         class SearchViewHolder extends RecyclerView.ViewHolder {

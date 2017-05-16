@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.util.SortedListAdapterCallback;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +21,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -34,7 +36,7 @@ import torille.fi.lurkforreddit.subreddit.SubredditActivity;
 
 public class SubredditsFragment extends Fragment implements SubredditsContract.View {
 
-    private SubredditsComponent subredditsComponent;
+    private SubredditsComponent mSubredditsComponent;
 
     @Inject
     SubredditsContract.Presenter<SubredditsContract.View> mActionsListener;
@@ -49,11 +51,11 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        subredditsComponent = DaggerSubredditsComponent.builder()
+        mSubredditsComponent = DaggerSubredditsComponent.builder()
                 .redditRepositoryComponent(((MyApplication) getActivity().getApplication()).getmRedditRepositoryComponent())
                 .build();
 
-        mListAdapter = new SubredditsAdapter(new ArrayList<Subreddit>(20), mItemListener, ContextCompat.getColor(getContext(), R.color.colorAccent));
+        mListAdapter = new SubredditsAdapter(mItemListener, ContextCompat.getColor(getContext(), R.color.colorAccent));
     }
 
     @Override
@@ -73,7 +75,7 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_subreddits, container, false);
-        subredditsComponent.inject(this);
+        mSubredditsComponent.inject(this);
         mActionsListener.setView(this);
 
         Context context = getContext();
@@ -144,15 +146,36 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
     private static class SubredditsAdapter extends RecyclerView.Adapter<SubredditsAdapter.ViewHolder> {
 
-        private List<Subreddit> mSubreddits;
+        private SortedList<Subreddit> mSubreddits;
         private SubredditItemListener mItemListener;
         private final ColorStateList mDefaultColor;
 
-        SubredditsAdapter(List<Subreddit> subreddits, SubredditItemListener itemListener, int color) {
-            setList(subreddits);
+        SubredditsAdapter(SubredditItemListener itemListener, int color) {
             mItemListener = itemListener;
             mDefaultColor = ColorStateList.valueOf(color);
-            setHasStableIds(true);
+            mSubreddits = new SortedList<Subreddit>(Subreddit.class, new SortedListAdapterCallback<Subreddit>(this) {
+                @Override
+                public int compare(Subreddit o1, Subreddit o2) {
+                    String displayName = o1.displayName();
+                    String displayName2 = o2.displayName();
+                    if (displayName != null && displayName2 != null) {
+                        return displayName.compareToIgnoreCase(displayName2);
+                    }
+                    return -1;
+                }
+
+                @Override
+                public boolean areContentsTheSame(Subreddit oldItem, Subreddit newItem) {
+                    return oldItem.equals(newItem);
+                }
+
+                @Override
+                public boolean areItemsTheSame(Subreddit item1, Subreddit item2) {
+                    String itemId = item1.id();
+                    String itemId2 = item2.id();
+                    return itemId != null && itemId2 != null && itemId.equals(itemId2);
+                }
+            });
         }
 
         @Override
@@ -160,7 +183,7 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
             Context context = parent.getContext();
             LayoutInflater inflater = LayoutInflater.from(context);
             View subredditsView = inflater.inflate(R.layout.item_subreddit, parent, false);
-            return new ViewHolder(subredditsView, mItemListener);
+            return new ViewHolder(subredditsView);
         }
 
         @Override
@@ -176,13 +199,13 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
         }
 
-        void replaceData(List<Subreddit> subreddits) {
-            setList(subreddits);
-            notifyDataSetChanged();
-        }
-
-        private void setList(List<Subreddit> subreddits) {
-            mSubreddits = subreddits;
+        void replaceData(@NonNull List<Subreddit> subreddits) {
+            mSubreddits.clear();
+            mSubreddits.beginBatchedUpdates();
+            for (Subreddit subreddit : subreddits) {
+                mSubreddits.add(subreddit);
+            }
+            mSubreddits.endBatchedUpdates();
         }
 
         @Override
@@ -190,22 +213,12 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
             return mSubreddits.size();
         }
 
-        @Override
-        public long getItemId(int position) {
-            return mSubreddits.get(position).id().hashCode();
-        }
-
-        Subreddit getItem(int position) {
-            return mSubreddits.get(position);
-        }
-
         class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
             final TextView title;
             final Button colorButton;
 
-            ViewHolder(View itemView, SubredditItemListener listener) {
+            ViewHolder(View itemView) {
                 super(itemView);
-                mItemListener = listener;
                 title = (TextView) itemView.findViewById(R.id.item_subreddit_title);
                 colorButton = (Button) itemView.findViewById(R.id.item_subreddit_circle);
                 itemView.setOnClickListener(this);
@@ -213,8 +226,7 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
             @Override
             public void onClick(View v) {
-                int position = getAdapterPosition();
-                mItemListener.onSubredditClick(getItem(position));
+                mItemListener.onSubredditClick(mSubreddits.get(getAdapterPosition()));
 
             }
         }

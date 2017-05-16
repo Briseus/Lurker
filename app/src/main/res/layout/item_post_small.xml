@@ -25,7 +25,7 @@
             android:layout_height="0dp"
             android:layout_marginBottom="0dp"
             android:foreground="@drawable/list_selector"
-            android:tint="@color/black_post_overlay"
+            android:tint="@color/black_post_image_overlay"
             app:actualImageScaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0.0"

@@ -59,7 +59,6 @@ public class MyApplication extends Application {
 
         ImagePipelineConfig config = OkHttpImagePipelineConfigFactory
                 .newBuilder(this, mOkHttpClient)
-                .setResizeAndRotateEnabledForNetwork(true)
                 .setDownsampleEnabled(true)
                 .build();
 

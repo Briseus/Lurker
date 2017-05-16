@@ -10,8 +10,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.util.SortedListAdapterCallback;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +30,6 @@ import com.facebook.imagepipeline.core.ImagePipeline;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -90,9 +91,7 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                 .redditRepositoryComponent(((MyApplication) getActivity().getApplication()).getmRedditRepositoryComponent())
                 .subredditPresenterModule(new SubredditPresenterModule(subreddit))
                 .build();
-        mListAdapter = new PostsAdapter(new ArrayList<Post>(25),
-                mClickListener,
-                ContextCompat.getColor(getContext(), R.color.colorAccent),
+        mListAdapter = new PostsAdapter(mClickListener,
                 Fresco.getImagePipeline());
         mCustomTabActivityHelper = new CustomTabActivityHelper();
         DisplayHelper.init(getContext());
@@ -141,7 +140,13 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
                     if (!refreshing && scrolledItems >= totalItemCount) {
                         refreshing = true;
                         Timber.d("Last item reached, getting more!");
-                        mActionsListener.loadMorePosts(getSubredditUrl(), mNextPageId);
+                        recyclerView.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mActionsListener.loadMorePosts(getSubredditUrl(), mNextPageId);
+                            }
+                        });
+
                     }
                 }
             }
@@ -326,16 +331,32 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         private final static String PROGRESSBAR = "progressbar";
         private final static String ERROR = "error";
 
-        private final List<Post> mPosts;
+        private final SortedList<Post> mPosts;
         private final postClickListener mClicklistener;
-        private final int mDefaultAccentColor;
         private final ImagePipeline imagePipeline;
 
-        PostsAdapter(@NonNull List<Post> posts, @NonNull postClickListener listener, int color, @NonNull ImagePipeline pipeline) {
-            mPosts = posts;
+        PostsAdapter(@NonNull postClickListener listener, @NonNull ImagePipeline pipeline) {
             mClicklistener = listener;
-            mDefaultAccentColor = color;
             imagePipeline = pipeline;
+            mPosts = new SortedList<Post>(Post.class, new SortedListAdapterCallback<Post>(this) {
+                @Override
+                public int compare(Post o1, Post o2) {
+                    if (o1.id().equals(o2.id())) {
+                        return 0;
+                    }
+                    return -1;
+                }
+
+                @Override
+                public boolean areContentsTheSame(Post oldItem, Post newItem) {
+                    return oldItem.equals(newItem);
+                }
+
+                @Override
+                public boolean areItemsTheSame(Post item1, Post item2) {
+                    return item1.id().equals(item2.id());
+                }
+            }, 25);
         }
 
         @Override
@@ -401,27 +422,20 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
 
         }
 
-        void addAll(List<Post> list) {
-            int oldDataEnd = 0;
-            if (!mPosts.isEmpty()) {
-                oldDataEnd = mPosts.size() - 1;
+        void addAll(@NonNull List<Post> list) {
+            mPosts.beginBatchedUpdates();
+            for (Post post : list) {
+                mPosts.add(post);
             }
-            mPosts.addAll(list);
-            notifyItemRangeInserted(oldDataEnd, list.size());
+            mPosts.endBatchedUpdates();
         }
 
         void addMorePosts(@NonNull final List<Post> newPosts) {
-            final int index = mPosts.size();
-            mPosts.addAll(index, newPosts);
-            notifyItemRangeInserted(index, newPosts.size());
-
-
+            addAll(newPosts);
         }
 
         void clear() {
-            final int oldSize = mPosts.size();
             mPosts.clear();
-            notifyItemRangeRemoved(0, oldSize);
 
         }
 
@@ -434,17 +448,8 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
             final int index = mPosts.size() - 1;
             if (active) {
                 mPosts.add(createPost(PROGRESSBAR));
-                android.os.Handler handler = new android.os.Handler();
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyItemInserted(index);
-                    }
-                });
-
             } else {
-                mPosts.remove(index);
-                notifyItemRemoved(index);
+                mPosts.removeItemAt(index);
 
             }
 
@@ -453,11 +458,9 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
         void setListLoadingError(boolean active) {
             final int index = mPosts.size() - 1;
             if (active) {
-                mPosts.set(index, createPost(ERROR));
-                notifyItemChanged(index);
+                mPosts.updateItemAt(index, createPost(ERROR));
             } else {
-                mPosts.remove(index);
-                notifyItemRemoved(index);
+                mPosts.removeItemAt(index);
             }
 
         }

@@ -389,6 +389,9 @@ public class CommentFragment extends Fragment implements CommentContract.View {
                             + " by " + mClickedPost.author();
                     mAuthor.setText(author);
                     mTitle.setText(mClickedPost.title());
+                } else {
+                    mAuthor.setText("");
+                    mTitle.setText("");
                 }
                 if (mClickedPost.flairText().length() == 0) {
                     mFlairText.setVisibility(View.GONE);
