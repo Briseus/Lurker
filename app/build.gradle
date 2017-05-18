@@ -40,8 +40,8 @@ android {
         applicationId "torille.fi.lurkforreddit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 16
-        versionName "0.7.1"
+        versionCode 17
+        versionName "0.7.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
@@ -107,6 +107,11 @@ dependencies {
     compile "com.google.dagger:dagger:$rootProject.ext.daggerVersion"
     annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.ext.daggerVersion"
 
+    // Retrofit
+    compile "com.squareup.retrofit2:retrofit:$rootProject.ext.retrofitVersion"
+    compile "com.squareup.retrofit2:converter-gson:$rootProject.ext.retrofitVersion"
+    compile "com.squareup.retrofit2:adapter-rxjava2:$rootProject.ext.retrofitVersion"
+
     // Autovalue dependencies
     annotationProcessor "com.ryanharter.auto.value:auto-value-gson:$rootProject.ext.autoValueGsonVersion"
     provided "com.ryanharter.auto.value:auto-value-gson:$rootProject.ext.autoValueGsonVersion"
@@ -126,18 +131,14 @@ dependencies {
     compile "com.google.android.exoplayer:exoplayer-ui:$rootProject.ext.exoplayerVersion"
     compile "com.google.android.exoplayer:extension-okhttp:$rootProject.ext.exoplayerVersion"
 
-    // Retrofit
-    compile "com.squareup.retrofit2:retrofit:$rootProject.ext.retrofitVersion"
-    compile "com.squareup.retrofit2:converter-gson:$rootProject.ext.retrofitVersion"
-    compile "com.squareup.retrofit2:adapter-rxjava2:$rootProject.ext.retrofitVersion"
-    compile "com.squareup.okhttp3:logging-interceptor:$rootProject.ext.okHttpVersion"
-
     // Because RxAndroid releases are few and far between, it is recommended you also
     // explicitly depend on RxJava's latest version for bug fixes and new features.
-    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    compile 'io.reactivex.rxjava2:rxjava:2.0.9'
-    compile 'com.android.support:support-v4:25.3.1'
-    
+    compile "io.reactivex.rxjava2:rxandroid:$rootProject.ext.rxAndroidVersion"
+    compile "io.reactivex.rxjava2:rxjava:$rootProject.ext.rxJavaVersion"
+
+    compile "com.squareup.okhttp3:okhttp:$rootProject.ext.okHttpVersion"
+    compile "com.squareup.okhttp3:logging-interceptor:$rootProject.ext.okHttpVersion"
+
     // Timber and leak canary dependencies
     compile "com.jakewharton.timber:timber:$rootProject.ext.timberVersion"
     debugCompile "com.squareup.leakcanary:leakcanary-android:$rootProject.ext.leakCanaryVersion"
@@ -168,6 +169,7 @@ dependencies. This is required since Espresso internally has a dependency on sup
 */
 configurations.all {
     resolutionStrategy.force "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
+    resolutionStrategy.force "com.android.support:support-v4:$rootProject.supportLibraryVersion"
     resolutionStrategy.force 'com.google.code.findbugs:jsr305:3.0.1'
 }
 

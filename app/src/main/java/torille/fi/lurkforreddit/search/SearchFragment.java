@@ -169,7 +169,6 @@ public class SearchFragment extends Fragment implements SearchContract.View {
                 @Override
                 public int compare(SearchResult o1, SearchResult o2) {
                     if (o1.title().equals(o2.title())) {
-                        Timber.d(o1.title().toString());
                         return 0;
                     }
                     return -1;

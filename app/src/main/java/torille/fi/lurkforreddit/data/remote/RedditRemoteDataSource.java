@@ -9,6 +9,8 @@ import com.google.gson.stream.JsonReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -62,27 +64,62 @@ public class RedditRemoteDataSource implements RedditDataSource {
         return mRedditApi.getUserMultireddits()
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
-                .map(new Function<MultiredditListing[], List<Subreddit>>() {
+                .map(new Function<MultiredditListing[], Observable<MultiredditListing>>() {
                     @Override
-                    public List<Subreddit> apply(@io.reactivex.annotations.NonNull MultiredditListing[] multireddits) throws Exception {
-                        List<Subreddit> multies = new ArrayList<Subreddit>();
-                        for (MultiredditListing multireddit : multireddits) {
-                            Timber.d(multireddit.toString());
-                            multies.add(TextHelper.formatSubreddit(multireddit.multireddit()));
-                        }
-                        return multies;
+                    public Observable<MultiredditListing> apply(@io.reactivex.annotations.NonNull MultiredditListing[] multireddits) throws Exception {
+                        return Observable.fromArray(multireddits);
                     }
-                });
+                })
+                .flatMap(new Function<Observable<MultiredditListing>, Observable<Subreddit>>() {
+                    @Override
+                    public Observable<Subreddit> apply(@io.reactivex.annotations.NonNull Observable<MultiredditListing> multiredditListingObservable) throws Exception {
+                        return multiredditListingObservable.map(new Function<MultiredditListing, Subreddit>() {
+                            @Override
+                            public Subreddit apply(@io.reactivex.annotations.NonNull MultiredditListing multiredditListing) throws Exception {
+                                return TextHelper.formatSubreddit(multiredditListing.multireddit());
+                            }
+                        });
+                    }
+                })
+                .toList().toObservable();
     }
 
-    private Observable<List<Subreddit>> getUserSubreddits() {
-        return mRedditApi.getMySubreddits(200)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.computation())
-                .map(new Function<SubredditListing, List<Subreddit>>() {
+    private Observable<List<Subreddit>> fetchSubreddits(Observable<SubredditListing> listingObservable) {
+        return listingObservable
+                .subscribeOn(Schedulers.computation())
+                .map(new Function<SubredditListing, Observable<SubredditChildren>>() {
                     @Override
-                    public List<Subreddit> apply(@io.reactivex.annotations.NonNull SubredditListing subredditListing) throws Exception {
-                        return TextHelper.formatSubreddits(subredditListing.data().children());
+                    public Observable<SubredditChildren> apply(@io.reactivex.annotations.NonNull SubredditListing subredditListing) throws Exception {
+                        return Observable.fromIterable(subredditListing.data().children());
+                    }
+                })
+                .flatMap(new Function<Observable<SubredditChildren>, Observable<Subreddit>>() {
+                    @Override
+                    public Observable<Subreddit> apply(@io.reactivex.annotations.NonNull Observable<SubredditChildren> subredditChildrenObservable) throws Exception {
+                        return subredditChildrenObservable.map(new Function<SubredditChildren, Subreddit>() {
+                            @Override
+                            public Subreddit apply(@io.reactivex.annotations.NonNull SubredditChildren subredditChildren) throws Exception {
+                                return TextHelper.formatSubreddit(subredditChildren);
+                            }
+                        });
+                    }
+                })
+                .toList().toObservable()
+                .map(new Function<List<Subreddit>, List<Subreddit>>() {
+                    @Override
+                    public List<Subreddit> apply(@io.reactivex.annotations.NonNull List<Subreddit> subreddits) throws Exception {
+                        Collections.sort(subreddits, new Comparator<Subreddit>() {
+                            @Override
+                            public int compare(Subreddit o1, Subreddit o2) {
+                                String displayName = o1.displayName();
+                                String displayName2 = o2.displayName();
+                                if (displayName != null && displayName2 != null) {
+                                    return displayName.compareToIgnoreCase(displayName2);
+                                }
+                                return -1;
+                            }
+                        });
+                        return subreddits;
                     }
                 });
     }
@@ -90,11 +127,12 @@ public class RedditRemoteDataSource implements RedditDataSource {
     @Override
     public Observable<List<Subreddit>> getSubreddits() {
         Timber.d("Fetching subs!");
-
-
+        Observable<SubredditListing> subreddits;
         if (mSettingsStore.isLoggedIn()) {
             Timber.d("Was logged in, getting personal subreddits");
-            return Observable.zip(getUserSubreddits(), getUserMultireddits(),
+            subreddits = mRedditApi.getMySubreddits(200);
+
+            return Observable.zip(fetchSubreddits(subreddits), getUserMultireddits(),
                     new BiFunction<List<Subreddit>, List<Subreddit>, List<Subreddit>>() {
                         @Override
                         public List<Subreddit> apply(@io.reactivex.annotations.NonNull List<Subreddit> subreddits, @io.reactivex.annotations.NonNull List<Subreddit> subreddits2) throws Exception {
@@ -108,15 +146,9 @@ public class RedditRemoteDataSource implements RedditDataSource {
                     .observeOn(AndroidSchedulers.mainThread());
         } else {
             Timber.d("Was not logged in, getting default subreddits");
-            return mRedditApi.getDefaultSubreddits(100)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.computation())
-                    .map(new Function<SubredditListing, List<Subreddit>>() {
-                        @Override
-                        public List<Subreddit> apply(@io.reactivex.annotations.NonNull SubredditListing subredditListing) throws Exception {
-                            return TextHelper.formatSubreddits(subredditListing.data().children());
-                        }
-                    });
+            subreddits = mRedditApi.getDefaultSubreddits(100);
+            return fetchSubreddits(subreddits);
+
         }
     }
 

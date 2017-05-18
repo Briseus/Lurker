@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -146,36 +147,14 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
     private static class SubredditsAdapter extends RecyclerView.Adapter<SubredditsAdapter.ViewHolder> {
 
-        private SortedList<Subreddit> mSubreddits;
+        private List<Subreddit> mSubreddits;
         private SubredditItemListener mItemListener;
         private final ColorStateList mDefaultColor;
 
         SubredditsAdapter(SubredditItemListener itemListener, int color) {
             mItemListener = itemListener;
             mDefaultColor = ColorStateList.valueOf(color);
-            mSubreddits = new SortedList<Subreddit>(Subreddit.class, new SortedListAdapterCallback<Subreddit>(this) {
-                @Override
-                public int compare(Subreddit o1, Subreddit o2) {
-                    String displayName = o1.displayName();
-                    String displayName2 = o2.displayName();
-                    if (displayName != null && displayName2 != null) {
-                        return displayName.compareToIgnoreCase(displayName2);
-                    }
-                    return -1;
-                }
-
-                @Override
-                public boolean areContentsTheSame(Subreddit oldItem, Subreddit newItem) {
-                    return oldItem.equals(newItem);
-                }
-
-                @Override
-                public boolean areItemsTheSame(Subreddit item1, Subreddit item2) {
-                    String itemId = item1.id();
-                    String itemId2 = item2.id();
-                    return itemId != null && itemId2 != null && itemId.equals(itemId2);
-                }
-            });
+            mSubreddits = new ArrayList<>(25);
         }
 
         @Override
@@ -201,11 +180,8 @@ public class SubredditsFragment extends Fragment implements SubredditsContract.V
 
         void replaceData(@NonNull List<Subreddit> subreddits) {
             mSubreddits.clear();
-            mSubreddits.beginBatchedUpdates();
-            for (Subreddit subreddit : subreddits) {
-                mSubreddits.add(subreddit);
-            }
-            mSubreddits.endBatchedUpdates();
+            mSubreddits.addAll(subreddits);
+            notifyDataSetChanged();
         }
 
         @Override

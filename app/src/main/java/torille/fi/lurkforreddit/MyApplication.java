@@ -6,6 +6,7 @@ import android.content.ComponentCallbacks2;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
+import com.facebook.imagepipeline.decoder.SimpleProgressiveJpegConfig;
 import com.squareup.leakcanary.LeakCanary;
 
 import javax.inject.Inject;
@@ -59,6 +60,8 @@ public class MyApplication extends Application {
 
         ImagePipelineConfig config = OkHttpImagePipelineConfigFactory
                 .newBuilder(this, mOkHttpClient)
+                .setResizeAndRotateEnabledForNetwork(true)
+                .setProgressiveJpegConfig(new SimpleProgressiveJpegConfig())
                 .setDownsampleEnabled(true)
                 .build();
 

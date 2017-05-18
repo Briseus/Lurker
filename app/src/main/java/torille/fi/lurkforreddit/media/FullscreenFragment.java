@@ -21,11 +21,9 @@ import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
-import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
@@ -46,6 +44,8 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import dagger.Lazy;
@@ -54,6 +54,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import me.relex.photodraweeview.PhotoDraweeView;
+import okhttp3.CacheControl;
 import okhttp3.OkHttpClient;
 import timber.log.Timber;
 import torille.fi.lurkforreddit.MyApplication;
@@ -86,7 +87,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
     Lazy<VideositeService.Streamable> mStreamableApi;
 
     @Inject
-    Lazy<OkHttpClient> mOkHttpClient;
+    OkHttpClient mOkHttpClient;
 
     /**
      * Use this factory method to create a new instance of
@@ -175,11 +176,11 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
             previewImageUrl = "";
         }
 
-        ImageRequest lowResRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(previewImageUrl))
+        ImageRequest lowResRequest = ImageRequestBuilder
+                .newBuilderWithSource(Uri.parse(previewImageUrl))
                 .build();
 
         ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
-                .setProgressiveRenderingEnabled(true)
                 .build();
 
         PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder()
@@ -202,6 +203,7 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                     public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
                         super.onFinalImageSet(id, imageInfo, animatable);
                         if (imageInfo == null || mImageView == null) {
+                            Timber.d("Was error");
                             return;
                         }
                         removeMarginTop();
@@ -224,11 +226,11 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
                 new AdaptiveTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector =
                 new DefaultTrackSelector(videoTrackSelectionFactory);
-
+        CacheControl control = new CacheControl.Builder().build();
         String userAgent = Util.getUserAgent(context, getString(R.string.app_name));
         // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new OkHttpDataSourceFactory(mOkHttpClient.get(),
-                userAgent, bandwidthMeter);
+        DataSource.Factory dataSourceFactory = new OkHttpDataSourceFactory(mOkHttpClient,
+                userAgent, bandwidthMeter, control);
 
         // Produces Extractor instances for parsing the media data.
         ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
