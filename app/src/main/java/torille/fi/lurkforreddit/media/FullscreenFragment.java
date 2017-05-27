@@ -185,7 +185,6 @@ public class FullscreenFragment extends Fragment implements FullscreenContract.V
 
         PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder()
                 .setAutoPlayAnimations(true)
-                .setUri(url)
                 .setImageRequest(request)
                 .setLowResImageRequest(lowResRequest)
                 .setOldController(mImageView.getController())

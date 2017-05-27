@@ -5,10 +5,12 @@ import android.text.Spanned;
 import android.text.format.DateUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.BiFunction;
+import io.reactivex.functions.Function;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentResponse;
@@ -143,165 +145,166 @@ public class TextHelper {
         return flatList;
     }
 
-    public static Post formatPost(PostDetails postDetails) {
-        String formatScore = TextHelper.formatScore(postDetails.score());
 
-        CharSequence title = TextHelper.fromHtml(postDetails.title());
+    private static Function<PostDetails, Post> funcFormatPost = new Function<PostDetails, Post>() {
+        @Override
+        public Post apply(@NonNull PostDetails postDetails) throws Exception {
+            String formatScore = TextHelper.formatScore(postDetails.score());
 
-        // sometimes formatting title can result in empty if it has <----- at start
-        // etc
-        if (title != null &&
-                title.length() == 0) {
-            title = String.valueOf(postDetails.title());
-        }
+            CharSequence title = TextHelper.fromHtml(postDetails.title());
 
-        CharSequence selfText = null;
-        if (postDetails.selftextHtml() != null) {
-            selfText = formatTextToHtml(postDetails.selftextHtml());
-        }
+            // sometimes formatting title can result in empty if it has <----- at start
+            // etc
+            if (title != null &&
+                    title.length() == 0) {
+                title = String.valueOf(postDetails.title());
+            }
 
-        CharSequence flair = "";
-        if (postDetails.stickied()) {
-            flair = TextHelper.fromHtml("Stickied");
-        }
-        if (postDetails.linkFlairText() != null) {
-            flair = TextHelper.fromHtml(flair + " " + postDetails.linkFlairText());
-        }
-        String previewImageUrl;
-        String thumbnail = postDetails.thumbnail();
-        switch (thumbnail) {
-            case "default":
-            case "self":
-            case "":
-            case "spoiler":
-            case "image":
-                previewImageUrl = "";
-                break;
-            case "nsfw":
-                flair = TextHelper.fromHtml("<font color='#FF1744'>NSFW </font>" + flair);
-                previewImageUrl = "";
-                break;
-            default:
-                previewImageUrl = DisplayHelper.getBestPreviewPicture(postDetails);
-        }
+            CharSequence selfText = null;
+            if (postDetails.selftextHtml() != null) {
+                selfText = formatTextToHtml(postDetails.selftextHtml());
+            }
+
+            CharSequence flair = "";
+            if (postDetails.stickied()) {
+                flair = TextHelper.fromHtml("Stickied");
+            }
+            if (postDetails.linkFlairText() != null) {
+                flair = TextHelper.fromHtml(flair + " " + postDetails.linkFlairText());
+            }
+            String previewImageUrl;
+            String thumbnail = postDetails.thumbnail();
+            switch (thumbnail) {
+                case "default":
+                case "self":
+                case "":
+                case "spoiler":
+                case "image":
+                    previewImageUrl = "";
+                    break;
+                case "nsfw":
+                    flair = TextHelper.fromHtml("<font color='#FF1744'>NSFW </font>" + flair);
+                    previewImageUrl = "";
+                    break;
+                default:
+                    previewImageUrl = DisplayHelper.getBestPreviewPicture(postDetails);
+            }
 
 
         /*if (postDetails.isOver18()) {
             title = TextHelper.fromHtml("<font color='#FF1744'> NSFW </font>" + postDetails.title());
         }*/
 
-        String numberOfComments = String.valueOf(postDetails.numberOfComments());
+            String numberOfComments = String.valueOf(postDetails.numberOfComments());
 
-        return Post.builder()
-                .setId(postDetails.name())
-                .setThumbnail(thumbnail)
-                .setDomain(postDetails.domain())
-                .setUrl(postDetails.url())
-                .setScore(formatScore)
-                .setFlairText(flair)
-                .setSelfText(selfText)
-                .setIsSelf(postDetails.isSelf())
-                .setNumberOfComments(numberOfComments)
-                .setTitle(title)
-                .setPreviewImage(previewImageUrl)
-                .setPermaLink(postDetails.permalink())
-                .setAuthor(postDetails.author())
-                .setCreatedUtc(postDetails.createdUtc())
-                .build();
-
-    }
-
-    public static List<Post> formatPosts(List<PostResponse> posts) {
-        List<Post> formattedPosts = new ArrayList<>(posts.size());
-
-        for (int i = 0, size = posts.size(); i < size; i++) {
-            PostDetails postDetails = posts.get(i).postDetails();
-            formattedPosts.add(formatPost(postDetails));
+            return Post.builder()
+                    .setId(postDetails.name())
+                    .setThumbnail(thumbnail)
+                    .setDomain(postDetails.domain())
+                    .setUrl(postDetails.url())
+                    .setScore(formatScore)
+                    .setFlairText(flair)
+                    .setSelfText(selfText)
+                    .setIsSelf(postDetails.isSelf())
+                    .setNumberOfComments(numberOfComments)
+                    .setTitle(title)
+                    .setPreviewImage(previewImageUrl)
+                    .setPermaLink(postDetails.permalink())
+                    .setAuthor(postDetails.author())
+                    .setCreatedUtc(postDetails.createdUtc())
+                    .build();
         }
+    };
 
-        return formattedPosts;
+    public static Observable<Post> formatPost(Observable<PostResponse> postDetails) {
+        return postDetails
+                .map(PostResponse::postDetails)
+                .map(funcFormatPost);
+
     }
 
-    public static Subreddit formatSubreddit(MultiredditListing.Multireddit multireddit) {
+    public static Observable<Post> formatPostDetails(Observable<PostDetails> postDetails) {
+        return postDetails
+                .map(funcFormatPost);
 
-        return Subreddit.builder()
-                .setUrl(multireddit.pathUrl())
-                .setBannerUrl(null)
-                .setId(multireddit.name())
-                .setKeyColor(multireddit.keyColor())
-                .setDisplayName(multireddit.displayName())
-                .build();
     }
 
-    public static Subreddit formatSubreddit(SubredditChildren subredditChildren) {
+    public static Observable<Subreddit> formatMultiToSubreddit(Observable<MultiredditListing> multireddit) {
+
+        return multireddit.map(multiredditListing -> {
+            MultiredditListing.Multireddit multireddit1 = multiredditListing.multireddit();
+            return Subreddit.builder()
+                    .setUrl(multireddit1.pathUrl())
+                    .setBannerUrl(null)
+                    .setId(multireddit1.name())
+                    .setKeyColor(multireddit1.keyColor())
+                    .setDisplayName(multireddit1.displayName())
+                    .build();
+        });
+
+    }
+
+    public static Observable<Subreddit> formatSubreddit(Observable<SubredditChildren> subredditChildren) {
+
+        return subredditChildren
+                .map(SubredditChildren::subreddit)
+                .map(subredditResponse -> Subreddit.builder()
+                        .setUrl(subredditResponse.url())
+                        .setBannerUrl(subredditResponse.banner())
+                        .setId(subredditResponse.id())
+                        .setKeyColor(subredditResponse.keyColor())
+                        .setDisplayName(subredditResponse.displayName())
+                        .build());
+    }
+
+    public static Observable<SearchResult> formatSearchResult(Observable<SubredditChildren> observable) {
+        return observable.map(subredditChildren -> {
+            Observable<SubredditChildren> subredditChildObservable = Observable.<SubredditChildren>fromArray(subredditChildren);
+            return Observable.zip(formatSubreddit(subredditChildObservable),
+                    subredditChildObservable,
+                    funcFormatSearchResult)
+                    .blockingSingle();
+
+        });
+    }
+
+    private static BiFunction<Subreddit, SubredditChildren, SearchResult> funcFormatSearchResult = (subreddit, subredditChildren) -> {
         SubredditResponse subredditResponse = subredditChildren.subreddit();
 
-        return Subreddit.builder()
-                .setUrl(subredditResponse.url())
-                .setBannerUrl(subredditResponse.banner())
-                .setId(subredditResponse.id())
-                .setKeyColor(subredditResponse.keyColor())
-                .setDisplayName(subredditResponse.displayName())
+        CharSequence formattedTitle;
+        String formattedSubscription;
+        CharSequence formattedDescription;
+
+        final String infoText = subredditResponse.subscribers() + " subscribers, Community since "
+                + DateUtils.getRelativeTimeSpanString(subredditResponse.createdUtc() * 1000);
+
+        if (subredditResponse.over18()) {
+            formattedTitle = TextHelper.fromHtml(subredditResponse.url()
+                    + "<font color='#FF1744'> NSFW</font>");
+        } else {
+            formattedTitle = subredditResponse.url();
+        }
+
+        if (subredditResponse.subscribed()) {
+            formattedSubscription = "Subscribed";
+        } else {
+            formattedSubscription = "Not subscribed";
+        }
+        String descriptionHtml = subredditResponse.descriptionHtml();
+        if (descriptionHtml != null && !descriptionHtml.isEmpty()) {
+            formattedDescription = formatTextToHtml(descriptionHtml);
+        } else {
+            formattedDescription = "No description";
+        }
+
+        return SearchResult.builder()
+                .setTitle(formattedTitle)
+                .setDescription(formattedDescription)
+                .setInfoText(infoText)
+                .setSubscriptionInfo(formattedSubscription)
+                .setSubreddit(subreddit)
                 .build();
-    }
-
-    public static List<Subreddit> formatSubreddits(List<SubredditChildren> results) {
-        List<Subreddit> subreddits = new ArrayList<>(results.size());
-
-        for (int i = 0, size = results.size(); i < size; i++) {
-            SubredditChildren result = results.get(i);
-            subreddits.add(formatSubreddit(result));
-        }
-
-        return subreddits;
-    }
-
-    public static List<SearchResult> formatSearchResults(List<SubredditChildren> hits) {
-        List<SearchResult> results = new ArrayList<>(hits.size());
-        for (int i = 0, size = hits.size(); i < size; i++) {
-            SubredditChildren subChild = hits.get(i);
-            SubredditResponse subredditResponse = subChild.subreddit();
-
-            CharSequence formattedTitle;
-            String formattedSubscription;
-            CharSequence formattedDescription;
-
-            final String infoText = subredditResponse.subscribers() + " subscribers, Community since "
-                    + DateUtils.getRelativeTimeSpanString(subredditResponse.createdUtc() * 1000);
-
-            if (subredditResponse.over18()) {
-                formattedTitle = TextHelper.fromHtml(subredditResponse.url()
-                        + "<font color='#FF1744'> NSFW</font>");
-            } else {
-                formattedTitle = subredditResponse.url();
-            }
-
-            if (subredditResponse.subscribed()) {
-                formattedSubscription = "Subscribed";
-            } else {
-                formattedSubscription = "Not subscribed";
-            }
-            String descriptionHtml = subredditResponse.descriptionHtml();
-            if (descriptionHtml != null && !descriptionHtml.isEmpty()) {
-                formattedDescription = formatTextToHtml(descriptionHtml);
-            } else {
-                formattedDescription = "No description";
-            }
-
-            Subreddit subreddit = formatSubreddit(subChild);
-
-            SearchResult result = SearchResult.builder()
-                    .setTitle(formattedTitle)
-                    .setDescription(formattedDescription)
-                    .setInfoText(infoText)
-                    .setSubscriptionInfo(formattedSubscription)
-                    .setSubreddit(subreddit)
-                    .build();
-
-            results.add(result);
-        }
-        return results;
-    }
+    };
 
     /**
      * Trims trailing whitespace. Removes any of these characters:
@@ -317,6 +320,7 @@ public class TextHelper {
      *
      * @return "" if source is null, otherwise string with all trailing whitespace removed
      */
+
     private static CharSequence trimTrailingWhitespace(CharSequence source) {
 
         if (source == null)

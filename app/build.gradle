@@ -1,16 +1,8 @@
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
-    }
+plugins {
+    id "me.tatarka.retrolambda" version "3.6.0"
+    id "net.ltgt.apt" version "0.10"
 }
-
 apply plugin: 'com.android.application'
-apply plugin: "net.ltgt.apt"
 
 // Create a variable called keystorePropertiesFile, and initialize it to your
 // keystore.properties file, in the rootProject folder.
@@ -31,6 +23,11 @@ android {
             storeFile file(keystoreProperties['storeFile'])
             storePassword keystoreProperties['storePassword']
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     compileSdkVersion rootProject.ext.compileSdkVersion

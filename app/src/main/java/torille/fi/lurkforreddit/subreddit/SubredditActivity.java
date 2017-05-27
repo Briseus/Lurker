@@ -21,6 +21,7 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import javax.inject.Inject;
 
 import dagger.Lazy;
+import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -91,7 +92,7 @@ public class SubredditActivity extends AppCompatActivity {
 
                 if (response.isSuccessful()) {
                     Timber.d("Got " + response.body().toString());
-                    Subreddit subreddit = TextHelper.formatSubreddit(response.body());
+                    Subreddit subreddit = TextHelper.formatSubreddit(Observable.<SubredditChildren>fromArray(response.body())).blockingSingle();
 
                     ActionBar actionBar = getSupportActionBar();
                     if (actionBar != null) {

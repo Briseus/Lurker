@@ -34,6 +34,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
 import timber.log.Timber;
 import torille.fi.lurkforreddit.MyApplication;
 import torille.fi.lurkforreddit.R;
@@ -395,7 +397,6 @@ public class SubredditFragment extends Fragment implements SubredditContract.Vie
          * @param listMaxSize   the maxsize which you cant go over
          */
         private void prefetchImages(final int fromIndex, final int prefetchCount, final int listMaxSize) {
-
 
             final int to = (fromIndex + prefetchCount);
                 /*

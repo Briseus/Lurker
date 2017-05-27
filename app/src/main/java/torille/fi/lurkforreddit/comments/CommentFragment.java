@@ -382,16 +382,16 @@ public class CommentFragment extends Fragment implements CommentContract.View {
 
             void bind(Post mClickedPost) {
 
-                if (mClickedPost.title().length() != 0) {
+                if (mClickedPost.title().length() == 0) {
+                    mAuthor.setText("");
+                    mTitle.setText("");
+                } else {
                     final String author = mClickedPost.score() + " points | "
                             + "Submitted "
                             + DateUtils.getRelativeTimeSpanString(mClickedPost.createdUtc() * 1000)
                             + " by " + mClickedPost.author();
                     mAuthor.setText(author);
                     mTitle.setText(mClickedPost.title());
-                } else {
-                    mAuthor.setText("");
-                    mTitle.setText("");
                 }
                 if (mClickedPost.flairText().length() == 0) {
                     mFlairText.setVisibility(View.GONE);

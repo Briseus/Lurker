@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -38,20 +39,11 @@ public class RedditRepository implements RedditDataSource {
     public Observable<List<Subreddit>> getSubreddits() {
         if (mCachedSubreddits == null) {
             return mRedditRemoteApi.getSubreddits()
-                    .flatMap(new Function<List<Subreddit>, Observable<List<Subreddit>>>() {
-                        @Override
-                        public Observable<List<Subreddit>> apply(@io.reactivex.annotations.NonNull List<Subreddit> subreddits) throws Exception {
-                            return Observable.fromArray(subreddits)
-                                    .doOnNext(new Consumer<List<Subreddit>>() {
-                                        @Override
-                                        public void accept(@io.reactivex.annotations.NonNull List<Subreddit> subreddits) throws Exception {
-                                            mCachedSubreddits = subreddits;
-                                        }
-                                    });
-                        }
-                    });
+                    .flatMap(subreddits ->
+                            Observable.<List<Subreddit>>fromArray(subreddits)
+                                    .doOnNext(subreddits1 -> mCachedSubreddits = subreddits1));
         } else {
-            return  Observable.fromArray(mCachedSubreddits);
+            return Observable.<List<Subreddit>>fromArray(mCachedSubreddits);
         }
     }
 
