@@ -37,8 +37,8 @@ android {
         applicationId "torille.fi.lurkforreddit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 17
-        versionName "0.7.2"
+        versionCode 18
+        versionName "0.7.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
