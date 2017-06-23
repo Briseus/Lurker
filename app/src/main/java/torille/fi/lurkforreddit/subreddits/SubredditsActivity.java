@@ -87,8 +87,8 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
 
         Subreddit frontpage = Subreddit.builder()
                 .setUrl("")
-                .setBannerUrl("")
-                .setId(null)
+                .setBannerUrl(null)
+                .setId("frontpage")
                 .setDisplayName("Popular")
                 .setKeyColor(null)
                 .build();
@@ -157,27 +157,17 @@ public class SubredditsActivity extends AppCompatActivity implements BottomNavig
 
     private void getToken(String code) {
         final String grant_type = "authorization_code";
-        Call<RedditToken> call = mRedditAuthApi.getUserAuthToken(grant_type, code, REDIRECT_URI);
-        call.enqueue(new Callback<RedditToken>() {
-            @Override
-            public void onResponse(Call<RedditToken> call, Response<RedditToken> response) {
-                if (response.isSuccessful()) {
-                    Timber.d("Got " + response.body().toString());
-                    store.setToken(response.body().access_token());
-                    store.setRefreshToken(response.body().refresh_token());
+        mRedditAuthApi.getUserAuthToken(grant_type, code, REDIRECT_URI)
+                .map(redditToken -> redditToken)
+                .doOnError(throwable -> {
+                    Timber.e(throwable);
+                    Toast.makeText(SubredditsActivity.this, R.string.toast_login_failed, Toast.LENGTH_LONG).show();
+                })
+                .subscribe(redditToken -> {
+                    store.setToken(redditToken.access_token());
+                    store.setRefreshToken(redditToken.refresh_token());
                     store.loggedIn(true);
-                    Toast.makeText(SubredditsActivity.this, R.string.toast_login_success, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(SubredditsActivity.this, R.string.toast_login_failed + "" + response.errorBody(), Toast.LENGTH_LONG).show();
-
-                }
-            }
-
-            @Override
-            public void onFailure(Call<RedditToken> call, Throwable t) {
-                Timber.e(t);
-            }
-        });
+                });
     }
 
     @Override

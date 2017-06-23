@@ -11,13 +11,10 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class Subreddit implements Parcelable {
 
-    @Nullable
     public abstract String id();
 
-    @Nullable
     public abstract String url();
 
-    @Nullable
     public abstract String displayName();
 
     @Nullable

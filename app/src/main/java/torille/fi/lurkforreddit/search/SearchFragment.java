@@ -240,6 +240,9 @@ public class SearchFragment extends Fragment implements SearchContract.View {
 
         void addProgressBar() {
             Subreddit subreddit = Subreddit.builder()
+                    .setId("Dummy")
+                    .setUrl("Url")
+                    .setDisplayName("Dummy")
                     .build();
 
             SearchResult dummy = SearchResult.builder()

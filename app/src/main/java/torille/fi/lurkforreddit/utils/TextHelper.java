@@ -37,7 +37,7 @@ public class TextHelper {
     }
 
     @SuppressWarnings("deprecation")
-    private static Spanned fromHtml(final String html) {
+    public static Spanned fromHtml(final String html) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
         } else {
@@ -45,7 +45,7 @@ public class TextHelper {
         }
     }
 
-    private static String formatScore(int score) {
+    public static String formatScore(int score) {
         final String value = String.valueOf(score);
         if (score < 1000) {
             return value;
@@ -146,103 +146,78 @@ public class TextHelper {
     }
 
 
-    private static Function<PostDetails, Post> funcFormatPost = new Function<PostDetails, Post>() {
-        @Override
-        public Post apply(@NonNull PostDetails postDetails) throws Exception {
-            String formatScore = TextHelper.formatScore(postDetails.score());
+    private static Function<PostDetails, Post> funcFormatPost = postDetails -> {
+        String formatScore = TextHelper.formatScore(postDetails.score());
 
-            CharSequence title = TextHelper.fromHtml(postDetails.title());
+        CharSequence title = TextHelper.fromHtml(postDetails.title());
 
-            // sometimes formatting title can result in empty if it has <----- at start
-            // etc
-            if (title != null &&
-                    title.length() == 0) {
-                title = String.valueOf(postDetails.title());
-            }
-
-            CharSequence selfText = null;
-            if (postDetails.selftextHtml() != null) {
-                selfText = formatTextToHtml(postDetails.selftextHtml());
-            }
-
-            CharSequence flair = "";
-            if (postDetails.stickied()) {
-                flair = TextHelper.fromHtml("Stickied");
-            }
-            if (postDetails.linkFlairText() != null) {
-                flair = TextHelper.fromHtml(flair + " " + postDetails.linkFlairText());
-            }
-            String previewImageUrl;
-            String thumbnail = postDetails.thumbnail();
-            switch (thumbnail) {
-                case "default":
-                case "self":
-                case "":
-                case "spoiler":
-                case "image":
-                    previewImageUrl = "";
-                    break;
-                case "nsfw":
-                    flair = TextHelper.fromHtml("<font color='#FF1744'>NSFW </font>" + flair);
-                    previewImageUrl = "";
-                    break;
-                default:
-                    previewImageUrl = DisplayHelper.getBestPreviewPicture(postDetails);
-            }
-
-
-        /*if (postDetails.isOver18()) {
-            title = TextHelper.fromHtml("<font color='#FF1744'> NSFW </font>" + postDetails.title());
-        }*/
-
-            String numberOfComments = String.valueOf(postDetails.numberOfComments());
-
-            return Post.builder()
-                    .setId(postDetails.name())
-                    .setThumbnail(thumbnail)
-                    .setDomain(postDetails.domain())
-                    .setUrl(postDetails.url())
-                    .setScore(formatScore)
-                    .setFlairText(flair)
-                    .setSelfText(selfText)
-                    .setIsSelf(postDetails.isSelf())
-                    .setNumberOfComments(numberOfComments)
-                    .setTitle(title)
-                    .setPreviewImage(previewImageUrl)
-                    .setPermaLink(postDetails.permalink())
-                    .setAuthor(postDetails.author())
-                    .setCreatedUtc(postDetails.createdUtc())
-                    .build();
+        // sometimes formatting title can result in empty if it has <----- at start
+        // etc
+        if (title != null &&
+                title.length() == 0) {
+            title = String.valueOf(postDetails.title());
         }
+
+        CharSequence selfText = null;
+        if (postDetails.selftextHtml() != null) {
+            selfText = formatTextToHtml(postDetails.selftextHtml());
+        }
+
+        CharSequence flair = "";
+        if (postDetails.stickied()) {
+            flair = TextHelper.fromHtml("Stickied");
+        }
+        if (postDetails.linkFlairText() != null) {
+            flair = TextHelper.fromHtml(flair + " " + postDetails.linkFlairText());
+        }
+        String previewImageUrl;
+        String thumbnail = postDetails.thumbnail();
+        switch (thumbnail) {
+            case "default":
+            case "self":
+            case "":
+            case "spoiler":
+            case "image":
+                previewImageUrl = "";
+                break;
+            case "nsfw":
+                flair = TextHelper.fromHtml("<font color='#FF1744'>NSFW </font>" + flair);
+                previewImageUrl = "";
+                break;
+            default:
+                previewImageUrl = DisplayHelper.getBestPreviewPicture(postDetails);
+        }
+
+
+    /*if (postDetails.isOver18()) {
+        title = TextHelper.fromHtml("<font color='#FF1744'> NSFW </font>" + postDetails.title());
+    }*/
+
+        String numberOfComments = String.valueOf(postDetails.numberOfComments());
+
+        return Post.builder()
+                .setId(postDetails.name())
+                .setThumbnail(thumbnail)
+                .setDomain(postDetails.domain())
+                .setUrl(postDetails.url())
+                .setScore(formatScore)
+                .setFlairText(flair)
+                .setSelfText(selfText)
+                .setIsSelf(postDetails.isSelf())
+                .setNumberOfComments(numberOfComments)
+                .setTitle(title)
+                .setPreviewImage(previewImageUrl)
+                .setPermaLink(postDetails.permalink())
+                .setAuthor(postDetails.author())
+                .setCreatedUtc(postDetails.createdUtc())
+                .build();
     };
+    public static Function<Observable<PostResponse>, Observable<Post>> funcFormatPostResponse = postResponseObservable -> postResponseObservable
+            .map(PostResponse::postDetails)
+            .map(funcFormatPost);
 
-    public static Observable<Post> formatPost(Observable<PostResponse> postDetails) {
-        return postDetails
-                .map(PostResponse::postDetails)
-                .map(funcFormatPost);
-
-    }
-
-    public static Observable<Post> formatPostDetails(Observable<PostDetails> postDetails) {
-        return postDetails
-                .map(funcFormatPost);
-
-    }
-
-    public static Observable<Subreddit> formatMultiToSubreddit(Observable<MultiredditListing> multireddit) {
-
-        return multireddit.map(multiredditListing -> {
-            MultiredditListing.Multireddit multireddit1 = multiredditListing.multireddit();
-            return Subreddit.builder()
-                    .setUrl(multireddit1.pathUrl())
-                    .setBannerUrl(null)
-                    .setId(multireddit1.name())
-                    .setKeyColor(multireddit1.keyColor())
-                    .setDisplayName(multireddit1.displayName())
-                    .build();
-        });
-
-    }
+    public static Function<Observable<PostDetails>, Observable<Post>> funcFormatPostDetails = postDetailsObservable -> postDetailsObservable
+            .map(funcFormatPost);
 
     public static Observable<Subreddit> formatSubreddit(Observable<SubredditChildren> subredditChildren) {
 
@@ -335,7 +310,7 @@ public class TextHelper {
         return source.subSequence(0, i + 1);
     }
 
-    private static CharSequence formatTextToHtml(String bodyText) {
+    public static CharSequence formatTextToHtml(String bodyText) {
         if (bodyText == null) {
             return "";
         }

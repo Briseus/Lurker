@@ -65,7 +65,7 @@ public class NetModule {
     @Provides
     @Singleton
     RxJava2CallAdapterFactory provideRxJava2CallAdapterFactory() {
-        return RxJava2CallAdapterFactory.create();
+        return RxJava2CallAdapterFactory.createAsync();
     }
 
     @Provides

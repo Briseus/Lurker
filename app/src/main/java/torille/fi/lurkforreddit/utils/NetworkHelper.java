@@ -9,6 +9,7 @@ import java.security.SecureRandom;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.Response;
 import timber.log.Timber;
@@ -49,38 +50,16 @@ final public class NetworkHelper {
             Timber.d("Was logged in as user, refreshing token");
             Timber.d("Using refreshtoken: " + mStore.getRefreshToken());
             final String type = "refresh_token";
-            final Call<RedditToken> call = mAuthApi.refreshUserToken(type, mStore.getRefreshToken());
-
-            Response<RedditToken> response = call.execute();
-            if (response.isSuccessful()) {
-                Timber.d("Got response: " + response.body().toString());
-                String accessToken = response.body().access_token();
+            return mAuthApi.refreshUserToken(type, mStore.getRefreshToken()).map(redditToken -> {
+                String accessToken = redditToken.access_token();
                 Timber.d("New token: " + accessToken);
                 mStore.setToken(accessToken);
                 return accessToken;
-            } else {
-                Timber.e("Got something else as response " + response.errorBody().string());
-                return "";
-            }
+            }).blockingSingle();
 
         } else {
-
             Timber.d("User was not logged in");
-            final String UUID = createUUID();
-            final String grant_type = "https://oauth.reddit.com/grants/installed_client";
-            final Call<RedditToken> call = mAuthApi.getAuthToken(grant_type, UUID);
-
-            Response<RedditToken> response = call.execute();
-            if (response.isSuccessful()) {
-                final String access_token = response.body().access_token();
-                mStore.setToken(access_token);
-                Timber.d("Got new token " + access_token);
-                return access_token;
-            } else {
-                Timber.e("Got something else as response " + response.errorBody().string());
-                return "";
-            }
-
+            return getToken();
         }
     }
 
@@ -88,18 +67,13 @@ final public class NetworkHelper {
 
         final String UUID = createUUID();
         final String grant_type = "https://oauth.reddit.com/grants/installed_client";
-        Call<RedditToken> call = mAuthApi.getAuthToken(grant_type, UUID);
         Timber.d("Getting token");
-        Response<RedditToken> response = call.execute();
-        if (response.isSuccessful()) {
-            final String access_token = response.body().access_token();
-            mStore.setToken(access_token);
+        return mAuthApi.getAuthToken(grant_type, UUID).map(redditToken -> {
+            final String access_token = redditToken.access_token();
             Timber.d("Got new token " + access_token);
-            return access_token;
-        } else {
-            Timber.e("Got something else as response " + response.errorBody().string());
-            return "";
-        }
+            mStore.setToken(access_token);
+            return  access_token;
+        }).blockingSingle();
     }
 
 

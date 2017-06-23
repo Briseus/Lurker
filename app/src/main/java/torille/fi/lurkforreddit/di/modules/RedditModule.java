@@ -1,5 +1,7 @@
 package torille.fi.lurkforreddit.di.modules;
 
+import android.support.annotation.NonNull;
+
 import java.io.IOException;
 
 import javax.inject.Singleton;
@@ -37,18 +39,18 @@ public class RedditModule {
 
     @Provides
     @Singleton
-    public RedditService.Reddit providesRedditService(GsonConverterFactory gsonConverterFactory,
-                                                      OkHttpClient okHttpClient,
-                                                      final Store store,
-                                                      Cache cache,
-                                                      HttpLoggingInterceptor logger,
-                                                      final NetworkHelper networkHelper,
-                                                      RxJava2CallAdapterFactory rxJava2CallAdapterFactory) {
+    RedditService.Reddit providesRedditService(GsonConverterFactory gsonConverterFactory,
+                                               OkHttpClient okHttpClient,
+                                               final Store store,
+                                               Cache cache,
+                                               HttpLoggingInterceptor logger,
+                                               final NetworkHelper networkHelper,
+                                               RxJava2CallAdapterFactory rxJava2CallAdapterFactory) {
 
 
         final Authenticator authenticator = new Authenticator() {
             @Override
-            public Request authenticate(Route route, Response response) throws IOException {
+            public Request authenticate(@NonNull Route route, @NonNull Response response) throws IOException {
                 if (responseCount(response) >= 3) {
                     Timber.e("Too many retries");
                     return null;
@@ -72,47 +74,41 @@ public class RedditModule {
                 return result;
             }
         };
-        final Interceptor rawJsonInterceptor = new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request original = chain.request();
-                HttpUrl originalHttpUrl = original.url();
+        final Interceptor rawJsonInterceptor = chain -> {
+            Request original = chain.request();
+            HttpUrl originalHttpUrl = original.url();
 
-                HttpUrl url = originalHttpUrl.newBuilder()
-                        .addQueryParameter("raw_json", "1")
-                        .build();
+            HttpUrl url = originalHttpUrl.newBuilder()
+                    .addQueryParameter("raw_json", "1")
+                    .build();
 
-                Request.Builder requestBuilder = original.newBuilder()
-                        .url(url);
+            Request.Builder requestBuilder = original.newBuilder()
+                    .url(url);
 
-                Request request = requestBuilder.build();
-                return chain.proceed(request);
-            }
+            Request request = requestBuilder.build();
+            return chain.proceed(request);
         };
-        final Interceptor tokenInterceptor = new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request original = chain.request();
+        final Interceptor tokenInterceptor = chain -> {
+            Request original = chain.request();
 
-                if (original.header("Authorization") != null) {
-                    return chain.proceed(original);
-                }
-
-                String token = store.getToken();
-
-                if (token == null || token.isEmpty()) {
-                    Timber.d("Token was not set, going to get token");
-                    token = networkHelper.getToken();
-                    Timber.d("Got new token " + token);
-                }
-
-                Request.Builder requestBuilder = original.newBuilder()
-                        .header("Authorization", "bearer " + token)
-                        .method(original.method(), original.body());
-
-                Request request = requestBuilder.build();
-                return chain.proceed(request);
+            if (original.header("Authorization") != null) {
+                return chain.proceed(original);
             }
+
+            String token = store.getToken();
+
+            if (token == null || token.isEmpty()) {
+                Timber.d("Token was not set, going to get token");
+                token = networkHelper.getToken();
+                Timber.d("Got new token " + token);
+            }
+
+            Request.Builder requestBuilder = original.newBuilder()
+                    .header("Authorization", "bearer " + token)
+                    .method(original.method(), original.body());
+
+            Request request = requestBuilder.build();
+            return chain.proceed(request);
         };
 
         Retrofit retrofit = new Retrofit.Builder()

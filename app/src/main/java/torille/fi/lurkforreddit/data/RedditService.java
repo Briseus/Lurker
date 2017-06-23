@@ -24,15 +24,15 @@ public interface RedditService {
     interface Auth {
         @FormUrlEncoded
         @POST("access_token")
-        Call<RedditToken> getAuthToken(@Field("grant_type") String grant_type, @Field("device_id") String UUID);
+        Observable<RedditToken> getAuthToken(@Field("grant_type") String grant_type, @Field("device_id") String UUID);
 
         @FormUrlEncoded
         @POST("access_token")
-        Call<RedditToken> getUserAuthToken(@Field("grant_type") String grant_type, @Field("code") String code, @Field("redirect_uri") String redirectUri);
+        Observable<RedditToken> getUserAuthToken(@Field("grant_type") String grant_type, @Field("code") String code, @Field("redirect_uri") String redirectUri);
 
         @FormUrlEncoded
         @POST("access_token")
-        Call<RedditToken> refreshUserToken(@Field("grant_type") String grant_type, @Field("refresh_token") String token);
+        Observable<RedditToken> refreshUserToken(@Field("grant_type") String grant_type, @Field("refresh_token") String token);
 
     }
 

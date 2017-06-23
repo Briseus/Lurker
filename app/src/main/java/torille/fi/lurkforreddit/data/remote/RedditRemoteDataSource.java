@@ -9,6 +9,7 @@ import com.google.gson.stream.JsonReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import timber.log.Timber;
 import torille.fi.lurkforreddit.data.RedditDataSource;
 import torille.fi.lurkforreddit.data.RedditService;
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing;
+import torille.fi.lurkforreddit.data.models.jsonResponses.MultiredditListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostListing;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditListing;
 import torille.fi.lurkforreddit.data.models.view.Comment;
@@ -63,10 +65,8 @@ public class RedditRemoteDataSource implements RedditDataSource {
 
             return Observable.zip(fetchSubreddits(subreddits), getUserMultireddits(),
                     (subreddits1, subreddits2) -> {
-                        List<Subreddit> combinedList = new ArrayList<>(subreddits1.size() + subreddits2.size());
-                        combinedList.addAll(subreddits1);
-                        combinedList.addAll(subreddits2);
-                        return combinedList;
+                        Collections.addAll(subreddits1, subreddits2.toArray(new Subreddit[0]));
+                        return subreddits1;
                     })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread());
@@ -83,7 +83,6 @@ public class RedditRemoteDataSource implements RedditDataSource {
 
         return mRedditApi
                 .getSubreddit(subredditUrl)
-                .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .map(funcFormatPostData);
     }
@@ -91,7 +90,6 @@ public class RedditRemoteDataSource implements RedditDataSource {
     @Override
     public Observable<Pair<String, List<Post>>> getMoreSubredditPosts(@NonNull String subredditUrl, @NonNull String nextpageId) {
         return mRedditApi.getSubredditNextPage(subredditUrl, nextpageId)
-                .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .map(funcFormatPostData);
     }
@@ -106,7 +104,6 @@ public class RedditRemoteDataSource implements RedditDataSource {
                                                           final boolean isSingleCommentThread) {
 
         return mRedditApi.getComments(permaLinkUrl)
-                .subscribeOn(Schedulers.io())
                 .map(responseBody -> {
                     try (InputStream stream = responseBody.byteStream();
                          InputStreamReader in = new InputStreamReader(stream, "UTF-8");
@@ -133,7 +130,7 @@ public class RedditRemoteDataSource implements RedditDataSource {
         return mRedditApi.getMoreComments(linkId,
                 TextUtils.join(",", childCommentIds),
                 "json")
-                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
                 .map(responseBody -> {
                     try (InputStream stream = responseBody.byteStream();
                          InputStreamReader in = new InputStreamReader(stream, "UTF-8");
@@ -143,7 +140,6 @@ public class RedditRemoteDataSource implements RedditDataSource {
                                 .readMoreComments(reader);
                     }
                 })
-                .observeOn(Schedulers.computation())
                 .map(commentChildren ->
                         TextHelper.flattenAdditionalComments(commentChildren, commentLevel));
     }
@@ -152,25 +148,32 @@ public class RedditRemoteDataSource implements RedditDataSource {
     public Observable<Pair<String, List<SearchResult>>> getSearchResults(@NonNull String query) {
 
         return mRedditApi.searchSubreddits(query, "relevance")
-                .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
-                .map(formatSearchData);
+                .map(formatSearchData)
+                .doOnError(throwable -> {
+                    return ;
+                });
     }
 
     @Override
     public Observable<Pair<String, List<SearchResult>>> getMoreSearchResults(@NonNull String query, @NonNull String afterId) {
         return mRedditApi.searchSubredditsNextPage(query, "relevance", afterId)
-                .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .map(formatSearchData);
     }
 
     private Observable<List<Subreddit>> getUserMultireddits() {
         return mRedditApi.getUserMultireddits()
-                .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .map(Observable::fromArray)
-                .flatMap(TextHelper::formatMultiToSubreddit)
+                .flatMap(multiredditListingObservable -> multiredditListingObservable.map(MultiredditListing::multireddit))
+                .map(multireddit -> Subreddit.builder()
+                        .setUrl(multireddit.pathUrl())
+                        .setBannerUrl(null)
+                        .setId(multireddit.name())
+                        .setKeyColor(multireddit.keyColor())
+                        .setDisplayName(multireddit.displayName())
+                        .build())
                 .toList().toObservable();
     }
 
@@ -179,18 +182,9 @@ public class RedditRemoteDataSource implements RedditDataSource {
                 .subscribeOn(Schedulers.computation())
                 .map(subredditListing -> Observable.fromIterable(subredditListing.data().children()))
                 .flatMap(TextHelper::formatSubreddit)
-                .toList().toObservable()
-                .map(subreddits -> {
-                    Collections.sort(subreddits, (o1, o2) -> {
-                        String displayName = o1.displayName();
-                        String displayName2 = o2.displayName();
-                        if (displayName != null && displayName2 != null) {
-                            return displayName.compareToIgnoreCase(displayName2);
-                        }
-                        return -1;
-                    });
-                    return subreddits;
-                });
+                .toSortedList((subreddit1, subreddit2) ->
+                        subreddit1.displayName().compareToIgnoreCase(subreddit2.displayName())
+                ).toObservable();
     }
 
     private Observable<Post> getPost(final Observable<List<CommentListing>> observable) {
@@ -200,18 +194,19 @@ public class RedditRemoteDataSource implements RedditDataSource {
                         .commentChildren()
                         .get(0)
                         .originalPost()))
-                .map(TextHelper::formatPostDetails).blockingSingle();
+                .map(TextHelper.funcFormatPostDetails).blockingSingle();
     }
 
     private Observable<List<Comment>> getFormattedComments(Observable<List<CommentListing>> observable, final boolean isSingleCommentThread) {
 
         return observable
+                .subscribeOn(Schedulers.computation())
                 .map(commentListings ->
                         commentListings.get(1)
                                 .commentData()
                                 .commentChildren())
-                .map(commentChildren -> {
-                    List<Comment> comments = TextHelper.flatten(commentChildren, 0);
+                .map(commentChildren -> TextHelper.flatten(commentChildren, 0))
+                .map(comments -> {
                     if (isSingleCommentThread) {
                         comments.set(0, comments.get(0).withKind(Comment.kind.SINGLECOMMENTTOP));
                     }
@@ -232,19 +227,16 @@ public class RedditRemoteDataSource implements RedditDataSource {
         return postListingObservable
                 .map(postListing -> postListing.data().Posts())
                 .map(Observable::fromIterable)
-                .flatMap(TextHelper::formatPost)
+                .flatMap(TextHelper.funcFormatPostResponse)
                 .toList().toObservable();
     }
 
-    private Function<SubredditListing, Pair<String, List<SearchResult>>> formatSearchData = new Function<SubredditListing, Pair<String, List<SearchResult>>>() {
-        @Override
-        public Pair<String, List<SearchResult>> apply(@io.reactivex.annotations.NonNull SubredditListing subredditListing) throws Exception {
-            Observable<SubredditListing> subredditListingObservable = Observable.fromArray(subredditListing);
-            return Observable.zip(Observable.fromArray(subredditListing.data().after()),
-                    getAndFormatSearchResults(subredditListingObservable),
-                    Pair::new)
-                    .blockingSingle();
-        }
+    private Function<SubredditListing, Pair<String, List<SearchResult>>> formatSearchData = subredditListing -> {
+        Observable<SubredditListing> subredditListingObservable = Observable.fromArray(subredditListing);
+        return Observable.zip(Observable.fromArray(subredditListing.data().after()),
+                getAndFormatSearchResults(subredditListingObservable),
+                Pair::new)
+                .blockingSingle();
     };
 
     private Observable<List<SearchResult>> getAndFormatSearchResults(Observable<SubredditListing> subredditListing) {

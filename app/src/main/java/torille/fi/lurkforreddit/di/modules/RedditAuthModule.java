@@ -14,6 +14,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import torille.fi.lurkforreddit.data.RedditService;
 import torille.fi.lurkforreddit.utils.NetworkHelper;
@@ -35,31 +36,30 @@ public class RedditAuthModule {
 
     @Provides
     @Singleton
-    public RedditService.Auth providesRedditService(GsonConverterFactory gsonConverterFactory,
-                                                    OkHttpClient okHttpClient,
-                                                    Cache cache,
-                                                    HttpLoggingInterceptor logger) {
-        final String password = "";
-        final String basic = Credentials.basic(mClientId, password);
+    RedditService.Auth providesRedditService(GsonConverterFactory gsonConverterFactory,
+                                             RxJava2CallAdapterFactory rxJava2CallAdapterFactory,
+                                             OkHttpClient okHttpClient,
+                                             Cache cache,
+                                             HttpLoggingInterceptor logger) {
 
-        Interceptor authHeader = new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request original = chain.request();
+        final String basic = Credentials.basic(mClientId, "");
 
-                Request.Builder requestBuilder = original.newBuilder()
-                        .header("Authorization", basic)
-                        .header("Accept", "application/json")
-                        .method(original.method(), original.body());
+        Interceptor authHeader = chain -> {
+            Request original = chain.request();
 
-                Request request = requestBuilder.build();
-                return chain.proceed(request);
-            }
+            Request.Builder requestBuilder = original.newBuilder()
+                    .header("Authorization", basic)
+                    .header("Accept", "application/json")
+                    .method(original.method(), original.body());
+
+            Request request = requestBuilder.build();
+            return chain.proceed(request);
         };
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(mBaseUrl)
                 .addConverterFactory(gsonConverterFactory)
+                .addCallAdapterFactory(rxJava2CallAdapterFactory)
                 .client(okHttpClient
                         .newBuilder()
                         .cache(cache)
@@ -73,7 +73,7 @@ public class RedditAuthModule {
 
     @Provides
     @Singleton
-    public NetworkHelper provideNetworkHelper(Store store, RedditService.Auth authApi) {
+    NetworkHelper provideNetworkHelper(Store store, RedditService.Auth authApi) {
         return new NetworkHelper(store, authApi);
     }
 

@@ -15,14 +15,14 @@ import java.util.List;
 public abstract class SubredditData {
     public abstract List<SubredditChildren> children();
 
-    @Nullable
     public abstract String after();
 
-    @Nullable
     public abstract String before();
 
     public static TypeAdapter<SubredditData> typeAdapter(Gson gson) {
-        return new AutoValue_SubredditData.GsonTypeAdapter(gson);
+        return new AutoValue_SubredditData.GsonTypeAdapter(gson)
+                .setDefaultAfter("")
+                .setDefaultBefore("");
 
     }
 }
