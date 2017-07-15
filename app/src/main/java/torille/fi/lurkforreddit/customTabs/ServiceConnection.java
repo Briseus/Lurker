@@ -1,9 +1,5 @@
 package torille.fi.lurkforreddit.customTabs;
 
-/**
- * Created by vllle on 10.11.2016.
- */
-
 // Copyright 2015 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");

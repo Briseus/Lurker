@@ -10,7 +10,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Observable;
 import torille.fi.lurkforreddit.data.RedditRepository;
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails;
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditResponse;
@@ -18,9 +17,7 @@ import torille.fi.lurkforreddit.data.models.view.Post;
 import torille.fi.lurkforreddit.data.models.view.Subreddit;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the implementation of {@link SubredditPresenter}
@@ -29,7 +26,7 @@ import static org.mockito.Mockito.when;
 public class SubredditPresenterTest {
     private static final String AFTER = "t3_5tkppe";
 
-    private static final SubredditResponse SUBREDDIT_WORLDNEWS = SubredditResponse.builder()
+    private static final SubredditResponse SUBREDDIT_WORLDNEWS = SubredditResponse.Companion.builder()
             .setId("2qh13")
             .setTitle("world news")
             .setUrl("/r/worldnews")
@@ -39,7 +36,7 @@ public class SubredditPresenterTest {
             .setCreatedUtc(0)
             .build();
 
-    private static final Post POST_SELFPOST = Post.builder()
+    private static final Post POST_SELFPOST = Post.Companion.builder()
             .setIsSelf(true)
             .setUrl("www.reddit.com/r/comments")
             .setDomain("reddit.com")
@@ -55,7 +52,7 @@ public class SubredditPresenterTest {
             .setCreatedUtc(10)
             .build();
 
-    private static final Post POST_CUSTOMURL = Post.builder()
+    private static final Post POST_CUSTOMURL = Post.Companion.builder()
             .setIsSelf(false)
             .setUrl("reddit.com/test")
             .setDomain("reddit.com")
@@ -71,7 +68,7 @@ public class SubredditPresenterTest {
             .setCreatedUtc(10)
             .build();
 
-    private static final Post POST_MEDIA = Post.builder()
+    private static final Post POST_MEDIA = Post.Companion.builder()
             .setIsSelf(false)
             .setUrl("imagesomewhere.com/cats.jpg")
             .setDomain("imagur")
@@ -87,7 +84,7 @@ public class SubredditPresenterTest {
             .setCreatedUtc(10)
             .build();
 
-    private static final Post POST_LAUNCH_ACTIVITY = Post.builder()
+    private static final Post POST_LAUNCH_ACTIVITY = Post.Companion.builder()
             .setIsSelf(false)
             .setUrl("youtube.com/videourl")
             .setDomain("youtube.com")

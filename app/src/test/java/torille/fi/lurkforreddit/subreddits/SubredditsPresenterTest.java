@@ -23,10 +23,10 @@ import static org.mockito.Mockito.verify;
 
 public class SubredditsPresenterTest {
 
-    private static final Subreddit SUBREDDIT_PICS = Subreddit.builder()
+    private static final Subreddit SUBREDDIT_PICS = Subreddit.Companion.builder()
             .build();
 
-    private static final Subreddit SUBREDDIT_WORLDNEWS = Subreddit.builder()
+    private static final Subreddit SUBREDDIT_WORLDNEWS = Subreddit.Companion.builder()
             .build();
 
 
