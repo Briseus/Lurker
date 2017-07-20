@@ -21,7 +21,7 @@ import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.RedditService
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren
 import torille.fi.lurkforreddit.data.models.view.Subreddit
-import torille.fi.lurkforreddit.utils.EspressoIdlingResource
+import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import torille.fi.lurkforreddit.utils.TextHelper
 import javax.inject.Inject
 
@@ -140,7 +140,7 @@ class SubredditActivity : AppCompatActivity() {
 
     val countingIdlingResource: IdlingResource
         @VisibleForTesting
-        get() = EspressoIdlingResource.getIdlingResource()
+        get() = EspressoIdlingResource.idlingResource
 
     companion object {
 

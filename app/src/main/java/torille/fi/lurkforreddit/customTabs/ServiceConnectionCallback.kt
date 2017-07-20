@@ -1,4 +1,5 @@
-package torille.fi.lurkforreddit.customTabs;
+package torille.fi.lurkforreddit.customTabs
+
 // Copyright 2015 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +15,20 @@ package torille.fi.lurkforreddit.customTabs;
 // limitations under the License.
 
 
-        import android.support.customtabs.CustomTabsClient;
+import android.support.customtabs.CustomTabsClient
 
 /**
  * Callback for events when connecting and disconnecting from Custom Tabs Service.
  */
-public interface ServiceConnectionCallback {
+interface ServiceConnectionCallback {
     /**
      * Called when the service is connected.
      * @param client a CustomTabsClient
      */
-    void onServiceConnected(CustomTabsClient client);
+    fun onServiceConnected(client: CustomTabsClient)
 
     /**
      * Called when the service is disconnected.
      */
-    void onServiceDisconnected();
+    fun onServiceDisconnected()
 }

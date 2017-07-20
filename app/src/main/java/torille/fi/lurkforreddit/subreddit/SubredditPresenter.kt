@@ -9,7 +9,7 @@ import timber.log.Timber
 import torille.fi.lurkforreddit.data.RedditRepository
 import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.data.models.view.Subreddit
-import torille.fi.lurkforreddit.utils.EspressoIdlingResource
+import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import torille.fi.lurkforreddit.utils.MediaHelper
 import javax.inject.Inject
 
