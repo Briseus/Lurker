@@ -55,12 +55,12 @@ class SubredditsFragment : Fragment(), SubredditsContract.View {
         val context = context
         val root = inflater!!.inflate(R.layout.fragment_subreddits, container, false)
 
-        val recyclerView = root.findViewById(R.id.subreddits_list) as RecyclerView
+        val recyclerView = root.findViewById<RecyclerView>(R.id.subreddits_list)
         recyclerView.adapter = mListAdapter
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        val swipeRefreshLayout = root.findViewById(R.id.refresh_layout) as SwipeRefreshLayout
+        val swipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
         swipeRefreshLayout.setColorSchemeColors(
                 ContextCompat.getColor(context, R.color.colorPrimary),
                 ContextCompat.getColor(context, R.color.colorAccent),
@@ -80,7 +80,7 @@ class SubredditsFragment : Fragment(), SubredditsContract.View {
 
     override fun setProgressIndicator(active: Boolean) {
         view?.apply {
-            val srl = this.findViewById(R.id.refresh_layout) as SwipeRefreshLayout
+            val srl = this.findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
             // Make sure setRefreshing() is called after the layout is done with everything else.
             srl.post { srl.isRefreshing = active }
         }

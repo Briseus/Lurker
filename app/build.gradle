@@ -88,8 +88,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 
     implementation "com.google.code.gson:gson:$rootProject.ext.gsonVersion"
-    implementation 'nz.bradcampbell:paperparcel:2.0.1'
-    kapt 'nz.bradcampbell:paperparcel-compiler:2.0.1'
+    implementation "nz.bradcampbell:paperparcel:$rootProject.ext.paperParcelVersion"
+    kapt "nz.bradcampbell:paperparcel-compiler:$rootProject.ext.paperParcelVersion"
 
     // App dependencies
     implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"

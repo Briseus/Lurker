@@ -123,11 +123,11 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
     }
 
     internal inner class PostViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val mAuthor: TextView = view.findViewById(R.id.comment_post_author) as TextView
-        val mSelftext: TextView = view.findViewById(R.id.comment_post_selftext) as TextView
-        val mTitle: TextView = view.findViewById(R.id.comment_post_title) as TextView
-        val mFlairText: TextView = view.findViewById(R.id.comment_post_flair) as TextView
-        val mImage: SimpleDraweeView = view.findViewById(R.id.comment_post_image) as SimpleDraweeView
+        val mAuthor: TextView = view.findViewById<TextView>(R.id.comment_post_author)
+        val mSelftext: TextView = view.findViewById<TextView>(R.id.comment_post_selftext)
+        val mTitle: TextView = view.findViewById<TextView>(R.id.comment_post_title)
+        val mFlairText: TextView = view.findViewById<TextView>(R.id.comment_post_flair)
+        val mImage: SimpleDraweeView = view.findViewById<SimpleDraweeView>(R.id.comment_post_image)
 
         init {
             mSelftext.transformationMethod = CustomLinkTransformationMethod()
@@ -184,9 +184,9 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
     internal inner class TopSingleCommentThreadViewHolder(view: View) : CommentViewHolder(view)
 
     internal open inner class CommentViewHolder(view: View) : CommentNormalViewHolder(view) {
-        val mCommentText: TextView = view.findViewById(R.id.comment_text) as TextView
-        val mCommentScore: TextView = view.findViewById(R.id.comment_post_score) as TextView
-        val mCommentAuthor: TextView = view.findViewById(R.id.comment_author) as TextView
+        val mCommentText: TextView = view.findViewById<TextView>(R.id.comment_text)
+        val mCommentScore: TextView = view.findViewById<TextView>(R.id.comment_post_score)
+        val mCommentAuthor: TextView = view.findViewById<TextView>(R.id.comment_author)
 
         init {
             mCommentText.linksClickable = true
@@ -209,7 +209,7 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
     }
 
     internal inner class CommentLoadMoreViewHolder(view: View) : CommentNormalViewHolder(view), View.OnClickListener {
-        val mClickMore: TextView = view.findViewById(R.id.comment_loadmore) as TextView
+        val mClickMore: TextView = view.findViewById<TextView>(R.id.comment_loadmore)
 
         init {
             view.setOnClickListener(this)
@@ -239,7 +239,7 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
     }
 
     internal inner class ProgressViewHolder(view: View) : CommentNormalViewHolder(view) {
-        val progressBar: ProgressBar = view.findViewById(R.id.progressBar) as ProgressBar
+        val progressBar: ProgressBar = view.findViewById<ProgressBar>(R.id.progressBar)
 
         fun bind(commentChild: Comment) {
             mComment = commentChild

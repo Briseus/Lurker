@@ -45,10 +45,10 @@ class SubredditsActivity : AppCompatActivity(), BottomNavigationView.OnNavigatio
         (application as MyApplication).getmRedditRepositoryComponent().inject(this)
         setContentView(R.layout.activity_main)
 
-        val toolbar = findViewById(R.id.appBarLayout) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.appBarLayout)
         setSupportActionBar(toolbar)
 
-        val bottomNavigationView = findViewById(R.id.bottom_navigation) as BottomNavigationView
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigationView.setOnNavigationItemSelectedListener(this)
 
         if (savedInstanceState == null) {

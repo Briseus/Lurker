@@ -44,7 +44,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         mLayoutManager = LinearLayoutManager(context)
         mLayoutManager.orientation = LinearLayoutManager.VERTICAL
 
-        val recyclerView = root.findViewById(R.id.search_list) as RecyclerView
+        val recyclerView = root.findViewById<RecyclerView>(R.id.search_list)
         recyclerView.layoutManager = mLayoutManager
         recyclerView.setHasFixedSize(true)
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -72,7 +72,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         })
         recyclerView.adapter = mAdapter
 
-        val mSearchView = root.findViewById(R.id.searchView) as SearchView
+        val mSearchView = root.findViewById<SearchView>(R.id.searchView)
         mSearchView.queryHint = "Find subreddits..."
         mSearchView.isIconified = false
         mSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {

@@ -15,7 +15,7 @@ class CommentActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_comments)
 
-        val toolbar = findViewById(R.id.appBarLayout) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.appBarLayout)
         setSupportActionBar(toolbar)
 
         val actionBar = supportActionBar

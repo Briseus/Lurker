@@ -54,7 +54,7 @@ class FullscreenActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
-        val content = findViewById(R.id.fullscreen_content)
+        val content = findViewById<View>(R.id.fullscreen_content)
 
         if (content != null) {
             if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {

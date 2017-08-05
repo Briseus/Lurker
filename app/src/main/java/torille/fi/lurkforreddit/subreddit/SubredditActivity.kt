@@ -37,7 +37,7 @@ class SubredditActivity : AppCompatActivity() {
 
         val subreddit = intent.getParcelableExtra<Subreddit?>(EXTRA_SUBREDDIT)
 
-        val toolbar = findViewById(R.id.appBarLayout) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.appBarLayout)
         setSupportActionBar(toolbar)
 
         val actionBar = supportActionBar
@@ -118,7 +118,7 @@ class SubredditActivity : AppCompatActivity() {
     }
 
     private fun loadBannerImage(bannerUrl: String?, keyColor: String?) {
-        val banner = findViewById(R.id.banner) as SimpleDraweeView
+        val banner = findViewById<SimpleDraweeView>(R.id.banner)
 
         if (!bannerUrl.isNullOrEmpty()) {
             Timber.d("Setting bannerUrl to " + bannerUrl)

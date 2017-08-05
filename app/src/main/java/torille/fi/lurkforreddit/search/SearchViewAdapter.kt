@@ -88,10 +88,10 @@ internal class SearchViewAdapter internal constructor(private val mClickListener
     }
 
     internal inner class SearchViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-        val title: TextView = v.findViewById(R.id.subreddit_title) as TextView
-        val infoText: TextView = v.findViewById(R.id.subreddits_infotext) as TextView
-        val description: TextView = v.findViewById(R.id.subreddit_description) as TextView
-        val subscribe: Button = v.findViewById(R.id.subreddit_subscribe) as Button
+        val title: TextView = v.findViewById<TextView>(R.id.subreddit_title)
+        val infoText: TextView = v.findViewById<TextView>(R.id.subreddits_infotext)
+        val description: TextView = v.findViewById<TextView>(R.id.subreddit_description)
+        val subscribe: Button = v.findViewById<Button>(R.id.subreddit_subscribe)
 
         init {
             description.movementMethod = LinkMovementMethod.getInstance()
@@ -108,7 +108,7 @@ internal class SearchViewAdapter internal constructor(private val mClickListener
     }
 
     private class ProgressViewHolder internal constructor(v: View) : RecyclerView.ViewHolder(v) {
-        internal val progressBar: ProgressBar = v.findViewById(R.id.progressBar) as ProgressBar
+        internal val progressBar: ProgressBar = v.findViewById<ProgressBar>(R.id.progressBar)
     }
 
     companion object {

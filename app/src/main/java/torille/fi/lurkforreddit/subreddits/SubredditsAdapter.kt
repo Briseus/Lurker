@@ -52,8 +52,8 @@ internal class SubredditsAdapter internal constructor(private val mItemListener:
     }
 
     internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
-        val title: TextView = itemView.findViewById(R.id.item_subreddit_title) as TextView
-        val colorButton: Button = itemView.findViewById(R.id.item_subreddit_circle) as Button
+        val title: TextView = itemView.findViewById<TextView>(R.id.item_subreddit_title)
+        val colorButton: Button = itemView.findViewById<Button>(R.id.item_subreddit_circle)
 
         init {
             itemView.setOnClickListener(this)

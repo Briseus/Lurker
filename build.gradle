@@ -33,16 +33,15 @@ ext {
     // Sdk and tools
     minSdkVersion = 21
     targetSdkVersion = 25
-    compileSdkVersion = 25
+    compileSdkVersion = 26
     buildToolsVersion = '26.0.0'
 
     // App dependencies
-    supportLibraryVersion = '25.4.0'
+    supportLibraryVersion = '26.0.0'
     constraintVersion = '1.0.2'
     retrofitVersion = '2.3.0'
     okHttpVersion = '3.8.1'
-    autoValueGsonVersion = '0.4.6'
-    autoValueParcelerVersion = '0.2.5'
+    paperParcelVersion = '2.0.1'
     frescoVersion = '1.4.0'
     timberVersion = '4.5.1'
     photoDraweeViewVersion = '1.1.2'
@@ -60,6 +59,6 @@ ext {
     hamcrestVersion = '1.3'
     runnerVersion = '0.5'
     rulesVersion = '0.5'
-    espressoVersion = '2.2.2'
+    espressoVersion = '3.0.0'
 }
 

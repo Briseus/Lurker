@@ -77,13 +77,13 @@ class CommentFragment : Fragment(), CommentContract.View {
         mActionsListener.setView(this)
         val context = context
 
-        val recyclerView = root.findViewById(R.id.comments_list) as RecyclerView
+        val recyclerView = root.findViewById<RecyclerView>(R.id.comments_list)
         recyclerView.setHasFixedSize(true)
         recyclerView.addItemDecoration(CommentsItemDecoration(ContextCompat.getDrawable(context, R.drawable.comment_item_decorator)))
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = mCommentAdapter
 
-        val mSwipeRefreshLayout = root.findViewById(R.id.refresh_layout) as SwipeRefreshLayout
+        val mSwipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
 
         mSwipeRefreshLayout.setColorSchemeColors(
                 ContextCompat.getColor(context, R.color.colorPrimary),
@@ -124,7 +124,7 @@ class CommentFragment : Fragment(), CommentContract.View {
         if (view == null) {
             return
         }
-        val srl = view!!.findViewById(R.id.refresh_layout) as SwipeRefreshLayout
+        val srl = view!!.findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
         srl.post { srl.isRefreshing = active }
 
     }

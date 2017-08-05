@@ -96,10 +96,10 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater!!.inflate(R.layout.fragment_fullscreen, container, false)
-        mImageView = root.findViewById(R.id.fullscreen_image) as PhotoDraweeView
-        mSimpleExpoPlayerView = root.findViewById(R.id.fullscreen_video) as SimpleExoPlayerView
+        mImageView = root.findViewById<PhotoDraweeView>(R.id.fullscreen_image)
+        mSimpleExpoPlayerView = root.findViewById<SimpleExoPlayerView>(R.id.fullscreen_video)
         mView = root
-        mProgressBar = root.findViewById(R.id.progressBarHorizontal) as ProgressBar
+        mProgressBar = root.findViewById<ProgressBar>(R.id.progressBarHorizontal)
 
         return root
     }

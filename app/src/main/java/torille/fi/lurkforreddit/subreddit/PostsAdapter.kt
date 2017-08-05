@@ -154,12 +154,12 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
 
     internal inner class PostViewHolder(postView: View) : RecyclerView.ViewHolder(postView) {
 
-        val title: TextView = postView.findViewById(R.id.post_title) as TextView
-        val domain: TextView = postView.findViewById(R.id.post_domain) as TextView
-        val flair: TextView = postView.findViewById(R.id.post_flair) as TextView
-        val comments: Button = postView.findViewById(R.id.post_messages) as Button
-        val openBrowser: Button = postView.findViewById(R.id.post_open_browser) as Button
-        val image: SimpleDraweeView = postView.findViewById(R.id.post_image) as SimpleDraweeView
+        val title: TextView = postView.findViewById<TextView>(R.id.post_title)
+        val domain: TextView = postView.findViewById<TextView>(R.id.post_domain)
+        val flair: TextView = postView.findViewById<TextView>(R.id.post_flair)
+        val comments: Button = postView.findViewById<Button>(R.id.post_messages)
+        val openBrowser: Button = postView.findViewById<Button>(R.id.post_open_browser)
+        val image: SimpleDraweeView = postView.findViewById<SimpleDraweeView>(R.id.post_image)
         val baseControllerListener: BaseControllerListener<ImageInfo>
         val mOnMediaClickListerner: View.OnClickListener = View.OnClickListener { mClicklistener.onMediaClick(getItem(adapterPosition)) }
 
@@ -213,7 +213,7 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
     }
 
     private inner class ErrorViewHolder internal constructor(v: View) : RecyclerView.ViewHolder(v) {
-        internal val retryButton: Button = v.findViewById(R.id.button) as Button
+        internal val retryButton: Button = v.findViewById<Button>(R.id.button)
 
         init {
             retryButton.setOnClickListener { mClicklistener.onRetryClick() }
@@ -221,7 +221,7 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
     }
 
     private class ProgressViewHolder internal constructor(v: View) : RecyclerView.ViewHolder(v) {
-        internal val progressBar: ProgressBar = v.findViewById(R.id.progressBar) as ProgressBar
+        internal val progressBar: ProgressBar = v.findViewById<ProgressBar>(R.id.progressBar)
     }
 
     companion object {
