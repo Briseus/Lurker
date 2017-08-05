@@ -53,7 +53,7 @@ object TextHelper {
                 .subscribeOn(Schedulers.computation())
                 .map { Observable.fromIterable(it) }
                 .concatMap { commentChildObservable -> formatCommentData(commentChildObservable, level) }
-                .collectInto(comments) { comments1, comments2 ->
+                .collectInto(comments) { _, comments2 ->
                     comments.addAll(comments2)
                 }
                 .blockingGet()
@@ -82,52 +82,52 @@ object TextHelper {
     private fun formatCommentData(commentChildObservable: Observable<CommentChild>, level: Int): Observable<List<Comment>> {
         return commentChildObservable
                 .map({ it.data!! })
-                .map { comment ->
+                .map {
                     var commentText: CharSequence = ""
                     var author: CharSequence = ""
                     var kind: kind = kind.MORE
 
-                    if (comment.bodyHtml.isNotEmpty()) {
+                    if (it.bodyHtml.isNotEmpty()) {
                         kind = torille.fi.lurkforreddit.data.models.view.kind.DEFAULT
-                        commentText = formatTextToHtml(comment.bodyHtml)
-                    } else if (comment.id == "_") {
+                        commentText = formatTextToHtml(it.bodyHtml)
+                    } else if (it.id == "_") {
                         commentText = "Continue this thread"
-                    } else if (comment.children.isNotEmpty()) {
-                        commentText = "Load more comments (" + comment.count + ")"
+                    } else if (it.children.isNotEmpty()) {
+                        commentText = "Load more comments (" + it.count + ")"
                     }
 
-                    val responseAuthor = comment.author
-                    if (responseAuthor.isNotEmpty() && comment.stickied) {
+                    val responseAuthor = it.author
+                    if (responseAuthor.isNotEmpty() && it.stickied) {
                         author = "<font color='#64FFDA'> Sticky post </font>" + responseAuthor
                     } else if (responseAuthor.isNotEmpty()) {
                         author = responseAuthor
                     }
 
-                    author = fromHtml(author.toString() + " " + DateUtils.getRelativeTimeSpanString(comment.createdUtc * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS))
+                    author = fromHtml(author.toString() + " " + DateUtils.getRelativeTimeSpanString(it.createdUtc * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS))
 
-                    if (comment.edited) {
+                    if (it.edited) {
                         author = author.toString() + " (edited)"
                     }
 
-                    val formatScore = formatScore(comment.score)
+                    val formatScore = formatScore(it.score)
 
                     val formattedComment = Comment(
-                            id = comment.id,
-                            parentId = comment.parentId,
-                            name = comment.name,
+                            id = it.id,
+                            parentId = it.parentId,
+                            name = it.name,
                             kind = kind,
                             author = author,
-                            childCommentIds = comment.children,
+                            childCommentIds = it.children,
                             commentLevel = level,
-                            commentLinkId = comment.linkId,
+                            commentLinkId = it.linkId,
                             commentText = commentText,
                             formattedScore = formatScore,
                             formattedTime = "",
                             replies = null
                     )
 
-                    if (comment.replies != null) {
-                        val commentChildList = comment.replies.commentData.commentChildren
+                    if (it.replies != null) {
+                        val commentChildList = it.replies.commentData.commentChildren
                         val commentList = ArrayList<Comment>(commentChildList.size)
                         commentList.add(formattedComment)
 
@@ -144,7 +144,7 @@ object TextHelper {
                 }
     }
 
-    private val funcFormatPost = Function { postDetails: PostDetails ->
+    val funcFormatPost = Function { postDetails: PostDetails ->
         val formatScore = TextHelper.formatScore(postDetails.score)
         var selfText: CharSequence = ""
         var previewImageUrl: String = ""
@@ -202,11 +202,6 @@ object TextHelper {
     val funcFormatPostResponse = { postResponseObservable: Observable<PostResponse> ->
         postResponseObservable
                 .map({ it.postDetails })
-                .map(funcFormatPost)
-    }
-
-    val funcFormatPostDetails = { postDetailsObservable: Observable<PostDetails> ->
-        postDetailsObservable
                 .map(funcFormatPost)
     }
 

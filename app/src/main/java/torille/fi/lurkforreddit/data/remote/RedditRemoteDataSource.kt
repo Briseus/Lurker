@@ -37,22 +37,23 @@ internal constructor(private val mRedditApi: RedditService.Reddit,
             Timber.d("Was logged in, getting personal subreddits")
             subreddits = mRedditApi.getMySubreddits(200)
 
-            return Observable.zip(fetchSubreddits(subreddits), getUserMultireddits(), BiFunction({
-                s: List<Subreddit>, m: List<Subreddit> ->
-                s.plus(m)
-            }))
+            return Observable.zip(fetchSubreddits(subreddits), getUserMultireddits(),
+                    BiFunction({
+                        s: List<Subreddit>, m: List<Subreddit> ->
+                        s.plus(m)
+                    }))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
         } else {
             Timber.d("Was not logged in, getting default subreddits")
             subreddits = mRedditApi.getDefaultSubreddits(100)
-            return fetchSubreddits(subreddits)
 
+            return fetchSubreddits(subreddits)
+                    .observeOn(AndroidSchedulers.mainThread())
         }
     }
 
     override fun getSubredditPosts(subredditUrl: String): Observable<Pair<String, List<Post>>> {
-
         return mRedditApi
                 .getSubreddit(subredditUrl)
                 .observeOn(Schedulers.computation())
@@ -71,7 +72,6 @@ internal constructor(private val mRedditApi: RedditService.Reddit,
 
     override fun getCommentsForPost(permaLinkUrl: String,
                                     isSingleCommentThread: Boolean): Observable<PostAndComments> {
-
         return mRedditApi.getComments(permaLinkUrl)
                 .map { responseBody ->
                     responseBody.byteStream().use { stream ->
@@ -88,8 +88,8 @@ internal constructor(private val mRedditApi: RedditService.Reddit,
                     Observable.zip<Post, List<Comment>, PostAndComments>(getPost(commentListingsObservable),
                             getFormattedComments(commentListingsObservable,
                                     isSingleCommentThread),
-                            BiFunction<Post, List<Comment>, PostAndComments> { post, comments -> PostAndComments(post, comments) }).blockingSingle()
-                }
+                            BiFunction<Post, List<Comment>, PostAndComments> { post, comments -> PostAndComments(post, comments) })
+                }.map { it.blockingSingle() }
     }
 
     override fun getMoreCommentsForPostAt(childCommentIds: List<String>,
@@ -151,12 +151,12 @@ internal constructor(private val mRedditApi: RedditService.Reddit,
     private fun getPost(observable: Observable<List<CommentListing>>): Observable<Post> {
         return observable
                 .map { commentListings ->
-                    Observable.fromArray(commentListings[0]
+                    commentListings[0]
                             .commentData
                             .commentChildren[0]
-                            .originalPost!!)
+                            .originalPost!!
                 }
-                .map(TextHelper.funcFormatPostDetails).blockingSingle()
+                .map(TextHelper.funcFormatPost)
     }
 
     private fun getFormattedComments(observable: Observable<List<CommentListing>>, isSingleCommentThread: Boolean): Observable<List<Comment>> {

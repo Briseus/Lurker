@@ -18,8 +18,6 @@ package torille.fi.lurkforreddit.utils.test
 
 import android.support.test.espresso.IdlingResource
 
-import torille.fi.lurkforreddit.utils.test.SimpleCountingIdlingResource
-
 /**
  * Contains a static reference to [IdlingResource], only available in the 'mock' build type.
  */

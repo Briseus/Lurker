@@ -17,15 +17,11 @@ package torille.fi.lurkforreddit.customTabs
 
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.text.TextUtils
-
-import java.util.ArrayList
-
 import timber.log.Timber
+import java.util.*
 
 /**
  * Helper class for Custom Tabs.

@@ -6,7 +6,7 @@ import torille.fi.lurkforreddit.di.scope.FragmentScoped
 
 /**
  * This is a Dagger module. We use this to pass in the View dependency to the
- * [CommentPresenter].
+ * [CommentPresener].
  */
 @FragmentScoped
 @Component(dependencies = arrayOf(RedditRepositoryComponent::class), modules = arrayOf(SubredditsPresenterModule::class))

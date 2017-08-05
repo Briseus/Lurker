@@ -108,7 +108,7 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
         val url = arguments.getString(EXTRA_URL)
         val previewImageUrl = arguments.getString(EXTRA_PREVIEWIMAGE)
         if (url != null) {
-            Timber.d("Fragment got " + url + "" + previewImageUrl)
+            Timber.d("Fragment got $url $previewImageUrl")
             mActionsListener.checkType(url, previewImageUrl)
         }
 
@@ -256,8 +256,8 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
         Timber.d("Uri was $uri")
         when (uri.host) {
             "gfycat.com" -> {
-                val gfy = url.split("g".toRegex(), 2).toTypedArray()
-                val gfyUri = "https://thumbs.g" + gfy[1] + "-mobile.mp4"
+                val gfy = url.split("/").last()
+                val gfyUri = "https://thumbs.gfycat.com/$gfy-mobile.mp4"
                 Timber.d("Playing gfycat $gfyUri")
                 showVideo(gfyUri)
             }
