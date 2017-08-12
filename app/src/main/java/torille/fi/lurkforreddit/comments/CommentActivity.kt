@@ -75,6 +75,7 @@ class CommentActivity : AppCompatActivity() {
             }
         }
         val parallaxImage = postForComments.previewImage
+        Timber.d("Got previewImage url = $parallaxImage")
         if (parallaxImage.isNotEmpty()) parallaxImageDrawee.setImageURI(parallaxImage) else parallaxImageDrawee.visibility = View.GONE
     }
 
@@ -88,6 +89,7 @@ class CommentActivity : AppCompatActivity() {
             if (size == 5 || size == 6) {
                 Timber.d("Got comment thread")
                 val post = Post(permaLink = appLinkData.path)
+                setupImage(post)
                 if (size == 5) {
                     initFragment(CommentFragment.newInstance(post, false))
                 } else {
