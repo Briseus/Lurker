@@ -1,6 +1,7 @@
 package torille.fi.lurkforreddit.comments
 
 import android.content.Intent
+import android.graphics.PointF
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -57,27 +58,36 @@ class CommentActivity : AppCompatActivity() {
 
     internal fun setupImage(postForComments: Post) {
         val parallaxImageDrawee = findViewById<SimpleDraweeView>(R.id.parallaxImage)
-        parallaxImageDrawee.setOnClickListener {
-            val postUrl = postForComments.url
-            if (MediaHelper.isContentMedia(postUrl, postForComments.domain)) {
-                val intent = Intent(this, FullscreenActivity::class.java)
-                intent.putExtra(FullscreenActivity.EXTRA_POST, postForComments)
-                startActivity(intent)
-            } else {
-                CustomTabActivityHelper.openCustomTab(this,
-                        MediaHelper.createCustomTabIntent(this,
-                                mCustomTabActivityHelper.session),
-                        postUrl
-                ) { _, _ ->
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(postUrl))
-                    startActivity(intent)
-                }
-            }
-        }
+
         val parallaxImage = postForComments.previewImage
         Timber.d("Got previewImage url = $parallaxImage")
-        if (parallaxImage.isNotEmpty()) parallaxImageDrawee.setImageURI(parallaxImage) else parallaxImageDrawee.visibility = View.GONE
+        if (parallaxImage.isNotEmpty()) {
+            parallaxImageDrawee.setOnClickListener {
+                val postUrl = postForComments.url
+                if (MediaHelper.isContentMedia(postUrl, postForComments.domain)) {
+                    val intent = Intent(this, FullscreenActivity::class.java)
+                    intent.putExtra(FullscreenActivity.EXTRA_POST, postForComments)
+                    startActivity(intent)
+                } else {
+                    CustomTabActivityHelper.openCustomTab(this,
+                            MediaHelper.createCustomTabIntent(this,
+                                    mCustomTabActivityHelper.session),
+                            postUrl
+                    ) { _, _ ->
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(postUrl))
+                        startActivity(intent)
+                    }
+                }
+            }
+            val focusPoint = PointF(0.5f, 0f)
+            parallaxImageDrawee.hierarchy.setActualImageFocusPoint(focusPoint)
+            parallaxImageDrawee.setImageURI(parallaxImage)
+        } else{
+            parallaxImageDrawee.visibility = View.GONE
+        }
     }
+
+
 
     internal fun handleIntent(intent: Intent?) {
         if (intent != null) {
