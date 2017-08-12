@@ -24,13 +24,6 @@ object MediaHelper {
         }
     }
 
-    fun isContentImage(url: String): Boolean {
-        when (TextHelper.getLastFourChars(url)) {
-            ".jpg", ".png", "jpeg", ".gif" -> return true
-            else -> return false
-        }
-    }
-
     fun checkDomainForMedia(domain: String?): Boolean {
         if (domain.isNullOrEmpty()) {
             return false
