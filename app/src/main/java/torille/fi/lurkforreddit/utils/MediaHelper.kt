@@ -12,7 +12,7 @@ import torille.fi.lurkforreddit.R
 
 object MediaHelper {
 
-    fun isContentMedia(url: String?): Boolean {
+    fun isContentMedia(url: String?, domain: String?): Boolean {
 
         if (url == null || url.length < 4) {
             return false
@@ -20,12 +20,19 @@ object MediaHelper {
 
         when (TextHelper.getLastFourChars(url)) {
             ".jpg", ".png", "jpeg", ".gif", ".mp4", "gifv" -> return true
+            else -> return checkDomainForMedia(domain)
+        }
+    }
+
+    fun isContentImage(url: String): Boolean {
+        when (TextHelper.getLastFourChars(url)) {
+            ".jpg", ".png", "jpeg", ".gif" -> return true
             else -> return false
         }
     }
 
     fun checkDomainForMedia(domain: String?): Boolean {
-        if (domain == null) {
+        if (domain.isNullOrEmpty()) {
             return false
         }
 

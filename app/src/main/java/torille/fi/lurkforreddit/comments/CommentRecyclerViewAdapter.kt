@@ -1,6 +1,5 @@
 package torille.fi.lurkforreddit.comments
 
-import android.graphics.drawable.Animatable
 import android.support.v7.widget.RecyclerView
 import android.text.format.DateUtils
 import android.text.method.LinkMovementMethod
@@ -9,11 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.facebook.drawee.backends.pipeline.Fresco
-import com.facebook.drawee.controller.BaseControllerListener
 import com.facebook.drawee.view.SimpleDraweeView
-import com.facebook.imagepipeline.image.ImageInfo
-import com.facebook.imagepipeline.request.ImageRequest
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Comment
@@ -127,7 +122,6 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
         val mSelftext: TextView = view.findViewById<TextView>(R.id.comment_post_selftext)
         val mTitle: TextView = view.findViewById<TextView>(R.id.comment_post_title)
         val mFlairText: TextView = view.findViewById<TextView>(R.id.comment_post_flair)
-        val mImage: SimpleDraweeView = view.findViewById<SimpleDraweeView>(R.id.comment_post_image)
 
         init {
             mSelftext.transformationMethod = CustomLinkTransformationMethod()
@@ -136,6 +130,7 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
         }
 
         fun bind(mClickedPost: Post) {
+            val selftext = mClickedPost.selfText
 
             if (mClickedPost.title.isEmpty()) {
                 mAuthor.text = ""
@@ -152,25 +147,6 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
                 mFlairText.text = mClickedPost.flairText
             }
 
-            if (mClickedPost.previewImage.isEmpty()) {
-                //TODO if post doesnt have image but preview has the layout breaks
-                mImage.visibility = View.GONE
-            } else {
-                mImage.visibility = View.VISIBLE
-                val controller = Fresco.newDraweeControllerBuilder()
-                        .setOldController(mImage.controller)
-                        .setImageRequest(ImageRequest.fromUri(mClickedPost.previewImage))
-                        .setControllerListener(object : BaseControllerListener<ImageInfo>() {
-                            override fun onFinalImageSet(id: String?, imageInfo: ImageInfo?, animatable: Animatable?) {
-                                super.onFinalImageSet(id, imageInfo, animatable)
-                                val ap = imageInfo!!.width.toFloat() / imageInfo.height
-                                mImage.aspectRatio = ap
-                            }
-                        })
-                        .build()
-                mImage.controller = controller
-            }
-            val selftext = mClickedPost.selfText
             if (selftext.isNotEmpty()) {
                 mSelftext.text = selftext
             } else {

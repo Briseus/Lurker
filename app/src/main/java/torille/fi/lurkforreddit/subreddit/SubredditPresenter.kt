@@ -9,8 +9,8 @@ import timber.log.Timber
 import torille.fi.lurkforreddit.data.RedditRepository
 import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.data.models.view.Subreddit
-import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import torille.fi.lurkforreddit.utils.MediaHelper
+import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import javax.inject.Inject
 
 class SubredditPresenter @Inject
@@ -33,7 +33,7 @@ internal constructor(private val mRedditRepository: RedditRepository,
     override fun openMedia(post: Post) {
         val domain = post.domain
         val url = post.url
-        if (MediaHelper.isContentMedia(url) || MediaHelper.checkDomainForMedia(domain)) {
+        if (MediaHelper.isContentMedia(url, domain)) {
             mSubredditsView.showMedia(post)
         } else if (MediaHelper.launchCustomActivity(post.domain)) {
             mSubredditsView.launchCustomActivity(post)

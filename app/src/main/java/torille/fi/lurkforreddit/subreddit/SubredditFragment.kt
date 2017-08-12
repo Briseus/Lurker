@@ -126,6 +126,7 @@ class SubredditFragment : Fragment(), SubredditContract.View {
 
     override fun onStart() {
         super.onStart()
+        Timber.d("ye")
         mCustomTabActivityHelper.bindCustomTabsService(activity)
     }
 

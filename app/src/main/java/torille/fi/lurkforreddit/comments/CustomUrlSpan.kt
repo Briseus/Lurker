@@ -20,23 +20,18 @@ internal class CustomUrlSpan(url: String) : URLSpan(url) {
         val url = url
         val uri = Uri.parse(url)
         val domain = uri.host
-        Timber.d("got url " + url)
+        Timber.d("Got url $url")
 
         val intent: Intent
         val context = widget.context
-        if (MediaHelper.isContentMedia(url) || MediaHelper.checkDomainForMedia(domain)) {
-
+        if (MediaHelper.isContentMedia(url, domain)) {
             intent = Intent(context, FullscreenActivity::class.java)
             intent.putExtra(FullscreenActivity.EXTRA_URL, url)
-
             context.startActivity(intent)
         } else if (checkForReddit(url)) {
-
+            Timber.d("Going to checkout subreddit $url")
             intent = Intent(context, SubredditActivity::class.java)
             intent.putExtra(SubredditActivity.EXTRA_SUBREDDITNAME, url)
-
-            Timber.d("Going to checkout subreddit " + url)
-
             context.startActivity(intent)
         } else {
             super.onClick(widget)
