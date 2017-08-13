@@ -18,3 +18,4 @@
 
 -dontwarn java.lang.invoke.*
 -dontwarn **$$Lambda$*
+-keep class android.support.v7.widget.ShareActionProvider { *; }

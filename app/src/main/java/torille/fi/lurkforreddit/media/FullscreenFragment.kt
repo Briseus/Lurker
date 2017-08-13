@@ -73,25 +73,31 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
 
     override fun onStart() {
         super.onStart()
+        Timber.d("Starting")
         startStuff()
     }
 
     override fun onPause() {
         super.onPause()
         Timber.d("Pausing")
-        releaseVideoPlayer()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Timber.d("Stopping")
+        player.stop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Timber.d("Destroying")
+        releaseVideoPlayer()
         disposables.dispose()
     }
 
     private fun releaseVideoPlayer() {
         Timber.d("Destroying player")
         player.release()
-
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
