@@ -1,16 +1,24 @@
 package torille.fi.lurkforreddit.media
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.view.MenuItemCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.ShareActionProvider
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Post
 
+
 class FullscreenActivity : AppCompatActivity() {
+
+    private lateinit var shareActionProvider: ShareActionProvider
+    private lateinit var shareUrl: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,24 +32,42 @@ class FullscreenActivity : AppCompatActivity() {
             val post = intent.getParcelableExtra<Post>(EXTRA_POST)
             if (post != null) {
                 Timber.d("Got $post")
+                shareUrl = post.url
                 initFragment(FullscreenFragment.newInstance(post.url, post.previewImage))
             } else {
                 val url = intent.getStringExtra(EXTRA_URL)
                 Timber.d("Got $url")
+                shareUrl = url
                 initFragment(FullscreenFragment.newInstance(url, null))
             }
 
         }
+
     }
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        if (id == android.R.id.home) {
-            onBackPressed()
-            return true
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+            }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.fullscreen_main, menu)
+        val item = menu.findItem(R.id.menu_item_share)
+        shareActionProvider = MenuItemCompat.getActionProvider(item) as ShareActionProvider
+        setShareIntent()
+        return true
+    }
+
+    private fun setShareIntent() {
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_TEXT, shareUrl)
+        shareActionProvider.setShareIntent(intent)
     }
 
     private fun initFragment(fragment: Fragment) {
@@ -67,7 +93,6 @@ class FullscreenActivity : AppCompatActivity() {
     }
 
     companion object {
-
         val EXTRA_POST = "post"
         val EXTRA_URL = "url"
     }
