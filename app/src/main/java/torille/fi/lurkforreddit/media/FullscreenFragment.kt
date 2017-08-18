@@ -9,7 +9,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ProgressBar
 import android.widget.Toast
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.drawee.controller.BaseControllerListener
@@ -24,7 +23,6 @@ import com.google.android.exoplayer2.source.TrackGroupArray
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
 import com.google.android.exoplayer2.util.Util
 import dagger.Lazy
@@ -32,7 +30,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
-import me.relex.photodraweeview.PhotoDraweeView
+import kotlinx.android.synthetic.main.fragment_fullscreen.*
+import kotlinx.android.synthetic.main.progress_bar_horizontal.*
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import timber.log.Timber
@@ -44,11 +43,7 @@ import javax.inject.Inject
 
 class FullscreenFragment : Fragment(), FullscreenContract.View {
 
-    private lateinit var mImageView: PhotoDraweeView
-    private lateinit var mSimpleExpoPlayerView: SimpleExoPlayerView
-    private lateinit var mProgressBar: ProgressBar
     private lateinit var mActionsListener: FullscreenPresenter
-    private lateinit var mView: View
     private lateinit var player: SimpleExoPlayer
 
     private val disposables = CompositeDisposable()
@@ -100,14 +95,8 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
         player.release()
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val root = inflater!!.inflate(R.layout.fragment_fullscreen, container, false)
-        mImageView = root.findViewById<PhotoDraweeView>(R.id.fullscreen_image)
-        mSimpleExpoPlayerView = root.findViewById<SimpleExoPlayerView>(R.id.fullscreen_video)
-        mView = root
-        mProgressBar = root.findViewById<ProgressBar>(R.id.progressBarHorizontal)
-
-        return root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_fullscreen, container, false)
     }
 
     private fun startStuff() {
@@ -122,11 +111,11 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
 
     override fun showImage(url: String, previewImageUrl: String?) {
         var previewImageUrl = previewImageUrl
-        mProgressBar.visibility = View.INVISIBLE
-        mImageView.visibility = View.VISIBLE
+        progressBarHorizontal.visibility = View.INVISIBLE
+        imageView.visibility = View.VISIBLE
 
-        val hierarchy = mImageView.hierarchy
-        hierarchy.setProgressBarImage(mProgressBar.progressDrawable)
+        val hierarchy = imageView.hierarchy
+        hierarchy.setProgressBarImage(progressBarHorizontal.progressDrawable)
 
         if (previewImageUrl == null) {
             previewImageUrl = ""
@@ -143,14 +132,14 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
                 .setAutoPlayAnimations(true)
                 .setImageRequest(request)
                 .setLowResImageRequest(lowResRequest)
-                .setOldController(mImageView.controller)
+                .setOldController(imageView.controller)
                 .setControllerListener(object : BaseControllerListener<ImageInfo>() {
                     override fun onIntermediateImageSet(id: String?, imageInfo: ImageInfo?) {
                         super.onIntermediateImageSet(id, imageInfo)
                         if (imageInfo == null) {
                             return
                         }
-                        mImageView.update(imageInfo.width, imageInfo.height)
+                        imageView.update(imageInfo.width, imageInfo.height)
                     }
 
                     override fun onFinalImageSet(id: String?, imageInfo: ImageInfo?, animatable: Animatable?) {
@@ -160,16 +149,16 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
                             return
                         }
                         removeMarginTop()
-                        mImageView.update(imageInfo.width, imageInfo.height)
+                        imageView.update(imageInfo.width, imageInfo.height)
                     }
                 })
 
-        mImageView.controller = controller.build()
+        imageView.controller = controller.build()
     }
 
     override fun showVideo(url: String) {
         Timber.d("Got url to play $url")
-        mSimpleExpoPlayerView.visibility = View.INVISIBLE
+        videoView.visibility = View.INVISIBLE
         val context = context
 
         val control = CacheControl.Builder().build()
@@ -198,10 +187,10 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
-                    mProgressBar.progress = 0
-                    mProgressBar.visibility = GONE
+                    progressBarHorizontal.progress = 0
+                    progressBarHorizontal.visibility = GONE
                     removeMarginTop()
-                    mSimpleExpoPlayerView.visibility = View.VISIBLE
+                    videoView.visibility = View.VISIBLE
                 }
             }
 
@@ -212,7 +201,7 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
             override fun onTimelineChanged(timeline: Timeline?, manifest: Any?) {}
 
         })
-        mSimpleExpoPlayerView.player = player
+        videoView.player = player
 
         // Prepare the player with the source.
         player.prepare(loopingSource)
@@ -222,7 +211,7 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
     }
 
     private fun removeMarginTop() {
-        val params = mView.layoutParams as FrameLayout.LayoutParams
+        val params = container.layoutParams as FrameLayout.LayoutParams
         params.setMargins(0, 0, 0, 0)
     }
 

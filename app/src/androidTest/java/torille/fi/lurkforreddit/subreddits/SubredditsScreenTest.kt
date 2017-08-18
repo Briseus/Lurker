@@ -83,7 +83,7 @@ class SubredditsScreenTest {
     fun clickSubredditView_opensSubredditUi() {
         val subredditName = "science"
         //scroll to subreddit where name is same
-        onView(withId(R.id.subreddits_list)).perform(
+        onView(withId(R.id.subRecyclerView)).perform(
                 scrollTo<SubredditsAdapter.ViewHolder>(hasDescendant(withText(subredditName))))
 
         onView(withItemText(subredditName)).check(matches(isDisplayed())).perform(click())

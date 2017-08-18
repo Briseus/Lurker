@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import kotlinx.android.synthetic.main.fragment_search.*
 import timber.log.Timber
 import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
@@ -37,17 +38,20 @@ class SearchFragment : Fragment(), SearchContract.View {
         mAdapter = SearchViewAdapter(searchClickListener)
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val root = inflater!!.inflate(R.layout.fragment_search, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_search, container, false)
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         mSearchComponent.inject(this)
         mActionsListener.setView(this)
         mLayoutManager = LinearLayoutManager(context)
         mLayoutManager.orientation = LinearLayoutManager.VERTICAL
 
-        val recyclerView = root.findViewById<RecyclerView>(R.id.search_list)
-        recyclerView.layoutManager = mLayoutManager
-        recyclerView.setHasFixedSize(true)
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        searchRecyclerView.layoutManager = mLayoutManager
+        searchRecyclerView.setHasFixedSize(true)
+        searchRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
             internal var pastVisiblesItems: Int = 0
             internal var visibleItemCount: Int = 0
@@ -70,16 +74,15 @@ class SearchFragment : Fragment(), SearchContract.View {
                 }
             }
         })
-        recyclerView.adapter = mAdapter
+        searchRecyclerView.adapter = mAdapter
 
-        val mSearchView = root.findViewById<SearchView>(R.id.searchView)
-        mSearchView.queryHint = "Find subreddits..."
-        mSearchView.isIconified = false
-        mSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        searchView.queryHint = "Find subreddits..."
+        searchView.isIconified = false
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 if (!query.isEmpty()) {
                     Timber.d("Going to search for " + query)
-                    mSearchView.clearFocus()
+                    searchView.clearFocus()
                     mActionsListener.searchSubreddits(query)
                 }
                 return false
@@ -89,9 +92,7 @@ class SearchFragment : Fragment(), SearchContract.View {
                 return false
             }
         })
-        return root
     }
-
     override fun onDestroy() {
         super.onDestroy()
         mActionsListener.dispose()

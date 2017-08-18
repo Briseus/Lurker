@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.facebook.drawee.backends.pipeline.Fresco
+import kotlinx.android.synthetic.main.fragment_subreddit.*
 import timber.log.Timber
 import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
@@ -56,20 +57,21 @@ class SubredditFragment : Fragment(), SubredditContract.View {
 
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
-        val root = inflater!!.inflate(R.layout.fragment_subreddit, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_subreddit, container, false)
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         subredditComponent.inject(this)
         mActionsListener.setView(this)
 
         mLayoutManager = LinearLayoutManager(context)
         mLayoutManager.orientation = LinearLayoutManager.VERTICAL
 
-        val recyclerView = root.findViewById<RecyclerView>(R.id.posts_list)
-        recyclerView.layoutManager = mLayoutManager
-        recyclerView.setHasFixedSize(true)
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        postRecyclerView.layoutManager = mLayoutManager
+        postRecyclerView.setHasFixedSize(true)
+        postRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             private val PREFETCH_SIZE = 2
             internal var pastVisiblesItems: Int = 0
             internal var visibleItemCount: Int = 0
@@ -103,20 +105,16 @@ class SubredditFragment : Fragment(), SubredditContract.View {
                 }
             }
         })
-        recyclerView.adapter = mListAdapter
+        postRecyclerView.adapter = mListAdapter
 
-        // Pull-to-refresh
-        val swipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
-        swipeRefreshLayout.setColorSchemeColors(
+        refreshLayout.setColorSchemeColors(
                 ContextCompat.getColor(context, R.color.colorPrimary),
                 ContextCompat.getColor(context, R.color.colorAccent),
                 ContextCompat.getColor(context, R.color.colorPrimaryDark))
-        swipeRefreshLayout.setOnRefreshListener {
+        refreshLayout.setOnRefreshListener {
             mListAdapter.clear()
             loadIfEmpty()
         }
-
-        return root
     }
 
     override fun onResume() {
@@ -144,11 +142,11 @@ class SubredditFragment : Fragment(), SubredditContract.View {
     private val subredditUrl: String
         get() {
             val subreddit = arguments.getParcelable<Subreddit>(ARGUMENT_SUBREDDIT)
-            if (subreddit != null) {
-                return subreddit.url
+            return if (subreddit != null) {
+                subreddit.url
             } else {
                 Toast.makeText(context, "SubredditResponse id was null! ", Toast.LENGTH_SHORT).show()
-                return ""
+                ""
             }
         }
 
@@ -181,9 +179,8 @@ class SubredditFragment : Fragment(), SubredditContract.View {
 
     override fun setProgressIndicator(active: Boolean) {
         view?.apply {
-            val srl = findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
             // Make sure setRefreshing() is called after the layout is done with everything else.
-            srl.post { srl.isRefreshing = active }
+            refreshLayout.isRefreshing = active
         }
     }
 

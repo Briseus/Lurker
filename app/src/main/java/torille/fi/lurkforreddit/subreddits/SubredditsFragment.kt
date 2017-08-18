@@ -4,13 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import kotlinx.android.synthetic.main.fragment_subreddits.*
+import kotlinx.android.synthetic.main.fragment_subreddits.view.*
 import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Subreddit
@@ -50,23 +51,24 @@ class SubredditsFragment : Fragment(), SubredditsContract.View {
         mActionsListener.dispose()
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+
+        return inflater.inflate(R.layout.fragment_subreddits, container, false)
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val context = context
-        val root = inflater!!.inflate(R.layout.fragment_subreddits, container, false)
+        subRecyclerView.adapter = mListAdapter
+        subRecyclerView.setHasFixedSize(true)
+        subRecyclerView.layoutManager = LinearLayoutManager(context)
 
-        val recyclerView = root.findViewById<RecyclerView>(R.id.subreddits_list)
-        recyclerView.adapter = mListAdapter
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-
-        val swipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
-        swipeRefreshLayout.setColorSchemeColors(
+        refreshLayout.setColorSchemeColors(
                 ContextCompat.getColor(context, R.color.colorPrimary),
                 ContextCompat.getColor(context, R.color.colorAccent),
                 ContextCompat.getColor(context, R.color.colorPrimaryDark))
-        swipeRefreshLayout.setOnRefreshListener { mActionsListener.loadSubreddits(true) }
-        return root
+        refreshLayout.setOnRefreshListener { mActionsListener.loadSubreddits(true) }
     }
 
     /**
@@ -80,9 +82,8 @@ class SubredditsFragment : Fragment(), SubredditsContract.View {
 
     override fun setProgressIndicator(active: Boolean) {
         view?.apply {
-            val srl = this.findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
             // Make sure setRefreshing() is called after the layout is done with everything else.
-            srl.post { srl.isRefreshing = active }
+            refreshLayout.post { refreshLayout.isRefreshing = active }
         }
     }
 

@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.View
 import com.facebook.drawee.view.SimpleDraweeView
+import kotlinx.android.synthetic.main.activity_comments.*
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper
@@ -24,8 +25,7 @@ class CommentActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_comments)
 
-        val toolbar = findViewById<Toolbar>(R.id.appBarLayout)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(appBarLayout)
 
         val actionBar = supportActionBar
         if (actionBar != null) {
@@ -57,12 +57,11 @@ class CommentActivity : AppCompatActivity() {
     }
 
     internal fun setupImage(postForComments: Post) {
-        val parallaxImageDrawee = findViewById<SimpleDraweeView>(R.id.parallaxImage)
 
-        val parallaxImage = postForComments.previewImage
-        Timber.d("Got previewImage url = $parallaxImage")
-        if (parallaxImage.isNotEmpty()) {
-            parallaxImageDrawee.setOnClickListener {
+        val parallaxImageUrl = postForComments.previewImage
+        Timber.d("Got previewImage url = $parallaxImageUrl")
+        if (parallaxImageUrl.isNotEmpty()) {
+            parallaxImage.setOnClickListener {
                 val postUrl = postForComments.url
                 if (MediaHelper.isContentMedia(postUrl, postForComments.domain)) {
                     val intent = Intent(this, FullscreenActivity::class.java)
@@ -80,10 +79,10 @@ class CommentActivity : AppCompatActivity() {
                 }
             }
             val focusPoint = PointF(0.5f, 0f)
-            parallaxImageDrawee.hierarchy.setActualImageFocusPoint(focusPoint)
-            parallaxImageDrawee.setImageURI(parallaxImage)
+            parallaxImage.hierarchy.setActualImageFocusPoint(focusPoint)
+            parallaxImage.setImageURI(parallaxImageUrl)
         } else{
-            parallaxImageDrawee.visibility = View.GONE
+            parallaxImage.visibility = View.GONE
         }
     }
 

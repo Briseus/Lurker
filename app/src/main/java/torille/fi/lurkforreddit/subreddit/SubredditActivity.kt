@@ -12,6 +12,7 @@ import android.widget.Toast
 import com.facebook.drawee.view.SimpleDraweeView
 import dagger.Lazy
 import io.reactivex.Observable
+import kotlinx.android.synthetic.main.activity_subreddit.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -37,8 +38,7 @@ class SubredditActivity : AppCompatActivity() {
 
         val subreddit = intent.getParcelableExtra<Subreddit?>(EXTRA_SUBREDDIT)
 
-        val toolbar = findViewById<Toolbar>(R.id.appBarLayout)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(appBarLayout)
 
         val actionBar = supportActionBar
 
@@ -118,7 +118,6 @@ class SubredditActivity : AppCompatActivity() {
     }
 
     private fun loadBannerImage(bannerUrl: String?, keyColor: String?) {
-        val banner = findViewById<SimpleDraweeView>(R.id.banner)
 
         if (!bannerUrl.isNullOrEmpty()) {
             Timber.d("Setting bannerUrl to " + bannerUrl)

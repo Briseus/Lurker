@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import kotlinx.android.synthetic.main.fragment_comments.*
 import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Comment
@@ -68,30 +69,32 @@ class CommentFragment : Fragment(), CommentContract.View {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?,
+    override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
-        val root = inflater!!.inflate(R.layout.fragment_comments, container, false)
+        val root = inflater.inflate(R.layout.fragment_comments, container, false)
         commentComponent.inject(this)
         mActionsListener.setView(this)
+        return root
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val context = context
 
-        val recyclerView = root.findViewById<RecyclerView>(R.id.comments_list)
-        recyclerView.setHasFixedSize(true)
-        recyclerView.addItemDecoration(CommentsItemDecoration(ContextCompat.getDrawable(context, R.drawable.comment_item_decorator)))
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = mCommentAdapter
+        commentRecyclerView.setHasFixedSize(true)
+        commentRecyclerView.addItemDecoration(CommentsItemDecoration(ContextCompat.getDrawable(context, R.drawable.comment_item_decorator)))
+        commentRecyclerView.layoutManager = LinearLayoutManager(context)
+        commentRecyclerView.adapter = mCommentAdapter
 
-        val mSwipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
 
-        mSwipeRefreshLayout.setColorSchemeColors(
+        refreshLayout.setColorSchemeColors(
                 ContextCompat.getColor(context, R.color.colorPrimary),
                 ContextCompat.getColor(context, R.color.colorAccent),
                 ContextCompat.getColor(context, R.color.colorPrimaryDark))
 
-        mSwipeRefreshLayout.setOnRefreshListener { mActionsListener.loadComments(mPost.permaLink, mIsSingleCommentThread) }
-        return root
+        refreshLayout.setOnRefreshListener { mActionsListener.loadComments(mPost.permaLink, mIsSingleCommentThread) }
     }
 
     override fun showComments(comments: List<Any>) {
@@ -124,8 +127,7 @@ class CommentFragment : Fragment(), CommentContract.View {
         if (view == null) {
             return
         }
-        val srl = view!!.findViewById<SwipeRefreshLayout>(R.id.refresh_layout)
-        srl.post { srl.isRefreshing = active }
+        refreshLayout.post { refreshLayout.isRefreshing = active }
 
     }
 

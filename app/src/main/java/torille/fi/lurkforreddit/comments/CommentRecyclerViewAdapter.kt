@@ -18,18 +18,18 @@ import torille.fi.lurkforreddit.data.models.view.kind
 internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any>, private val mClickListener: CommentFragment.CommentClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        when (viewType) {
-            COMMENT_ORIGINAL -> return PostViewHolder(LayoutInflater.from(parent.context)
+        return when (viewType) {
+            COMMENT_ORIGINAL -> PostViewHolder(LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_comment_clicked_post, parent, false))
-            COMMENT_LOAD_MORE -> return CommentLoadMoreViewHolder(LayoutInflater.from(parent.context)
+            COMMENT_LOAD_MORE -> CommentLoadMoreViewHolder(LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_comment_loadmore, parent, false))
-            COMMENT_PROGRESSBAR -> return ProgressViewHolder(LayoutInflater.from(parent.context)
+            COMMENT_PROGRESSBAR -> ProgressViewHolder(LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_progressbar, parent, false))
-            COMMENT_TOP -> return TopSingleCommentThreadViewHolder(LayoutInflater
+            COMMENT_TOP -> TopSingleCommentThreadViewHolder(LayoutInflater
                     .from(parent.context)
                     .inflate(R.layout.item_comment_top_comment, parent, false))
         //COMMENT_NORMAL,
-            else -> return CommentViewHolder(LayoutInflater.from(parent.context)
+            else -> CommentViewHolder(LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_comment_constraint, parent, false))
         }
     }
@@ -46,11 +46,11 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
         if (position == 0) {
             return COMMENT_ORIGINAL
         } else if (mComments[position] is Comment) {
-            when ((mComments[position] as Comment).kind) {
-                kind.SINGLECOMMENTTOP -> return COMMENT_TOP
-                kind.MORE -> return COMMENT_LOAD_MORE
-                kind.PROGRESSBAR -> return COMMENT_PROGRESSBAR
-                else -> return COMMENT_NORMAL
+            return when ((mComments[position] as Comment).kind) {
+                kind.SINGLECOMMENTTOP -> COMMENT_TOP
+                kind.MORE -> COMMENT_LOAD_MORE
+                kind.PROGRESSBAR -> COMMENT_PROGRESSBAR
+                else -> COMMENT_NORMAL
             }
         }
         return COMMENT_NORMAL

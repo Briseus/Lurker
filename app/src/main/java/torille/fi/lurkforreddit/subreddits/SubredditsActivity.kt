@@ -13,6 +13,7 @@ import android.widget.Toast
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
+import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
@@ -45,10 +46,8 @@ class SubredditsActivity : AppCompatActivity(), BottomNavigationView.OnNavigatio
         (application as MyApplication).getmRedditRepositoryComponent().inject(this)
         setContentView(R.layout.activity_main)
 
-        val toolbar = findViewById<Toolbar>(R.id.appBarLayout)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(appBarLayout)
 
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigationView.setOnNavigationItemSelectedListener(this)
 
         if (savedInstanceState == null) {
