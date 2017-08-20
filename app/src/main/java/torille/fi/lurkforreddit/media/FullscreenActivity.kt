@@ -16,7 +16,6 @@ import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Post
 
-
 class FullscreenActivity : DaggerAppCompatActivity() {
 
     private lateinit var shareActionProvider: ShareActionProvider
