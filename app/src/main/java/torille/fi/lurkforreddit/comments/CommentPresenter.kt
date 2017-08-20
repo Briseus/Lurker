@@ -1,9 +1,5 @@
 package torille.fi.lurkforreddit.comments
 
-import java.util.ArrayList
-
-import javax.inject.Inject
-
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
@@ -13,11 +9,13 @@ import torille.fi.lurkforreddit.data.RedditRepository
 import torille.fi.lurkforreddit.data.models.view.Comment
 import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.data.models.view.PostAndComments
+import java.util.*
+import javax.inject.Inject
 
 class CommentPresenter @Inject
-internal constructor(private val mRedditRepository: RedditRepository,
-                     private val mPost: Post,
-                     private val mIsSingleCommentThread: Boolean) : CommentContract.Presenter<CommentContract.View> {
+internal constructor(val mRedditRepository: RedditRepository,
+                     val mPost: Post,
+                     val mIsSingleCommentThread: Boolean) : CommentContract.Presenter {
 
     private lateinit var mCommentsView: CommentContract.View
 
@@ -78,15 +76,12 @@ internal constructor(private val mRedditRepository: RedditRepository,
         }
     }
 
-    override fun setView(view: CommentContract.View) {
+    override fun takeView(view: CommentContract.View) {
         mCommentsView = view
-    }
-
-    override fun start() {
         loadComments(mPost.permaLink, mIsSingleCommentThread)
     }
 
-    override fun dispose() {
+    override fun dropView() {
         disposables.dispose()
     }
 }

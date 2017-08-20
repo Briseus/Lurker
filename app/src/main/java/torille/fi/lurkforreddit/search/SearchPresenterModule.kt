@@ -1,15 +1,20 @@
 package torille.fi.lurkforreddit.search
 
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import torille.fi.lurkforreddit.data.RedditRepository
+import dagger.android.ContributesAndroidInjector
+import torille.fi.lurkforreddit.di.scope.ActivityScoped
+import torille.fi.lurkforreddit.di.scope.FragmentScoped
 
 @Module
-class SearchPresenterModule {
+abstract class SearchPresenterModule {
 
-    @Provides
-    fun provideSearchPresenter(redditRepository: RedditRepository): SearchContract.Presenter<SearchContract.View> {
-        return SearchPresenter(redditRepository)
-    }
+    @FragmentScoped
+    @ContributesAndroidInjector
+    abstract fun searchFragment(): SearchFragment
+
+    @ActivityScoped
+    @Binds
+    abstract fun searchPresenter(searchPresenter: SearchPresenter): SearchContract.Presenter
 
 }

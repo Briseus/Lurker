@@ -1,10 +1,18 @@
 package torille.fi.lurkforreddit
 
-interface BasePresenter<in T : BaseView> {
 
-    fun setView(view: T)
+interface BasePresenter<in T> {
 
-    fun start()
+    /**
+     * Binds presenter with a view when resumed. The Presenter will perform initialization here.
+     *
+     * @param view the view associated with this presenter
+     */
+    fun takeView(view: T)
 
-    fun dispose()
+    /**
+     * Drops the reference to the view when destroyed
+     */
+    fun dropView()
+
 }

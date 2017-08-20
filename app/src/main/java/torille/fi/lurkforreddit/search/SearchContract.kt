@@ -6,7 +6,7 @@ import torille.fi.lurkforreddit.data.models.view.SearchResult
 
 interface SearchContract {
 
-    interface View : BaseView {
+    interface View : BaseView<Presenter> {
 
         fun showResults(results: List<SearchResult>)
 
@@ -18,7 +18,7 @@ interface SearchContract {
 
     }
 
-    interface Presenter<T : BaseView> : BasePresenter<SearchContract.View> {
+    interface Presenter: BasePresenter<View> {
 
         fun searchSubreddits(query: String)
 

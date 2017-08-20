@@ -2,7 +2,6 @@ package torille.fi.lurkforreddit.search
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
@@ -10,21 +9,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_search.*
 import timber.log.Timber
-import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.SearchResult
 import torille.fi.lurkforreddit.data.models.view.Subreddit
 import torille.fi.lurkforreddit.subreddit.SubredditActivity
 import javax.inject.Inject
 
-class SearchFragment : Fragment(), SearchContract.View {
+class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.View {
 
     @Inject
-    internal lateinit var mActionsListener: SearchContract.Presenter<SearchContract.View>
-
-    private lateinit var mSearchComponent: SearchComponent
+    internal lateinit var mActionsListener: SearchContract.Presenter
 
     private lateinit var mAdapter: SearchViewAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -32,9 +29,6 @@ class SearchFragment : Fragment(), SearchContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mSearchComponent = DaggerSearchComponent.builder()
-                .redditRepositoryComponent((activity.application as MyApplication).getmRedditRepositoryComponent())
-                .build()
         mAdapter = SearchViewAdapter(searchClickListener)
     }
 
@@ -44,8 +38,6 @@ class SearchFragment : Fragment(), SearchContract.View {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mSearchComponent.inject(this)
-        mActionsListener.setView(this)
         mLayoutManager = LinearLayoutManager(context)
         mLayoutManager.orientation = LinearLayoutManager.VERTICAL
 
@@ -93,9 +85,15 @@ class SearchFragment : Fragment(), SearchContract.View {
             }
         })
     }
+
     override fun onDestroy() {
         super.onDestroy()
-        mActionsListener.dispose()
+        mActionsListener.dropView()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mActionsListener.takeView(this)
     }
 
     override fun showResults(results: List<SearchResult>) {

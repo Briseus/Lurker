@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.View
 import com.facebook.drawee.view.SimpleDraweeView
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_comments.*
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
@@ -17,7 +18,7 @@ import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.media.FullscreenActivity
 import torille.fi.lurkforreddit.utils.MediaHelper
 
-class CommentActivity : AppCompatActivity() {
+class CommentActivity : DaggerAppCompatActivity() {
 
     private val mCustomTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
 
@@ -88,7 +89,7 @@ class CommentActivity : AppCompatActivity() {
 
 
 
-    internal fun handleIntent(intent: Intent?) {
+    private fun handleIntent(intent: Intent?) {
         if (intent != null) {
             val appLinkData = intent.data
             val paths = appLinkData.pathSegments

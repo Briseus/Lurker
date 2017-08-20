@@ -5,15 +5,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_comments.*
-import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Comment
 import torille.fi.lurkforreddit.data.models.view.Post
@@ -25,25 +23,17 @@ import javax.inject.Inject
  * Use the [CommentFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class CommentFragment : Fragment(), CommentContract.View {
+class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.View {
 
-    private lateinit var commentComponent: CommentComponent
     private lateinit var mCommentAdapter: CommentRecyclerViewAdapter
-    private lateinit var mPost: Post
-    private var mIsSingleCommentThread: Boolean = false
+    @Inject lateinit var mPost: Post
+    var mIsSingleCommentThread: Boolean = false
 
-    @Inject internal lateinit var mActionsListener: CommentContract.Presenter<CommentContract.View>
+    @Inject internal lateinit var mActionsListener: CommentContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mPost = arguments.getParcelable<Post>(ARGUMENT_CLICKED_POST)
         mIsSingleCommentThread = arguments.getBoolean(ARGUMENT_IS_SINGLE_COMMENT_THREAD, false)
-
-        commentComponent = DaggerCommentComponent.builder()
-                .redditRepositoryComponent((activity.application as MyApplication).getmRedditRepositoryComponent())
-                .commentPresenterModule(CommentPresenterModule(mPost, mIsSingleCommentThread))
-                .build()
-
         mCommentAdapter = CommentRecyclerViewAdapter(setupList(mPost), mClickListener)
     }
 
@@ -55,28 +45,19 @@ class CommentFragment : Fragment(), CommentContract.View {
 
     override fun onResume() {
         super.onResume()
-        loadIfEmpty()
+        mActionsListener.takeView(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mActionsListener.dispose()
-    }
-
-    private fun loadIfEmpty() {
-        if (mCommentAdapter.itemCount == 1) {
-            mActionsListener.start()
-        }
+        mActionsListener.dropView()
     }
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
-        val root = inflater.inflate(R.layout.fragment_comments, container, false)
-        commentComponent.inject(this)
-        mActionsListener.setView(this)
-        return root
+        return inflater.inflate(R.layout.fragment_comments, container, false)
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -157,8 +138,8 @@ class CommentFragment : Fragment(), CommentContract.View {
 
     companion object {
 
-        private val ARGUMENT_CLICKED_POST = "post"
-        private val ARGUMENT_IS_SINGLE_COMMENT_THREAD = "single"
+        val ARGUMENT_CLICKED_POST = "post"
+        val ARGUMENT_IS_SINGLE_COMMENT_THREAD = "single"
 
         /**
          * Use this factory method to create a new instance of

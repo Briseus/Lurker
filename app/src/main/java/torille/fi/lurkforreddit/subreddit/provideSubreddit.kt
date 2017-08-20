@@ -4,15 +4,17 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
-import dagger.android.support.DaggerAppCompatActivity
 import torille.fi.lurkforreddit.data.models.view.Subreddit
 import torille.fi.lurkforreddit.di.scope.ActivityScoped
 import torille.fi.lurkforreddit.di.scope.FragmentScoped
 import torille.fi.lurkforreddit.subreddits.SubredditsActivity
 import javax.inject.Named
 
+/**
+ * Created by eva on 19.8.2017.
+ */
 @Module
-abstract class SubredditPresenterModule {
+abstract class provideSubreddit {
 
     @FragmentScoped
     @ContributesAndroidInjector
@@ -28,23 +30,9 @@ abstract class SubredditPresenterModule {
         @Provides
         @ActivityScoped
         @Named("sub")
-        fun provideSubreddit(subredditActivity: SubredditActivity): Subreddit {
-            return subredditActivity.intent.getParcelableExtra(SubredditFragment.ARGUMENT_SUBREDDIT)
+        fun provideSubreddit(subredditsActivity: SubredditsActivity): Subreddit {
+            return subredditsActivity.intent.getParcelableExtra(SubredditFragment.ARGUMENT_SUBREDDIT)
         }
 
     }
-    /*
-    @Module
-    companion object {
-        @JvmStatic
-        @Provides
-        @ActivityScoped
-        @Named("sub")
-        fun provideSubreddit(subredditActivity: SubredditActivity): Subreddit {
-            return subredditActivity.intent.getParcelableExtra(SubredditFragment.ARGUMENT_SUBREDDIT)
-        }
-
-    }
-    */
-
 }

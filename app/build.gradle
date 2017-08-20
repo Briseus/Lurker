@@ -103,8 +103,12 @@ dependencies {
     implementation "com.android.support.constraint:constraint-layout:$rootProject.constraintVersion"
 
     // Dagger dependencies
-    implementation "com.google.dagger:dagger:$rootProject.ext.daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$rootProject.ext.daggerVersion"
+    implementation "com.google.dagger:dagger:$rootProject.ext.daggerVersion"
+    implementation "com.google.dagger:dagger-android:$rootProject.ext.daggerVersion"
+    implementation "com.google.dagger:dagger-android-support:$rootProject.ext.daggerVersion"
+    kapt "com.google.dagger:dagger-android-processor:$rootProject.ext.daggerVersion"
+
 
     implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okHttpVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.ext.okHttpVersion"

@@ -10,7 +10,7 @@ import torille.fi.lurkforreddit.data.models.view.Subreddit
 
 interface SubredditsContract {
 
-    interface View : BaseView {
+    interface View : BaseView<Presenter> {
 
         fun setProgressIndicator(active: Boolean)
 
@@ -22,7 +22,7 @@ interface SubredditsContract {
 
     }
 
-    interface Presenter<T : BaseView> : BasePresenter<View> {
+    interface Presenter : BasePresenter<View> {
 
         fun loadSubreddits(forcedUpdate: Boolean)
 

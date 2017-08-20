@@ -6,7 +6,7 @@ import torille.fi.lurkforreddit.data.models.view.Comment
 
 interface CommentContract {
 
-    interface View : BaseView {
+    interface View : BaseView<Presenter> {
 
         fun showComments(comments: List<Any>)
 
@@ -23,7 +23,7 @@ interface CommentContract {
         fun setProgressIndicator(active: Boolean)
     }
 
-    interface Presenter<T : BaseView> : BasePresenter<CommentContract.View> {
+    interface Presenter : BasePresenter<View> {
 
         fun loadComments(permaLinkUrl: String, isSingleCommentThread: Boolean)
 

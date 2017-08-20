@@ -10,13 +10,14 @@ import android.support.v7.widget.ShareActionProvider
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_fullscreen.*
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Post
 
 
-class FullscreenActivity : AppCompatActivity() {
+class FullscreenActivity : DaggerAppCompatActivity() {
 
     private lateinit var shareActionProvider: ShareActionProvider
     private lateinit var shareUrl: String

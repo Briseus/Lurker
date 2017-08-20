@@ -7,15 +7,16 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import torille.fi.lurkforreddit.data.RedditRepository
 import torille.fi.lurkforreddit.data.models.view.Subreddit
+import torille.fi.lurkforreddit.di.scope.ActivityScoped
 import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import javax.inject.Inject
 
 /**
  * Presenter in the MVP model of displaying subreddits
  */
-
+@ActivityScoped
 class SubredditsPresenter @Inject
-constructor(private val mRedditRepository: RedditRepository) : SubredditsContract.Presenter<SubredditsContract.View> {
+constructor(private val mRedditRepository: RedditRepository) : SubredditsContract.Presenter {
 
     private lateinit var mSubredditsView: SubredditsContract.View
     private val disposables = CompositeDisposable()
@@ -53,16 +54,14 @@ constructor(private val mRedditRepository: RedditRepository) : SubredditsContrac
         mSubredditsView.loadSelectedSubreddit(subreddit)
     }
 
-    override fun setView(view: SubredditsContract.View) {
-        mSubredditsView = view
-    }
-
-    override fun start() {
-        loadSubreddits(false)
-    }
-
-    override fun dispose() {
+    override fun dropView() {
         mSubredditsView.setProgressIndicator(false)
         disposables.dispose()
     }
+
+    override fun takeView(view: SubredditsContract.View) {
+        mSubredditsView = view
+        loadSubreddits(false)
+    }
+
 }

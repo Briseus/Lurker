@@ -3,12 +3,12 @@ package torille.fi.lurkforreddit.data
 import android.support.v4.util.Pair
 import io.reactivex.Observable
 import torille.fi.lurkforreddit.data.models.view.*
-import torille.fi.lurkforreddit.di.scope.RedditScope
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@RedditScope
+@Singleton
 class RedditRepository @Inject
-constructor(@param:Remote private val mRedditRemoteApi: RedditDataSource) : RedditDataSource {
+constructor(@Remote private val mRedditRemoteApi: RedditDataSource) : RedditDataSource {
 
     private var mCachedSubreddits: List<Subreddit> = emptyList()
 

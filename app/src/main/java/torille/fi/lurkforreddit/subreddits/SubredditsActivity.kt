@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
@@ -23,16 +24,18 @@ import torille.fi.lurkforreddit.data.models.jsonResponses.RedditToken
 import torille.fi.lurkforreddit.data.models.view.Subreddit
 import torille.fi.lurkforreddit.search.SearchFragment
 import torille.fi.lurkforreddit.subreddit.SubredditFragment
+import torille.fi.lurkforreddit.subreddits.SubredditsContract.Presenter
 import torille.fi.lurkforreddit.utils.MediaHelper
 import torille.fi.lurkforreddit.utils.NetworkHelper
 import torille.fi.lurkforreddit.utils.Store
 import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * The apps main activity that starts with the app
  */
 
-class SubredditsActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
+class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
     private val helper = CustomTabActivityHelper()
 
@@ -43,7 +46,6 @@ class SubredditsActivity : AppCompatActivity(), BottomNavigationView.OnNavigatio
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme_NoActionBar)
         super.onCreate(savedInstanceState)
-        (application as MyApplication).getmRedditRepositoryComponent().inject(this)
         setContentView(R.layout.activity_main)
 
         setSupportActionBar(appBarLayout)
@@ -51,7 +53,7 @@ class SubredditsActivity : AppCompatActivity(), BottomNavigationView.OnNavigatio
         bottomNavigationView.setOnNavigationItemSelectedListener(this)
 
         if (savedInstanceState == null) {
-            getFrontPageFragment()
+            initFragment(SubredditsFragment.newInstance())
         }
 
     }

@@ -3,40 +3,42 @@ package torille.fi.lurkforreddit.subreddit
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.support.annotation.Nullable
 import android.support.annotation.VisibleForTesting
 import android.support.test.espresso.IdlingResource
 import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.widget.Toast
-import com.facebook.drawee.view.SimpleDraweeView
 import dagger.Lazy
+import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.Observable
 import kotlinx.android.synthetic.main.activity_subreddit.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
-import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.RedditService
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren
 import torille.fi.lurkforreddit.data.models.view.Subreddit
-import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import torille.fi.lurkforreddit.utils.TextHelper
+import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import javax.inject.Inject
+import javax.inject.Named
 
-class SubredditActivity : AppCompatActivity() {
+class SubredditActivity : DaggerAppCompatActivity() {
 
     @Inject
-    internal lateinit var mRedditApi: Lazy<RedditService.Reddit>
+    lateinit var subredditPresenter: SubredditPresenter
+
+    @Inject
+    lateinit var mRedditApi: Lazy<RedditService.Reddit>
+
+    @field:[Inject Named("sub")]
+    lateinit var subreddit: Subreddit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_subreddit)
-        (application as MyApplication).getmNetComponent().inject(this)
-
-        val subreddit = intent.getParcelableExtra<Subreddit?>(EXTRA_SUBREDDIT)
 
         setSupportActionBar(appBarLayout)
 
@@ -46,7 +48,7 @@ class SubredditActivity : AppCompatActivity() {
         actionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (subreddit != null) {
-            actionBar?.title = subreddit.displayName
+            actionBar?.title = subreddit?.displayName
         } else {
             actionBar?.title = null
         }
@@ -60,8 +62,8 @@ class SubredditActivity : AppCompatActivity() {
             handleIntent(intent)
         } else if (subredditFragment == null) {
             Timber.d(subreddit.toString())
-            loadBannerImage(subreddit.bannerUrl, subreddit.keyColor)
             subredditFragment = SubredditFragment.newInstance(subreddit)
+            loadBannerImage(subreddit?.bannerUrl, subreddit?.keyColor)
             initFragment(subredditFragment)
         }
 

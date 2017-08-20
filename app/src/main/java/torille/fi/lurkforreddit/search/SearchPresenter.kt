@@ -11,7 +11,8 @@ import torille.fi.lurkforreddit.data.models.view.SearchResult
 import javax.inject.Inject
 
 class SearchPresenter @Inject
-internal constructor(private val mRedditRepository: RedditRepository) : SearchContract.Presenter<SearchContract.View> {
+internal constructor(private val mRedditRepository: RedditRepository) : SearchContract.Presenter {
+
     private var mSearchView: SearchContract.View? = null
     private var searchAfter: String? = null
     private var searchQuery: String? = null
@@ -63,15 +64,11 @@ internal constructor(private val mRedditRepository: RedditRepository) : SearchCo
                 }))
     }
 
-    override fun setView(view: SearchContract.View) {
+    override fun takeView(view: SearchContract.View) {
         mSearchView = view
     }
 
-    override fun start() {
-
-    }
-
-    override fun dispose() {
+    override fun dropView() {
         disposables.dispose()
     }
 }

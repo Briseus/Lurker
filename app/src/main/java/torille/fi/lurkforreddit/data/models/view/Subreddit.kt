@@ -8,7 +8,7 @@ import paperparcel.PaperParcel
  * Data class for showing a subreddit
  */
 @PaperParcel
-data class Subreddit(
+public data class Subreddit(
         val id: String = "",
         val url: String = "",
         val displayName: String = "",

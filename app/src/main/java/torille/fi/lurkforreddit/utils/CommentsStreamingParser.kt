@@ -4,14 +4,14 @@ import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import torille.fi.lurkforreddit.data.models.jsonResponses.*
-import torille.fi.lurkforreddit.di.scope.RedditScope
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Utility classes to stream parse [CommentListing] Json and nested models
  */
-@RedditScope
+@Singleton
 class CommentsStreamingParser @Inject
 constructor(val gson: Gson) {
 

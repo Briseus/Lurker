@@ -1,12 +1,8 @@
 package torille.fi.lurkforreddit.di.modules
 
-import android.app.Application
-
+import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-
-import javax.inject.Singleton
-
 import dagger.Module
 import dagger.Provides
 import okhttp3.Cache
@@ -17,6 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import torille.fi.lurkforreddit.BuildConfig
 import torille.fi.lurkforreddit.utils.CommentsStreamingParser
 import torille.fi.lurkforreddit.utils.Store
+import javax.inject.Singleton
 
 /**
  * Provides shared network classes
@@ -26,15 +23,15 @@ class NetModule {
 
     @Provides
     @Singleton
-    internal fun provideOkHttpCache(application: Application): Cache {
+    internal fun provideOkHttpCache(context: Context): Cache {
         val cacheSize = 10 * 1024 * 1024 //10MiB
-        return Cache(application.cacheDir, cacheSize.toLong())
+        return Cache(context.cacheDir, cacheSize.toLong())
     }
 
     @Provides
     @Singleton
-    internal fun providesSharedPreferences(application: Application): Store {
-        return Store(application.applicationContext)
+    internal fun providesSharedPreferences(context: Context): Store {
+        return Store(context)
     }
 
     @Provides

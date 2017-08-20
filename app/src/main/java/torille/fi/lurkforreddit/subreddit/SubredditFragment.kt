@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.facebook.drawee.backends.pipeline.Fresco
+import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_subreddit.*
 import timber.log.Timber
 import torille.fi.lurkforreddit.MyApplication
@@ -32,25 +33,20 @@ import javax.inject.Inject
  * Use the [SubredditFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class SubredditFragment : Fragment(), SubredditContract.View {
+class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContract.View {
 
     private val mCustomTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
     private var refreshing: Boolean = false
     private var mNextPageId: String? = null
 
-    private lateinit var subredditComponent: SubredditComponent
     private lateinit var mListAdapter: PostsAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
 
-    @Inject internal lateinit var mActionsListener: SubredditContract.Presenter<SubredditContract.View>
+    @Inject
+    lateinit var mActionsListener: SubredditContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val subreddit = arguments.getParcelable<Subreddit>(ARGUMENT_SUBREDDIT)
-        subredditComponent = DaggerSubredditComponent.builder()
-                .redditRepositoryComponent((activity.application as MyApplication).getmRedditRepositoryComponent())
-                .subredditPresenterModule(SubredditPresenterModule(subreddit))
-                .build()
         mListAdapter = PostsAdapter(mClickListener,
                 Fresco.getImagePipeline())
         DisplayHelper.init(context)
@@ -63,8 +59,6 @@ class SubredditFragment : Fragment(), SubredditContract.View {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        subredditComponent.inject(this)
-        mActionsListener.setView(this)
 
         mLayoutManager = LinearLayoutManager(context)
         mLayoutManager.orientation = LinearLayoutManager.VERTICAL
@@ -119,6 +113,7 @@ class SubredditFragment : Fragment(), SubredditContract.View {
 
     override fun onResume() {
         super.onResume()
+        mActionsListener.takeView(this)
         loadIfEmpty()
     }
 
@@ -135,8 +130,8 @@ class SubredditFragment : Fragment(), SubredditContract.View {
     }
 
     override fun onDestroy() {
+        mActionsListener.dropView()
         super.onDestroy()
-        mActionsListener.dispose()
     }
 
     private val subredditUrl: String
@@ -152,7 +147,7 @@ class SubredditFragment : Fragment(), SubredditContract.View {
 
     private fun loadIfEmpty() {
         if (mListAdapter.itemCount == 0) {
-            mActionsListener.start()
+            //TODO Is this needed?
         }
     }
 
@@ -249,7 +244,7 @@ class SubredditFragment : Fragment(), SubredditContract.View {
     }
 
     companion object {
-        private val ARGUMENT_SUBREDDIT = "subreddit"
+        val ARGUMENT_SUBREDDIT = "subreddit"
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.

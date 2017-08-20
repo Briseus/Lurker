@@ -6,7 +6,7 @@ import torille.fi.lurkforreddit.data.models.view.Post
 
 interface SubredditContract {
 
-    interface View : BaseView {
+    interface View : BaseView<Presenter> {
 
         fun setProgressIndicator(active: Boolean)
 
@@ -29,7 +29,7 @@ interface SubredditContract {
         fun setListErrorButton(active: Boolean)
     }
 
-    interface Presenter<T : BaseView> : BasePresenter<View> {
+    interface Presenter : BasePresenter<View> {
 
         fun openComments(clickedPost: Post)
 

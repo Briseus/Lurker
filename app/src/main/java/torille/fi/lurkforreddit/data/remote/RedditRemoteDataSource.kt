@@ -10,6 +10,7 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import torille.fi.lurkforreddit.data.RedditDataSource
 import torille.fi.lurkforreddit.data.RedditService
+import torille.fi.lurkforreddit.data.Remote
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostListing
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditListing
@@ -24,7 +25,7 @@ import javax.inject.Inject
 /**
  * Implementation of Reddit API
  */
-@RedditScope
+@Remote
 class RedditRemoteDataSource @Inject
 internal constructor(private val mRedditApi: RedditService.Reddit,
                      private val mSettingsStore: Store,

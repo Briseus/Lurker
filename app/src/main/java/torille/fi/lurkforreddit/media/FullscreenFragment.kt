@@ -26,6 +26,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
 import com.google.android.exoplayer2.util.Util
 import dagger.Lazy
+import dagger.android.support.DaggerFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
@@ -35,13 +36,12 @@ import kotlinx.android.synthetic.main.progress_bar_horizontal.*
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import timber.log.Timber
-import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.VideositeService
 import torille.fi.lurkforreddit.data.models.jsonResponses.StreamableVideo
 import javax.inject.Inject
 
-class FullscreenFragment : Fragment(), FullscreenContract.View {
+class FullscreenFragment : DaggerFragment(), FullscreenContract.View {
 
     private lateinit var mActionsListener: FullscreenPresenter
     private lateinit var player: SimpleExoPlayer
@@ -56,9 +56,6 @@ class FullscreenFragment : Fragment(), FullscreenContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (activity.application as MyApplication)
-                .getmNetComponent()
-                .inject(this)
         mActionsListener = FullscreenPresenter(this)
 
         val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory(null)

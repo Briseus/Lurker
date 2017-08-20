@@ -1,27 +1,39 @@
 package torille.fi.lurkforreddit.comments
 
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import torille.fi.lurkforreddit.data.RedditRepository
+import dagger.android.ContributesAndroidInjector
 import torille.fi.lurkforreddit.data.models.view.Post
+import torille.fi.lurkforreddit.di.scope.ActivityScoped
+import torille.fi.lurkforreddit.di.scope.FragmentScoped
+import javax.annotation.Nullable
 
 @Module
-class CommentPresenterModule(private val mPost: Post, private val mIsSingleCommentThread: Boolean) {
+abstract class CommentPresenterModule {
 
-    @Provides
-    internal fun provideCommentContractPresenter(repository: RedditRepository,
-                                                 post: Post,
-                                                 isSingleCommentThread: Boolean): CommentContract.Presenter<CommentContract.View> {
-        return CommentPresenter(repository, post, isSingleCommentThread)
-    }
+    @FragmentScoped
+    @ContributesAndroidInjector
+    internal abstract fun commentFragment(): CommentFragment
 
-    @Provides
-    internal fun provideCommentOriginalPost(): Post {
-        return mPost
-    }
+    @ActivityScoped
+    @Binds
+    internal abstract fun commentPresenter(presenter: CommentPresenter): CommentContract.Presenter
 
-    @Provides
-    internal fun provideIsSingleCommentThread(): Boolean {
-        return mIsSingleCommentThread
+    @Module
+    companion object {
+        @JvmStatic
+        @Provides
+        @ActivityScoped
+        internal fun provideCommentOriginalPost(commentActivity: CommentActivity): Post {
+            return commentActivity.intent.getParcelableExtra(CommentActivity.EXTRA_CLICKED_POST)
+        }
+
+        @JvmStatic
+        @Provides
+        @ActivityScoped
+        internal fun provideIsSingleCommentThread(commentActivity: CommentActivity): Boolean {
+            return commentActivity.intent.getBooleanExtra(CommentFragment.ARGUMENT_IS_SINGLE_COMMENT_THREAD, false)
+        }
     }
 }

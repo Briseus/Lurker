@@ -1,27 +1,42 @@
 package torille.fi.lurkforreddit
 
-import android.app.Application
 import android.content.ComponentCallbacks2
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory
 import com.facebook.imagepipeline.decoder.SimpleProgressiveJpegConfig
 import com.squareup.leakcanary.LeakCanary
+import dagger.android.AndroidInjector
+import dagger.android.DaggerApplication
 import okhttp3.OkHttpClient
 import timber.log.Timber
-import torille.fi.lurkforreddit.data.DaggerRedditRepositoryComponent
-import torille.fi.lurkforreddit.data.RedditRepositoryComponent
-import torille.fi.lurkforreddit.di.components.DaggerNetComponent
-import torille.fi.lurkforreddit.di.components.NetComponent
+import torille.fi.lurkforreddit.di.components.AppComponent
+import torille.fi.lurkforreddit.di.components.DaggerAppComponent
 import torille.fi.lurkforreddit.di.modules.*
 import javax.inject.Inject
 
-class MyApplication : Application() {
-
-    private lateinit var mRedditRepositoryComponent: RedditRepositoryComponent
-    private lateinit var mNetComponent: NetComponent
+class MyApplication : DaggerApplication() {
 
     @Inject
     internal lateinit var mOkHttpClient: OkHttpClient
+
+    override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
+        /*val appComponent = DaggerNetComponent.builder().application(this).build()
+        appComponent.inject(this)
+        return appComponent*/
+
+        val client_id = resources.getString(R.string.client_id)
+
+        val appComponent: AppComponent = DaggerAppComponent.builder()
+                .appModule(AppModule(this))
+                .netModule(NetModule())
+                .redditAuthModule(RedditAuthModule(client_id, "https://www.reddit.com/api/v1/"))
+                .redditModule(RedditModule("https://oauth.reddit.com/"))
+                .streamableModule(StreamableModule("https://api.streamable.com/"))
+                .redditRepositoryModule(RedditRepositoryModule())
+                .build()
+        appComponent.inject(this)
+        return appComponent
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -32,22 +47,6 @@ class MyApplication : Application() {
             return
         }
         LeakCanary.install(this)
-
-        val client_id = resources.getString(R.string.client_id)
-
-        mNetComponent = DaggerNetComponent.builder()
-                .appModule(AppModule(this))
-                .netModule(NetModule())
-                .redditAuthModule(RedditAuthModule(client_id, "https://www.reddit.com/api/v1/"))
-                .redditModule(RedditModule("https://oauth.reddit.com/"))
-                .streamableModule(StreamableModule("https://api.streamable.com/"))
-                .build()
-
-        mNetComponent.inject(this)
-
-        mRedditRepositoryComponent = DaggerRedditRepositoryComponent.builder()
-                .netComponent(mNetComponent)
-                .build()
 
         val config = OkHttpImagePipelineConfigFactory
                 .newBuilder(this, mOkHttpClient)
@@ -74,11 +73,4 @@ class MyApplication : Application() {
         }
     }
 
-    fun getmRedditRepositoryComponent(): RedditRepositoryComponent {
-        return mRedditRepositoryComponent
-    }
-
-    fun getmNetComponent(): NetComponent {
-        return mNetComponent
-    }
 }

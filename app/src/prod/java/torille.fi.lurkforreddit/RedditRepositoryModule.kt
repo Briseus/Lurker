@@ -1,22 +1,28 @@
 package torille.fi.lurkforreddit
 
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import torille.fi.lurkforreddit.data.RedditDataSource
+import torille.fi.lurkforreddit.data.RedditService
 import torille.fi.lurkforreddit.data.Remote
 import torille.fi.lurkforreddit.data.remote.RedditRemoteDataSource
-import torille.fi.lurkforreddit.di.scope.RedditScope
+import torille.fi.lurkforreddit.utils.CommentsStreamingParser
+import torille.fi.lurkforreddit.utils.Store
+import javax.inject.Singleton
 
 /**
- * Abstract class used to point to the datasource you want
- * Used to mock in test
+ * This is used by Dagger to inject the required arguments
  */
 @Module
-abstract class RedditRepositoryModule {
+class RedditRepositoryModule {
 
-    @RedditScope
-    @Binds
+    @Singleton
+    @Provides
     @Remote
-    internal abstract fun provideRemoteDataSource(dataSource: RedditRemoteDataSource): RedditDataSource
+    internal fun provideRemoteDataSource(commentsStreamingParser: CommentsStreamingParser,
+                                         redditApi: RedditService.Reddit,
+                                         settingsStore: Store): RedditDataSource {
+        return RedditRemoteDataSource(redditApi, settingsStore, commentsStreamingParser)
+    }
 
 }

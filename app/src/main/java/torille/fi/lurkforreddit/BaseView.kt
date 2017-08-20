@@ -1,3 +1,3 @@
 package torille.fi.lurkforreddit
 
-interface BaseView
+interface BaseView<T>
