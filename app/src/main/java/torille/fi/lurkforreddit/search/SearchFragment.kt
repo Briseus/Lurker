@@ -20,8 +20,7 @@ import javax.inject.Inject
 
 class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.View {
 
-    @Inject
-    internal lateinit var mActionsListener: SearchContract.Presenter
+    @Inject internal lateinit var mActionsListener: SearchContract.Presenter
 
     private lateinit var mAdapter: SearchViewAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -89,6 +88,7 @@ class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.Vi
     override fun onDestroy() {
         super.onDestroy()
         mActionsListener.dropView()
+        Timber.d("Destroyed")
     }
 
     override fun onResume() {
@@ -123,12 +123,5 @@ class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.Vi
 
     internal interface SearchClickListener {
         fun onSearchClick(subreddit: Subreddit)
-    }
-
-    companion object {
-
-        fun newInstance(): SearchFragment {
-            return SearchFragment()
-        }
     }
 }

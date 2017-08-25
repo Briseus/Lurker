@@ -5,12 +5,11 @@ import dagger.android.ContributesAndroidInjector
 import torille.fi.lurkforreddit.comments.CommentActivity
 import torille.fi.lurkforreddit.comments.CommentPresenterModule
 import torille.fi.lurkforreddit.di.scope.ActivityScoped
-import torille.fi.lurkforreddit.media.FullscreenFragment
-import torille.fi.lurkforreddit.media.FullscreenPresenter
 import torille.fi.lurkforreddit.search.SearchPresenterModule
+import torille.fi.lurkforreddit.subreddit.FrontPageModule
 import torille.fi.lurkforreddit.subreddit.SubredditActivity
+import torille.fi.lurkforreddit.subreddit.SubredditModule
 import torille.fi.lurkforreddit.subreddit.SubredditPresenterModule
-import torille.fi.lurkforreddit.subreddit.provideSubreddit
 import torille.fi.lurkforreddit.subreddits.SubredditsActivity
 import torille.fi.lurkforreddit.subreddits.SubredditsPresenterModule
 
@@ -18,11 +17,11 @@ import torille.fi.lurkforreddit.subreddits.SubredditsPresenterModule
 abstract class ActivityBindingModule {
 
     @ActivityScoped
-    @ContributesAndroidInjector(modules = arrayOf(SubredditPresenterModule::class))
+    @ContributesAndroidInjector(modules = arrayOf(SubredditPresenterModule::class, SubredditModule::class))
     abstract fun subredditActivity(): SubredditActivity
 
     @ActivityScoped
-    @ContributesAndroidInjector(modules = arrayOf(SubredditsPresenterModule::class, SearchPresenterModule::class, provideSubreddit::class))
+    @ContributesAndroidInjector(modules = arrayOf(SubredditsPresenterModule::class, SearchPresenterModule::class, SubredditPresenterModule::class, FrontPageModule::class))
     abstract fun subredditsActivity(): SubredditsActivity
 
     @ActivityScoped

@@ -18,8 +18,8 @@ internal constructor(val mRedditRepository: RedditRepository,
                      val mIsSingleCommentThread: Boolean) : CommentContract.Presenter {
 
     private lateinit var mCommentsView: CommentContract.View
-
     private val disposables = CompositeDisposable()
+    private var firstLoad = true
 
     override fun loadComments(permaLinkUrl: String, isSingleCommentThread: Boolean) {
         Timber.d("Loading comments for permalink $permaLinkUrl")
@@ -78,7 +78,10 @@ internal constructor(val mRedditRepository: RedditRepository,
 
     override fun takeView(view: CommentContract.View) {
         mCommentsView = view
-        loadComments(mPost.permaLink, mIsSingleCommentThread)
+        if (firstLoad) {
+            loadComments(mPost.permaLink, mIsSingleCommentThread)
+            firstLoad = false
+        }
     }
 
     override fun dropView() {

@@ -7,24 +7,23 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import torille.fi.lurkforreddit.data.RedditRepository
 import torille.fi.lurkforreddit.data.models.view.Subreddit
-import torille.fi.lurkforreddit.di.scope.ActivityScoped
 import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import javax.inject.Inject
 
 /**
  * Presenter in the MVP model of displaying subreddits
  */
-@ActivityScoped
 class SubredditsPresenter @Inject
-constructor(private val mRedditRepository: RedditRepository) : SubredditsContract.Presenter {
+internal constructor(private val mRedditRepository: RedditRepository) : SubredditsContract.Presenter {
 
-    private lateinit var mSubredditsView: SubredditsContract.View
+    private var mSubredditsView: SubredditsContract.View? = null
     private val disposables = CompositeDisposable()
 
     override fun loadSubreddits(forcedUpdate: Boolean) {
         Timber.d("Going to fetch subs!")
-        mSubredditsView.setProgressIndicator(true)
+        mSubredditsView?.setProgressIndicator(true)
         if (forcedUpdate) {
+            Timber.d("Refreshing data")
             mRedditRepository.refreshData()
         }
         // The network request might be handled in a different thread so make sure Espresso knows
@@ -35,28 +34,31 @@ constructor(private val mRedditRepository: RedditRepository) : SubredditsContrac
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<List<Subreddit>>() {
                     override fun onNext(@io.reactivex.annotations.NonNull subreddits: List<Subreddit>) {
-                        mSubredditsView.showSubreddits(subreddits)
+                        Timber.d("Got this")
+                        mSubredditsView?.showSubreddits(subreddits)
                     }
 
                     override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
-                        mSubredditsView.onError(e.toString())
-                        mSubredditsView.setProgressIndicator(false)
+                        mSubredditsView?.onError(e.toString())
+                        mSubredditsView?.setProgressIndicator(false)
+                        Timber.e(e)
                     }
 
                     override fun onComplete() {
                         EspressoIdlingResource.decrement() // Set app as idle.
-                        mSubredditsView.setProgressIndicator(false)
+                        mSubredditsView?.setProgressIndicator(false)
                     }
                 }))
     }
 
     override fun openSubreddit(subreddit: Subreddit) {
-        mSubredditsView.loadSelectedSubreddit(subreddit)
+        mSubredditsView?.loadSelectedSubreddit(subreddit)
     }
 
     override fun dropView() {
-        mSubredditsView.setProgressIndicator(false)
+        mSubredditsView?.setProgressIndicator(false)
         disposables.dispose()
+        mSubredditsView = null
     }
 
     override fun takeView(view: SubredditsContract.View) {

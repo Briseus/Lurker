@@ -39,7 +39,7 @@ interface SubredditContract {
 
         fun loadPosts(subredditUrl: String)
 
-        fun loadMorePosts(subredditUrl: String, nextpage: String)
+        fun loadMorePosts()
 
         fun retry()
     }

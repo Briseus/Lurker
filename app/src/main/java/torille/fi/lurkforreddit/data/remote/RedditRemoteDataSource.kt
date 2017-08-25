@@ -15,7 +15,6 @@ import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostListing
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditListing
 import torille.fi.lurkforreddit.data.models.view.*
-import torille.fi.lurkforreddit.di.scope.RedditScope
 import torille.fi.lurkforreddit.utils.CommentsStreamingParser
 import torille.fi.lurkforreddit.utils.Store
 import torille.fi.lurkforreddit.utils.TextHelper

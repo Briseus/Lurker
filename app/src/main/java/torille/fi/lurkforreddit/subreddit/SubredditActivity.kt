@@ -3,7 +3,6 @@ package torille.fi.lurkforreddit.subreddit
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.support.annotation.Nullable
 import android.support.annotation.VisibleForTesting
 import android.support.test.espresso.IdlingResource
 import android.support.v4.app.Fragment
@@ -23,48 +22,31 @@ import torille.fi.lurkforreddit.data.models.view.Subreddit
 import torille.fi.lurkforreddit.utils.TextHelper
 import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import javax.inject.Inject
-import javax.inject.Named
 
 class SubredditActivity : DaggerAppCompatActivity() {
 
-    @Inject
-    lateinit var subredditPresenter: SubredditPresenter
-
-    @Inject
-    lateinit var mRedditApi: Lazy<RedditService.Reddit>
-
-    @field:[Inject Named("sub")]
-    lateinit var subreddit: Subreddit
+    @Inject lateinit var subredditPresenter: SubredditPresenter
+    @Inject lateinit var mRedditApi: Lazy<RedditService.Reddit>
+    @Inject lateinit var subreddit: Subreddit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_subreddit)
-
         setSupportActionBar(appBarLayout)
 
         val actionBar = supportActionBar
 
         actionBar?.setHomeAsUpIndicator(resources.getDrawable(R.drawable.ic_arrow_back_white_24px, null))
         actionBar?.setDisplayHomeAsUpEnabled(true)
+        actionBar?.title = subreddit.displayName
 
-        if (subreddit != null) {
-            actionBar?.title = subreddit?.displayName
-        } else {
-            actionBar?.title = null
-        }
-
-
-        var subredditFragment: SubredditFragment? = supportFragmentManager
+        val subredditFragment: SubredditFragment? = supportFragmentManager
                 .findFragmentById(R.id.contentFrame) as? SubredditFragment
 
-        if (subreddit == null) {
-            initFragment(ProgressFragment.newInstance())
-            handleIntent(intent)
-        } else if (subredditFragment == null) {
+        if (subredditFragment == null) {
             Timber.d(subreddit.toString())
-            subredditFragment = SubredditFragment.newInstance(subreddit)
-            loadBannerImage(subreddit?.bannerUrl, subreddit?.keyColor)
-            initFragment(subredditFragment)
+            loadBannerImage(subreddit.bannerUrl, subreddit.keyColor)
+            initFragment(SubredditFragment.newInstance(subreddit))
         }
 
     }
@@ -144,7 +126,6 @@ class SubredditActivity : DaggerAppCompatActivity() {
         get() = EspressoIdlingResource.idlingResource
 
     companion object {
-
         val EXTRA_SUBREDDIT = "subreddit"
         val EXTRA_SUBREDDITNAME = "subredditname"
     }

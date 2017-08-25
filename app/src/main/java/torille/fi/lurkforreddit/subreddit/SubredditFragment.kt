@@ -37,7 +37,6 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
 
     private val mCustomTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
     private var refreshing: Boolean = false
-    private var mNextPageId: String? = null
 
     private lateinit var mListAdapter: PostsAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
@@ -93,7 +92,7 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
                     if (!refreshing && scrolledItems >= totalItemCount) {
                         refreshing = true
                         Timber.d("Last item reached, getting more!")
-                        recyclerV?.post { mActionsListener.loadMorePosts(subredditUrl, mNextPageId!!) }
+                        recyclerV?.post { mActionsListener.loadMorePosts() }
 
                     }
                 }
@@ -107,19 +106,16 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
                 ContextCompat.getColor(context, R.color.colorPrimaryDark))
         refreshLayout.setOnRefreshListener {
             mListAdapter.clear()
-            loadIfEmpty()
         }
     }
 
     override fun onResume() {
         super.onResume()
         mActionsListener.takeView(this)
-        loadIfEmpty()
     }
 
     override fun onStart() {
         super.onStart()
-        Timber.d("ye")
         mCustomTabActivityHelper.bindCustomTabsService(activity)
     }
 
@@ -130,25 +126,8 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
     }
 
     override fun onDestroy() {
-        mActionsListener.dropView()
         super.onDestroy()
-    }
-
-    private val subredditUrl: String
-        get() {
-            val subreddit = arguments.getParcelable<Subreddit>(ARGUMENT_SUBREDDIT)
-            return if (subreddit != null) {
-                subreddit.url
-            } else {
-                Toast.makeText(context, "SubredditResponse id was null! ", Toast.LENGTH_SHORT).show()
-                ""
-            }
-        }
-
-    private fun loadIfEmpty() {
-        if (mListAdapter.itemCount == 0) {
-            //TODO Is this needed?
-        }
+        mActionsListener.dropView()
     }
 
     /**
@@ -181,7 +160,6 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
 
     override fun showPosts(posts: List<Post>, nextpage: String) {
         mListAdapter.addAll(posts)
-        mNextPageId = nextpage
     }
 
     override fun setListProgressIndicator(active: Boolean) {
@@ -191,7 +169,6 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
     override fun addMorePosts(posts: List<Post>, nextpage: String) {
         mListAdapter.addMorePosts(posts)
         refreshing = false
-        mNextPageId = nextpage
     }
 
 

@@ -12,14 +12,14 @@ import torille.fi.lurkforreddit.data.models.view.Subreddit
 import torille.fi.lurkforreddit.utils.MediaHelper
 import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import javax.inject.Inject
-import javax.inject.Named
 
-open class SubredditPresenter @Inject
-internal constructor(val mRedditRepository: RedditRepository) : SubredditContract.Presenter {
+class SubredditPresenter @Inject
+internal constructor(private val mRedditRepository: RedditRepository,
+                     private val mSubreddit: Subreddit) : SubredditContract.Presenter {
 
-    @field:[Inject Named("sub")] lateinit var mSubreddit: Subreddit
     private var mSubredditsView: SubredditContract.View? = null
     private var nextPageId: String? = null
+    private var firstLoad = true
 
     private val disposables = CompositeDisposable()
 
@@ -78,41 +78,50 @@ internal constructor(val mRedditRepository: RedditRepository) : SubredditContrac
 
     }
 
-    override fun loadMorePosts(subredditUrl: String, nextpage: String) {
+    override fun loadMorePosts() {
         mSubredditsView?.setListProgressIndicator(true)
 
         EspressoIdlingResource.increment()
-        Timber.d("Fetching more posts at $subredditUrl id $nextpage")
-        disposables.add(mRedditRepository.getMoreSubredditPosts(subredditUrl, nextpage)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableObserver<Pair<String, List<Post>>>() {
-                    override fun onNext(@io.reactivex.annotations.NonNull postsPair: Pair<String, List<Post>>) {
-                        nextPageId = postsPair.first
-                        mSubredditsView?.setListProgressIndicator(false)
-                        mSubredditsView?.addMorePosts(postsPair.second, postsPair.first)
+        if(nextPageId.isNullOrEmpty()) {
+            Timber.d("No more posts")
+            // TODO show no more posts
+        } else {
+            Timber.d("Fetching more posts at ${mSubreddit.url} id ${nextPageId}")
+            disposables.add(mRedditRepository.getMoreSubredditPosts(mSubreddit.url, nextPageId!!)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(object : DisposableObserver<Pair<String, List<Post>>>() {
+                        override fun onNext(@io.reactivex.annotations.NonNull postsPair: Pair<String, List<Post>>) {
+                            nextPageId = postsPair.first
+                            mSubredditsView?.setListProgressIndicator(false)
+                            mSubredditsView?.addMorePosts(postsPair.second, postsPair.first)
 
-                    }
+                        }
 
-                    override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
-                        mSubredditsView?.onError(e.toString())
-                        mSubredditsView?.setListErrorButton(true)
-                    }
+                        override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
+                            mSubredditsView?.onError(e.toString())
+                            mSubredditsView?.setListErrorButton(true)
+                        }
 
-                    override fun onComplete() {
-                        EspressoIdlingResource.decrement()
-                    }
-                }))
+                        override fun onComplete() {
+                            EspressoIdlingResource.decrement()
+                        }
+                    }))
+        }
+
     }
 
     override fun retry() {
         mSubredditsView?.setListErrorButton(false)
-        loadMorePosts(mSubreddit.url, nextPageId!!)
+        loadMorePosts()
     }
 
     override fun takeView(view: SubredditContract.View) {
         mSubredditsView = view
-        loadPosts(mSubreddit.url)
+        if (firstLoad) {
+            loadPosts(mSubreddit.url)
+            firstLoad = false
+        }
     }
 
     override fun dropView() {

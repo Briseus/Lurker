@@ -5,8 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -16,20 +14,16 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
-import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper
 import torille.fi.lurkforreddit.data.RedditService
 import torille.fi.lurkforreddit.data.models.jsonResponses.RedditToken
-import torille.fi.lurkforreddit.data.models.view.Subreddit
 import torille.fi.lurkforreddit.search.SearchFragment
 import torille.fi.lurkforreddit.subreddit.SubredditFragment
-import torille.fi.lurkforreddit.subreddits.SubredditsContract.Presenter
 import torille.fi.lurkforreddit.utils.MediaHelper
 import torille.fi.lurkforreddit.utils.NetworkHelper
 import torille.fi.lurkforreddit.utils.Store
 import javax.inject.Inject
-import javax.inject.Named
 
 /**
  * The apps main activity that starts with the app
@@ -37,10 +31,10 @@ import javax.inject.Named
 
 class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
-    private val helper = CustomTabActivityHelper()
-
     @Inject internal lateinit var store: Store
     @Inject internal lateinit var mRedditAuthApi: RedditService.Auth
+
+    private val helper = CustomTabActivityHelper()
     private val disposables = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +47,7 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
         bottomNavigationView.setOnNavigationItemSelectedListener(this)
 
         if (savedInstanceState == null) {
-            initFragment(SubredditsFragment.newInstance())
+            initFragment(SubredditFragment())
         }
 
     }
@@ -64,11 +58,6 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(R.id.content, subredditsFragment)
         transaction.commit()
-    }
-
-    private fun getFrontPageFragment() {
-        val frontpage = Subreddit(id = "frontpage", displayName = "Popular")
-        initFragment(SubredditFragment.newInstance(frontpage))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -153,15 +142,15 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_frontpage -> {
-                getFrontPageFragment()
+                initFragment(SubredditFragment())
                 return true
             }
             R.id.action_subreddits -> {
-                initFragment(SubredditsFragment.newInstance())
+                initFragment(SubredditsFragment())
                 return true
             }
             R.id.action_search -> {
-                initFragment(SearchFragment.newInstance())
+                initFragment(SearchFragment())
                 return true
             }
         }

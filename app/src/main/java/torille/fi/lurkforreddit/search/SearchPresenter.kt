@@ -70,5 +70,6 @@ internal constructor(private val mRedditRepository: RedditRepository) : SearchCo
 
     override fun dropView() {
         disposables.dispose()
+        mSearchView = null
     }
 }

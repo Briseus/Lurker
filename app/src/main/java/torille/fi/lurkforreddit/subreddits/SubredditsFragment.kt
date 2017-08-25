@@ -20,7 +20,7 @@ import javax.inject.Inject
  * Fragment for
  */
 
-class SubredditsFragment : DaggerFragment(), SubredditsContract.View {
+class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsContract.View {
 
     @Inject
     internal lateinit var mActionsListener: SubredditsContract.Presenter
@@ -94,11 +94,5 @@ class SubredditsFragment : DaggerFragment(), SubredditsContract.View {
 
     internal interface SubredditItemListener {
         fun onSubredditClick(subreddit: Subreddit)
-    }
-
-    companion object {
-        fun newInstance(): SubredditsFragment {
-            return SubredditsFragment()
-        }
     }
 }
