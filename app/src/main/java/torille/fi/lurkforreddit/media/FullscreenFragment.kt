@@ -3,7 +3,6 @@ package torille.fi.lurkforreddit.media
 import android.graphics.drawable.Animatable
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -25,48 +24,39 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
 import com.google.android.exoplayer2.util.Util
-import dagger.Lazy
 import dagger.android.support.DaggerFragment
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.observers.DisposableObserver
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_fullscreen.*
 import kotlinx.android.synthetic.main.progress_bar_horizontal.*
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
-import torille.fi.lurkforreddit.data.VideositeService
-import torille.fi.lurkforreddit.data.models.jsonResponses.StreamableVideo
 import javax.inject.Inject
 
-class FullscreenFragment : DaggerFragment(), FullscreenContract.View {
+class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenContract.View {
 
-    private lateinit var mActionsListener: FullscreenPresenter
+    @Inject lateinit var actionsListener: FullscreenContract.Presenter
+
+    @Inject lateinit var okHttpClient: OkHttpClient
+
     private lateinit var player: SimpleExoPlayer
-
-    private val disposables = CompositeDisposable()
-
-    @Inject
-    internal lateinit var mStreamableApi: Lazy<VideositeService.Streamable>
-
-    @Inject
-    internal lateinit var mOkHttpClient: OkHttpClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mActionsListener = FullscreenPresenter(this)
-
         val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory(null)
         val trackSelector = DefaultTrackSelector(videoTrackSelectionFactory)
         player = ExoPlayerFactory.newSimpleInstance(context, trackSelector)
     }
 
+    override fun onResume() {
+        super.onResume()
+        Timber.d("Resuming")
+        actionsListener.takeView(this)
+    }
+
     override fun onStart() {
         super.onStart()
         Timber.d("Starting")
-        startStuff()
     }
 
     override fun onPause() {
@@ -84,7 +74,7 @@ class FullscreenFragment : DaggerFragment(), FullscreenContract.View {
         super.onDestroy()
         Timber.d("Destroying")
         releaseVideoPlayer()
-        disposables.dispose()
+        actionsListener.dropView()
     }
 
     private fun releaseVideoPlayer() {
@@ -96,38 +86,24 @@ class FullscreenFragment : DaggerFragment(), FullscreenContract.View {
         return inflater.inflate(R.layout.fragment_fullscreen, container, false)
     }
 
-    private fun startStuff() {
-        val url = arguments.getString(EXTRA_URL)
-        val previewImageUrl = arguments.getString(EXTRA_PREVIEWIMAGE)
-        if (url != null) {
-            Timber.d("Fragment got $url $previewImageUrl")
-            mActionsListener.checkType(url, previewImageUrl)
-        }
-
-    }
-
     override fun showImage(url: String, previewImageUrl: String?) {
-        var previewImageUrl = previewImageUrl
         progressBarHorizontal.visibility = View.INVISIBLE
         imageView.visibility = View.VISIBLE
+        imageView.hierarchy.setProgressBarImage(progressBarHorizontal.progressDrawable)
 
-        val hierarchy = imageView.hierarchy
-        hierarchy.setProgressBarImage(progressBarHorizontal.progressDrawable)
-
-        if (previewImageUrl == null) {
-            previewImageUrl = ""
-        }
+        val previewImgUrl = if (previewImageUrl.isNullOrEmpty()) "" else previewImageUrl
 
         val lowResRequest = ImageRequestBuilder
-                .newBuilderWithSource(Uri.parse(previewImageUrl))
+                .newBuilderWithSource(Uri.parse(previewImgUrl))
                 .build()
 
-        val request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
+        val imageRequest = ImageRequestBuilder
+                .newBuilderWithSource(Uri.parse(url))
                 .build()
 
         val controller = Fresco.newDraweeControllerBuilder()
                 .setAutoPlayAnimations(true)
-                .setImageRequest(request)
+                .setImageRequest(imageRequest)
                 .setLowResImageRequest(lowResRequest)
                 .setOldController(imageView.controller)
                 .setControllerListener(object : BaseControllerListener<ImageInfo>() {
@@ -142,7 +118,7 @@ class FullscreenFragment : DaggerFragment(), FullscreenContract.View {
                     override fun onFinalImageSet(id: String?, imageInfo: ImageInfo?, animatable: Animatable?) {
                         super.onFinalImageSet(id, imageInfo, animatable)
                         if (imageInfo == null) {
-                            Timber.d("Was error")
+                            Timber.d("Had an error")
                             return
                         }
                         removeMarginTop()
@@ -161,7 +137,7 @@ class FullscreenFragment : DaggerFragment(), FullscreenContract.View {
         val control = CacheControl.Builder().build()
         val userAgent = Util.getUserAgent(context, getString(R.string.app_name))
         // Produces DataSource instances through which media data is loaded.
-        val dataSourceFactory = OkHttpDataSourceFactory(mOkHttpClient,
+        val dataSourceFactory = OkHttpDataSourceFactory(okHttpClient,
                 userAgent, DefaultBandwidthMeter(), control)
 
         // Produces Extractor instances for parsing the media data.
@@ -207,40 +183,13 @@ class FullscreenFragment : DaggerFragment(), FullscreenContract.View {
 
     }
 
+    override fun showNoVideoFound() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private fun removeMarginTop() {
         val params = container.layoutParams as FrameLayout.LayoutParams
         params.setMargins(0, 0, 0, 0)
-    }
-
-    override fun showStreamableVideo(identifier: String) {
-        disposables.add(mStreamableApi.get().getVideo(identifier)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableObserver<StreamableVideo>() {
-                    override fun onNext(@io.reactivex.annotations.NonNull streamableVideo: StreamableVideo) {
-                        var videoUrl = "https:"
-                        val mobileVideo = streamableVideo.videos.mobileVideo
-                        if (mobileVideo != null) {
-                            videoUrl += mobileVideo.url!!
-                        } else {
-                            videoUrl += streamableVideo.videos.video.url!!
-                        }
-                        Timber.d("Got streamable with url " + videoUrl)
-                        if (videoUrl == "https:") {
-                            onError(Throwable("No video found"))
-                        } else {
-                            showVideo(videoUrl)
-                        }
-                    }
-
-                    override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
-                        Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show()
-                    }
-
-                    override fun onComplete() {
-
-                    }
-                }))
     }
 
     override fun checkDomain(url: String) {
@@ -256,7 +205,7 @@ class FullscreenFragment : DaggerFragment(), FullscreenContract.View {
             "streamable.com" -> {
                 val identifier = uri.lastPathSegment
                 Timber.d("Got identifier $identifier from uri $uri")
-                showStreamableVideo(identifier)
+                actionsListener.checkStreamableVideo(identifier)
             }
             "i.imgur.com", "imgur.com" -> {
                 Timber.d("Showing imgur")
@@ -266,30 +215,4 @@ class FullscreenFragment : DaggerFragment(), FullscreenContract.View {
         }
 
     }
-
-    companion object {
-
-        private val EXTRA_URL = "url"
-        private val EXTRA_PREVIEWIMAGE = "imageUrl"
-
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-
-         * @param url        Link to media
-         * *
-         * @param previewUrl link to previewUrl
-         * *
-         * @return A new instance of fragment SubredditFragment.
-         */
-        fun newInstance(url: String, previewUrl: String?): FullscreenFragment {
-            val fullscreenFragment = FullscreenFragment()
-            val args = Bundle()
-            args.putString(EXTRA_URL, url)
-            args.putString(EXTRA_PREVIEWIMAGE, previewUrl)
-            fullscreenFragment.arguments = args
-            return fullscreenFragment
-        }
-    }
-
 }

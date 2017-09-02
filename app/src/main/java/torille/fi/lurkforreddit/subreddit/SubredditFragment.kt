@@ -186,6 +186,7 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
     override fun showMedia(post: Post) {
         val intent = Intent(context, FullscreenActivity::class.java)
         intent.putExtra(FullscreenActivity.EXTRA_POST, post)
+        intent.putExtra(FullscreenActivity.EXTRA_URL, post.previewImage)
         startActivity(intent)
     }
 

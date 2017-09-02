@@ -5,6 +5,8 @@ import dagger.android.ContributesAndroidInjector
 import torille.fi.lurkforreddit.comments.CommentActivity
 import torille.fi.lurkforreddit.comments.CommentPresenterModule
 import torille.fi.lurkforreddit.di.scope.ActivityScoped
+import torille.fi.lurkforreddit.media.FullscreenActivity
+import torille.fi.lurkforreddit.media.FullscreenPresenterModule
 import torille.fi.lurkforreddit.search.SearchPresenterModule
 import torille.fi.lurkforreddit.subreddit.FrontPageModule
 import torille.fi.lurkforreddit.subreddit.SubredditActivity
@@ -28,5 +30,8 @@ abstract class ActivityBindingModule {
     @ContributesAndroidInjector(modules = arrayOf(CommentPresenterModule::class))
     abstract fun commentActivity(): CommentActivity
 
+    @ActivityScoped
+    @ContributesAndroidInjector(modules = arrayOf(FullscreenPresenterModule::class))
+    abstract fun fullscreenActivity(): FullscreenActivity
 
 }
