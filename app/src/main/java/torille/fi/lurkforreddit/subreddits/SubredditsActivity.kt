@@ -32,9 +32,9 @@ import javax.inject.Inject
 class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
     @Inject internal lateinit var store: Store
-    @Inject internal lateinit var mRedditAuthApi: RedditService.Auth
+    @Inject internal lateinit var redditAuthApi: RedditService.Auth
 
-    private val helper = CustomTabActivityHelper()
+    private val customTabActivityHelper = CustomTabActivityHelper()
     private val disposables = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,13 +72,13 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
 
     override fun onStart() {
         super.onStart()
-        helper.bindCustomTabsService(this)
+        customTabActivityHelper.bindCustomTabsService(this)
         checkIntent(intent)
     }
 
     override fun onStop() {
         super.onStop()
-        helper.unbindCustomTabsService(this)
+        customTabActivityHelper.unbindCustomTabsService(this)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
@@ -95,29 +95,29 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
         if (intent != null && intent.data != null) {
             val uri = intent.data
             intent.data = null
-            Timber.d("Uri is " + uri)
+            Timber.d("Uri is $uri")
             val state = uri.getQueryParameter("state")
             // check that state matches
             if (state == STATE) {
                 val code = uri.getQueryParameter("code")
                 if (!code.isNullOrEmpty()) {
-                    Timber.d("Code was " + code)
+                    Timber.d("Code was $code")
                     getToken(code)
                 } else if (uri.getQueryParameter("error") != null) {
                     // show an error message here
-                    Timber.e("Got error " + uri.getQueryParameter("error"))
-                    Toast.makeText(this, "Got error " + uri.getQueryParameter("error"), Toast.LENGTH_LONG).show()
+                    Timber.e("Got error ${uri.getQueryParameter("error")}")
+                    Toast.makeText(this, "Got error ${uri.getQueryParameter("error")}", Toast.LENGTH_LONG).show()
                 }
             } else {
-                Timber.e(state + " does not match " + STATE)
-                Toast.makeText(this, state + " does not match " + STATE, Toast.LENGTH_LONG).show()
+                Timber.e("$state does not match $STATE" + STATE)
+                Toast.makeText(this, "Login requests differ", Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun getToken(code: String) {
         val grant_type = "authorization_code"
-        disposables.add(mRedditAuthApi.getUserAuthToken(grant_type, code, REDIRECT_URI)
+        disposables.add(redditAuthApi.getUserAuthToken(grant_type, code, REDIRECT_URI)
                 .map { redditToken -> redditToken }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<RedditToken>() {
@@ -181,17 +181,16 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
     private fun logIn() {
         val CLIENT_ID = resources.getString(R.string.client_id)
         //TODO Switch to constant
-        val url = "https://www.reddit.com/api/v1/"
-                .plus("authorize.compact?client_id=" + CLIENT_ID)
-                .plus("&response_type=" + RESPONSE_TYPE)
-                .plus("&state=" + STATE)
-                .plus("&redirect_uri=" + REDIRECT_URI)
-                .plus("&duration=" + DURATION)
-                .plus("&scope=" + SCOPE)
+        val url = "https://www.reddit.com/api/v1/authorize.compact?client_id=$CLIENT_ID" +
+                "&response_type=$RESPONSE_TYPE" +
+                "&state=$STATE" +
+                "&redirect_uri=$REDIRECT_URI" +
+                "&duration=$DURATION" +
+                "&scope=$SCOPE"
 
         CustomTabActivityHelper.openCustomTab(this,
                 MediaHelper.createCustomTabIntent(this,
-                        helper.session),
+                        customTabActivityHelper.session),
                 url
         ) { _, _ ->
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))

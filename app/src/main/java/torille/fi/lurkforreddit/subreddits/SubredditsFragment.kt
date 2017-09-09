@@ -23,23 +23,23 @@ import javax.inject.Inject
 class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsContract.View {
 
     @Inject
-    internal lateinit var mActionsListener: SubredditsContract.Presenter
+    internal lateinit var actionsListener: SubredditsContract.Presenter
 
-    private lateinit var mListAdapter: SubredditsAdapter
+    private lateinit var subredditsAdapter: SubredditsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mListAdapter = SubredditsAdapter(mItemListener, ContextCompat.getColor(context, R.color.colorAccent))
+        subredditsAdapter = SubredditsAdapter(mItemListener, ContextCompat.getColor(context, R.color.colorAccent))
     }
 
     override fun onResume() {
         super.onResume()
-        mActionsListener.takeView(this)
+        actionsListener.takeView(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mActionsListener.dropView()
+        actionsListener.dropView()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -51,7 +51,7 @@ class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsCon
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val context = context
-        subRecyclerView.adapter = mListAdapter
+        subRecyclerView.adapter = subredditsAdapter
         subRecyclerView.setHasFixedSize(true)
         subRecyclerView.layoutManager = LinearLayoutManager(context)
 
@@ -59,7 +59,7 @@ class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsCon
                 ContextCompat.getColor(context, R.color.colorPrimary),
                 ContextCompat.getColor(context, R.color.colorAccent),
                 ContextCompat.getColor(context, R.color.colorPrimaryDark))
-        refreshLayout.setOnRefreshListener { mActionsListener.loadSubreddits(true) }
+        refreshLayout.setOnRefreshListener { actionsListener.loadSubreddits(true) }
     }
 
     /**
@@ -67,7 +67,7 @@ class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsCon
      */
     private val mItemListener = object : SubredditItemListener {
         override fun onSubredditClick(subreddit: Subreddit) {
-            mActionsListener.openSubreddit(subreddit)
+            actionsListener.openSubreddit(subreddit)
         }
     }
 
@@ -79,7 +79,7 @@ class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsCon
     }
 
     override fun showSubreddits(subreddits: List<Subreddit>) {
-        mListAdapter.replaceData(subreddits)
+        subredditsAdapter.replaceData(subreddits)
     }
 
     override fun loadSelectedSubreddit(subreddit: Subreddit) {
