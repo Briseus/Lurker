@@ -16,6 +16,5 @@
 #   public *;
 #}
 
--dontwarn java.lang.invoke.*
 -dontwarn com.google.errorprone.annotations.*
 -keep class android.support.v7.widget.ShareActionProvider { *; }
