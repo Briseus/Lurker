@@ -14,13 +14,11 @@ import android.widget.TextView
 internal class CustomLinkTransformationMethod : TransformationMethod {
     override fun getTransformation(source: CharSequence, view: View): CharSequence {
         if (view is TextView) {
-            val textView = view
-            //LinkifyCompat.addLinks(textView, Linkify.WEB_URLS);
-            if (textView.text == null || textView.text !is Spannable) {
+            if (view.text == null || view.text !is Spannable) {
                 return source
             }
-            val text = textView.text as Spannable
-            val spans = text.getSpans(0, textView.length(), URLSpan::class.java)
+            val text = view.text as Spannable
+            val spans = text.getSpans(0, view.length(), URLSpan::class.java)
             for (i in spans.indices.reversed()) {
                 val oldSpan = spans[i]
                 val start = text.getSpanStart(oldSpan)
