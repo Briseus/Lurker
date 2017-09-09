@@ -18,22 +18,16 @@ import torille.fi.lurkforreddit.data.models.view.Post
 import java.util.*
 import javax.inject.Inject
 
-/**
- * A simple [Fragment] subclass.
- * Use the [CommentFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.View {
 
-    @Inject lateinit var post: Post
+    @Inject internal lateinit var post: Post
     @Inject internal lateinit var actionsListener: CommentContract.Presenter
+    @Inject @JvmField var singleCommentThread: Boolean = false
 
     private lateinit var commentAdapter: CommentRecyclerViewAdapter
-    private var singleCommentThread: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        singleCommentThread = arguments.getBoolean(ARGUMENT_IS_SINGLE_COMMENT_THREAD, false)
         commentAdapter = CommentRecyclerViewAdapter(setupList(post), mClickListener)
     }
 
@@ -105,11 +99,7 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
     }
 
     override fun setProgressIndicator(active: Boolean) {
-        if (view == null) {
-            return
-        }
         refreshLayout.post { refreshLayout.isRefreshing = active }
-
     }
 
     /**
@@ -134,29 +124,6 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
         fun onClick(parentComment: Comment, linkId: String, position: Int)
 
         fun onContinueThreadClick(permaLinkurl: String)
-    }
-
-    companion object {
-
-        val ARGUMENT_CLICKED_POST = "post"
-        val ARGUMENT_IS_SINGLE_COMMENT_THREAD = "single"
-
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-
-         * @param clickedPost the PostResponse which comments are to be loaded
-         * *
-         * @return A new instance of fragment CommentFragment.
-         */
-        fun newInstance(clickedPost: Post, isSingleCommentThread: Boolean): CommentFragment {
-            val fragment = CommentFragment()
-            val args = Bundle()
-            args.putParcelable(ARGUMENT_CLICKED_POST, clickedPost)
-            args.putBoolean(ARGUMENT_IS_SINGLE_COMMENT_THREAD, isSingleCommentThread)
-            fragment.arguments = args
-            return fragment
-        }
     }
 
 }

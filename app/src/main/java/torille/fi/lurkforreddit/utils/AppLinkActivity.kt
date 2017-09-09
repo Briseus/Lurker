@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import timber.log.Timber
 import torille.fi.lurkforreddit.comments.CommentActivity
+import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.subreddit.SubredditActivity
 
 /**
@@ -39,7 +40,18 @@ class AppLinkActivity : AppCompatActivity() {
             } else if (size == 5 || size == 6) {
                 Timber.d("Got normal comment thread")
                 val commentIntent = Intent(applicationContext, CommentActivity::class.java)
-                commentIntent.data = appLinkData
+
+                val parts = appLinkData.pathSegments.size
+                //Normal comment threads if 5 or 6 segments
+                when (parts) {
+                    5 -> commentIntent.putExtra(CommentActivity.IS_SINGLE_COMMENT_THREAD, false)
+                    6 -> commentIntent.putExtra(CommentActivity.IS_SINGLE_COMMENT_THREAD, true)
+                    else -> {
+                        // TODO("add indicator if malformed url")
+                    }
+                }
+                val post = Post(permaLink = appLinkData.path)
+                commentIntent.putExtra(CommentActivity.EXTRA_CLICKED_POST, post)
                 startActivity(commentIntent)
                 finish()
             }//TODO add indicator if malformed url

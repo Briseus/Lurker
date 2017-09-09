@@ -13,8 +13,11 @@ import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper
 import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.media.FullscreenActivity
 import torille.fi.lurkforreddit.utils.MediaHelper
+import javax.inject.Inject
 
 class CommentActivity : DaggerAppCompatActivity() {
+
+    @Inject lateinit var post: Post
 
     private val customTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
 
@@ -32,37 +35,28 @@ class CommentActivity : DaggerAppCompatActivity() {
             actionBar.setDisplayHomeAsUpEnabled(true)
         }
 
-        var commentFragment: CommentFragment? = supportFragmentManager
+        setupImage()
+
+        val commentFragment: CommentFragment? = supportFragmentManager
                 .findFragmentById(R.id.contentFrame) as? CommentFragment
-        val originalPost = intent.getParcelableExtra<Post>(EXTRA_CLICKED_POST)
 
-        if (commentFragment == null && originalPost != null) {
-            setupImage(originalPost)
-            commentFragment = CommentFragment.newInstance(originalPost, false)
-            initFragment(commentFragment)
-
-        } else if (originalPost == null) {
-            handleIntent(intent)
+        if (commentFragment == null) {
+            initFragment(CommentFragment())
         }
 
+
     }
 
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        Timber.d("Got new intent")
-        handleIntent(intent)
-    }
+    private fun setupImage() {
 
-    internal fun setupImage(postForComments: Post) {
-
-        val parallaxImageUrl = postForComments.previewImage
+        val parallaxImageUrl = post.previewImage
         Timber.d("Got previewImage url = $parallaxImageUrl")
         if (parallaxImageUrl.isNotEmpty()) {
             parallaxImage.setOnClickListener {
-                val postUrl = postForComments.url
-                if (MediaHelper.isContentMedia(postUrl, postForComments.domain)) {
+                val postUrl = post.url
+                if (MediaHelper.isContentMedia(postUrl, post.domain)) {
                     val intent = Intent(this, FullscreenActivity::class.java)
-                    intent.putExtra(FullscreenActivity.EXTRA_POST, postForComments)
+                    intent.putExtra(FullscreenActivity.EXTRA_POST, post)
                     startActivity(intent)
                 } else {
                     CustomTabActivityHelper.openCustomTab(this,
@@ -76,33 +70,9 @@ class CommentActivity : DaggerAppCompatActivity() {
                 }
             }
             parallaxImage.setImageURI(parallaxImageUrl)
-        } else{
+        } else {
             parallaxImage.visibility = View.GONE
         }
-    }
-
-
-
-    private fun handleIntent(intent: Intent?) {
-        if (intent != null) {
-            val appLinkData = intent.data
-            val paths = appLinkData.pathSegments
-            val size = paths.size
-            // TODO("add indicator if malformed url")
-            //Normal comment threads if 5 or 6 segments
-            if (size == 5 || size == 6) {
-                Timber.d("Got comment thread")
-                val post = Post(permaLink = appLinkData.path)
-                setupImage(post)
-                if (size == 5) {
-                    initFragment(CommentFragment.newInstance(post, false))
-                } else {
-                    initFragment(CommentFragment.newInstance(post, true))
-                }
-
-            }
-        }
-
     }
 
     private fun initFragment(commentFragment: Fragment) {
@@ -130,6 +100,7 @@ class CommentActivity : DaggerAppCompatActivity() {
 
     companion object {
         val EXTRA_CLICKED_POST = "post"
+        val IS_SINGLE_COMMENT_THREAD = "single"
     }
 
 }
