@@ -38,7 +38,7 @@ ext {
     buildToolsVersion = '26.0.1'
 
     // App dependencies
-    supportLibraryVersion = '26.0.1'
+    supportLibraryVersion = '26.0.2'
     constraintVersion = '1.0.2'
     retrofitVersion = '2.3.0'
     okHttpVersion = '3.8.1'
