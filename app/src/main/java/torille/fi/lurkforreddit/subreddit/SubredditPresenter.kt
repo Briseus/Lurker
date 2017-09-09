@@ -45,13 +45,13 @@ internal constructor(private val mRedditRepository: RedditRepository,
         }
     }
 
-    override fun loadPosts(subredditUrl: String) {
+    override fun loadPosts() {
         mSubredditsView?.setProgressIndicator(true)
 
         // The network request might be handled in a different thread so make sure Espresso knows
         // that the appm is busy until the response is handled.
         EspressoIdlingResource.increment() // App is busy until further notice
-        disposables.add(mRedditRepository.getSubredditPosts(subredditUrl)
+        disposables.add(mRedditRepository.getSubredditPosts(mSubreddit.url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<Pair<String, List<Post>>>() {
@@ -119,7 +119,7 @@ internal constructor(private val mRedditRepository: RedditRepository,
     override fun takeView(view: SubredditContract.View) {
         mSubredditsView = view
         if (firstLoad) {
-            loadPosts(mSubreddit.url)
+            loadPosts()
             firstLoad = false
         }
     }

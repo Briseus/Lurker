@@ -37,7 +37,7 @@ interface SubredditContract {
 
         fun openMedia(post: Post)
 
-        fun loadPosts(subredditUrl: String)
+        fun loadPosts()
 
         fun loadMorePosts()
 

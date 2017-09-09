@@ -106,6 +106,7 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
                 ContextCompat.getColor(context, R.color.colorPrimaryDark))
         refreshLayout.setOnRefreshListener {
             mListAdapter.clear()
+            mActionsListener.loadPosts()
         }
     }
 
