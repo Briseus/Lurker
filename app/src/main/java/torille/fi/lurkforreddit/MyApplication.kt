@@ -1,7 +1,6 @@
 package torille.fi.lurkforreddit
 
 import android.content.ComponentCallbacks2
-import android.util.Log
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory
 import com.facebook.imagepipeline.decoder.SimpleProgressiveJpegConfig
@@ -21,12 +20,7 @@ class MyApplication : DaggerApplication() {
     internal lateinit var mOkHttpClient: OkHttpClient
 
     override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
-        /*val appComponent = DaggerNetComponent.builder().application(this).build()
-        appComponent.inject(this)
-        return appComponent*/
-
         val client_id = resources.getString(R.string.client_id)
-
         val appComponent: AppComponent = DaggerAppComponent.builder()
                 .appModule(AppModule(this))
                 .netModule(NetModule())
