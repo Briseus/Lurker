@@ -75,7 +75,7 @@ class CommentPresenterTest {
     @Test
     fun loadMoreCommentsFromRepositoryAndLoadIntoView() {
        /* mCommentPresenter.loadMoreCommentsAt(mockParentComment!!, mockLinkId, mockPosition)
-        verify<RedditRepository>(mRedditRepository).getMoreCommentsForPostAt(any(Comment::class.java),
+        verify<RedditRepository>(redditRepository).getMoreCommentsForPostAt(any(Comment::class.java),
                 any(String::class.java),
                 any(Int::class.javaPrimitiveType),
                 loadPostCommentsCallbackArgumentCaptor.capture(),

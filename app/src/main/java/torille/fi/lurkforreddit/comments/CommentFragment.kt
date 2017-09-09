@@ -99,7 +99,7 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
     }
 
     override fun setProgressIndicator(active: Boolean) {
-        refreshLayout.post { refreshLayout.isRefreshing = active }
+        refreshLayout?.post { refreshLayout.isRefreshing = active }
     }
 
     /**

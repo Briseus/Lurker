@@ -5,6 +5,7 @@ import android.net.Uri
 import android.text.style.URLSpan
 import android.view.View
 import timber.log.Timber
+import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.media.FullscreenActivity
 import torille.fi.lurkforreddit.subreddit.SubredditActivity
 import torille.fi.lurkforreddit.utils.MediaHelper
@@ -27,6 +28,7 @@ internal class CustomUrlSpan(url: String) : URLSpan(url) {
         when {
             MediaHelper.isContentMedia(url, domain) -> {
                 intent = Intent(context, FullscreenActivity::class.java)
+                intent.putExtra(FullscreenActivity.EXTRA_POST, Post(url = url))
                 intent.putExtra(FullscreenActivity.EXTRA_URL, url)
                 context.startActivity(intent)
             }

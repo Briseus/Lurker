@@ -1,6 +1,7 @@
 package torille.fi.lurkforreddit
 
 import android.content.ComponentCallbacks2
+import android.util.Log
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory
 import com.facebook.imagepipeline.decoder.SimpleProgressiveJpegConfig
