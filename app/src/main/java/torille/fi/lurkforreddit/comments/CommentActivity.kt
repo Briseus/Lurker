@@ -1,14 +1,10 @@
 package torille.fi.lurkforreddit.comments
 
 import android.content.Intent
-import android.graphics.PointF
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.View
-import com.facebook.drawee.view.SimpleDraweeView
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_comments.*
 import timber.log.Timber
@@ -20,7 +16,7 @@ import torille.fi.lurkforreddit.utils.MediaHelper
 
 class CommentActivity : DaggerAppCompatActivity() {
 
-    private val mCustomTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
+    private val customTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +67,7 @@ class CommentActivity : DaggerAppCompatActivity() {
                 } else {
                     CustomTabActivityHelper.openCustomTab(this,
                             MediaHelper.createCustomTabIntent(this,
-                                    mCustomTabActivityHelper.session),
+                                    customTabActivityHelper.session),
                             postUrl
                     ) { _, _ ->
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(postUrl))
@@ -79,8 +75,6 @@ class CommentActivity : DaggerAppCompatActivity() {
                     }
                 }
             }
-            val focusPoint = PointF(0.5f, 0f)
-            parallaxImage.hierarchy.setActualImageFocusPoint(focusPoint)
             parallaxImage.setImageURI(parallaxImageUrl)
         } else{
             parallaxImage.visibility = View.GONE
@@ -126,12 +120,12 @@ class CommentActivity : DaggerAppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mCustomTabActivityHelper.bindCustomTabsService(this)
+        customTabActivityHelper.bindCustomTabsService(this)
     }
 
     override fun onStop() {
         super.onStop()
-        mCustomTabActivityHelper.unbindCustomTabsService(this)
+        customTabActivityHelper.unbindCustomTabsService(this)
     }
 
     companion object {

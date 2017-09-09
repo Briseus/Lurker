@@ -20,20 +20,20 @@ internal constructor(private val mRedditRepository: RedditRepository) : SearchCo
 
     override fun searchSubreddits(query: String) {
         this.searchQuery = query
-        mSearchView!!.clearResults()
-        mSearchView!!.showProgressbar()
+        mSearchView?.clearResults()
+        mSearchView?.showProgressbar()
         disposables.add(mRedditRepository.getSearchResults(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<Pair<String, List<SearchResult>>>() {
                     override fun onNext(@io.reactivex.annotations.NonNull resultPair: Pair<String, List<SearchResult>>) {
                         searchAfter = resultPair.first
-                        mSearchView!!.showResults(resultPair.second)
+                        mSearchView?.showResults(resultPair.second)
                     }
 
                     override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
                         Timber.e(e)
-                        mSearchView!!.showError(e.toString())
+                        mSearchView?.showError(e.toString())
                     }
 
                     override fun onComplete() {
@@ -43,19 +43,19 @@ internal constructor(private val mRedditRepository: RedditRepository) : SearchCo
     }
 
     override fun searchMoreSubreddits() {
-        mSearchView!!.showProgressbar()
+        mSearchView?.showProgressbar()
         disposables.add(mRedditRepository.getMoreSearchResults(searchQuery!!, searchAfter!!)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<Pair<String, List<SearchResult>>>() {
                     override fun onNext(@io.reactivex.annotations.NonNull resultPair: Pair<String, List<SearchResult>>) {
                         searchAfter = resultPair.first
-                        mSearchView!!.showResults(resultPair.second)
+                        mSearchView?.showResults(resultPair.second)
                     }
 
                     override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
                         Timber.e(e)
-                        mSearchView!!.showError(e.toString())
+                        mSearchView?.showError(e.toString())
                     }
 
                     override fun onComplete() {

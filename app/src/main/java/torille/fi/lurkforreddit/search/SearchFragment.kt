@@ -20,15 +20,15 @@ import javax.inject.Inject
 
 class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.View {
 
-    @Inject internal lateinit var mActionsListener: SearchContract.Presenter
+    @Inject internal lateinit var actionsListener: SearchContract.Presenter
 
-    private lateinit var mAdapter: SearchViewAdapter
-    private lateinit var mLayoutManager: LinearLayoutManager
+    private lateinit var adapter: SearchViewAdapter
+    private lateinit var layoutManager: LinearLayoutManager
     private var loading: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mAdapter = SearchViewAdapter(searchClickListener)
+        adapter = SearchViewAdapter(searchClickListener)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -37,10 +37,10 @@ class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.Vi
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mLayoutManager = LinearLayoutManager(context)
-        mLayoutManager.orientation = LinearLayoutManager.VERTICAL
+        layoutManager = LinearLayoutManager(context)
+        layoutManager.orientation = LinearLayoutManager.VERTICAL
 
-        searchRecyclerView.layoutManager = mLayoutManager
+        searchRecyclerView.layoutManager = layoutManager
         searchRecyclerView.setHasFixedSize(true)
         searchRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
@@ -51,21 +51,21 @@ class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.Vi
             override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (dy > 0) {
-                    visibleItemCount = mLayoutManager.childCount
-                    totalItemCount = mLayoutManager.itemCount
-                    pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition()
+                    visibleItemCount = layoutManager.childCount
+                    totalItemCount = layoutManager.itemCount
+                    pastVisiblesItems = layoutManager.findFirstVisibleItemPosition()
 
                     if (!loading && visibleItemCount + pastVisiblesItems >= totalItemCount) {
                         loading = true
                         Timber.d("Last item reached, getting more!")
-                        recyclerView!!.post { mActionsListener.searchMoreSubreddits() }
+                        recyclerView!!.post { actionsListener.searchMoreSubreddits() }
 
                     }
 
                 }
             }
         })
-        searchRecyclerView.adapter = mAdapter
+        searchRecyclerView.adapter = adapter
 
         searchView.queryHint = "Find subreddits..."
         searchView.isIconified = false
@@ -74,7 +74,7 @@ class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.Vi
                 if (!query.isEmpty()) {
                     Timber.d("Going to search for " + query)
                     searchView.clearFocus()
-                    mActionsListener.searchSubreddits(query)
+                    actionsListener.searchSubreddits(query)
                 }
                 return false
             }
@@ -87,26 +87,26 @@ class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.Vi
 
     override fun onDestroy() {
         super.onDestroy()
-        mActionsListener.dropView()
+        actionsListener.dropView()
         Timber.d("Destroyed")
     }
 
     override fun onResume() {
         super.onResume()
-        mActionsListener.takeView(this)
+        actionsListener.takeView(this)
     }
 
     override fun showResults(results: List<SearchResult>) {
         loading = false
-        mAdapter.addResults(results)
+        adapter.addResults(results)
     }
 
     override fun showProgressbar() {
-        mAdapter.addProgressBar()
+        adapter.addProgressBar()
     }
 
     override fun clearResults() {
-        mAdapter.clear()
+        adapter.clear()
     }
 
     override fun showError(errorText: String) {
