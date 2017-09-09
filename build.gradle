@@ -1,15 +1,19 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
+    ext.kotlin_version = '1.1.4-3'
 
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0-beta5'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
+
+
 }
 
 allprojects {
@@ -19,6 +23,7 @@ allprojects {
             url "https://maven.google.com"
         }
     }
+
 }
 
 task clean(type: Delete) {
@@ -29,21 +34,20 @@ ext {
     // Sdk and tools
     minSdkVersion = 21
     targetSdkVersion = 25
-    compileSdkVersion = 25
-    buildToolsVersion = '26.0.0'
+    compileSdkVersion = 26
+    buildToolsVersion = '26.0.1'
 
     // App dependencies
-    supportLibraryVersion = '25.4.0'
+    supportLibraryVersion = '26.0.2'
     constraintVersion = '1.0.2'
     retrofitVersion = '2.3.0'
     okHttpVersion = '3.8.1'
-    autoValueGsonVersion = '0.4.6'
-    autoValueParcelerVersion = '0.2.5'
-    frescoVersion = '1.3.0'
+    paperParcelVersion = '2.0.1'
+    frescoVersion = '1.4.0'
     timberVersion = '4.5.1'
     photoDraweeViewVersion = '1.1.2'
     exoplayerVersion = 'r2.4.0'
-    leakCanaryVersion = '1.5'
+    leakCanaryVersion = '1.5.1'
     gsonVersion = '2.8.1'
     daggerVersion = '2.11'
     rxAndroidVersion = '2.0.1'
@@ -56,5 +60,6 @@ ext {
     hamcrestVersion = '1.3'
     runnerVersion = '0.5'
     rulesVersion = '0.5'
-    espressoVersion = '2.2.2'
+    espressoVersion = '3.0.0'
 }
+

@@ -2,17 +2,17 @@
 <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/refresh_layout"
+    android:id="@+id/refreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/comments_list"
+        android:id="@+id/commentRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorDarkBackground"
         android:scrollbars="vertical"
         app:layoutManager="LinearLayoutManager"
         tools:context=".comments.CommentFragment"
-        tools:listitem="@layout/item_post" />
+        tools:listitem="@layout/item_comment_constraint" />
 </android.support.v4.widget.SwipeRefreshLayout>

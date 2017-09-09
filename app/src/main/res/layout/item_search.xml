@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:foreground="@drawable/list_selector_bound"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:focusable="true">
 
     <TextView
         android:id="@+id/subreddit_title"
