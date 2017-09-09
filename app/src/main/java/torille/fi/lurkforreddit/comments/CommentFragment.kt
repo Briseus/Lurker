@@ -25,16 +25,16 @@ import javax.inject.Inject
  */
 class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.View {
 
-    private lateinit var mCommentAdapter: CommentRecyclerViewAdapter
-    @Inject lateinit var mPost: Post
-    var mIsSingleCommentThread: Boolean = false
+    @Inject lateinit var post: Post
+    @Inject internal lateinit var actionsListener: CommentContract.Presenter
 
-    @Inject internal lateinit var mActionsListener: CommentContract.Presenter
+    private lateinit var commentAdapter: CommentRecyclerViewAdapter
+    private var singleCommentThread: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mIsSingleCommentThread = arguments.getBoolean(ARGUMENT_IS_SINGLE_COMMENT_THREAD, false)
-        mCommentAdapter = CommentRecyclerViewAdapter(setupList(mPost), mClickListener)
+        singleCommentThread = arguments.getBoolean(ARGUMENT_IS_SINGLE_COMMENT_THREAD, false)
+        commentAdapter = CommentRecyclerViewAdapter(setupList(post), mClickListener)
     }
 
     private fun setupList(post: Post): MutableList<Any> {
@@ -45,12 +45,12 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
 
     override fun onResume() {
         super.onResume()
-        mActionsListener.takeView(this)
+        actionsListener.takeView(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mActionsListener.dropView()
+        actionsListener.dropView()
     }
 
     override fun onCreateView(inflater: LayoutInflater,
@@ -67,7 +67,7 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
         commentRecyclerView.setHasFixedSize(true)
         commentRecyclerView.addItemDecoration(CommentsItemDecoration(ContextCompat.getDrawable(context, R.drawable.comment_item_decorator)))
         commentRecyclerView.layoutManager = LinearLayoutManager(context)
-        commentRecyclerView.adapter = mCommentAdapter
+        commentRecyclerView.adapter = commentAdapter
 
 
         refreshLayout.setColorSchemeColors(
@@ -75,24 +75,24 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
                 ContextCompat.getColor(context, R.color.colorAccent),
                 ContextCompat.getColor(context, R.color.colorPrimaryDark))
 
-        refreshLayout.setOnRefreshListener { mActionsListener.loadComments(mPost.permaLink, mIsSingleCommentThread) }
+        refreshLayout.setOnRefreshListener { actionsListener.loadComments(post.permaLink, singleCommentThread) }
     }
 
     override fun showComments(comments: List<Any>) {
-        mCommentAdapter.replaceData(comments)
+        commentAdapter.replaceData(comments)
     }
 
     override fun showProgressbarAt(position: Int, level: Int) {
-        mCommentAdapter.addProgressbar(position, level)
+        commentAdapter.addProgressbar(position, level)
     }
 
     override fun hideProgressbarAt(position: Int) {
-        mCommentAdapter.removeAt(position)
+        commentAdapter.removeAt(position)
     }
 
     override fun addCommentsAt(comments: List<Comment>, position: Int) {
         if (!comments.isEmpty()) {
-            mCommentAdapter.addAllCommentsTo(position, comments)
+            commentAdapter.addAllCommentsTo(position, comments)
         }
     }
 
@@ -101,7 +101,7 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
     }
 
     override fun showErrorAt(position: Int) {
-        mCommentAdapter.changeToErrorAt(position)
+        commentAdapter.changeToErrorAt(position)
     }
 
     override fun setProgressIndicator(active: Boolean) {
@@ -117,7 +117,7 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
      */
     private val mClickListener = object : CommentClickListener {
         override fun onClick(parentComment: Comment, linkId: String, position: Int) {
-            mActionsListener.loadMoreCommentsAt(parentComment, linkId, position)
+            actionsListener.loadMoreCommentsAt(parentComment, linkId, position)
         }
 
         override fun onContinueThreadClick(permaLinkurl: String) {

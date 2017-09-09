@@ -14,5 +14,5 @@
         android:scrollbars="vertical"
         app:layoutManager="LinearLayoutManager"
         tools:context=".comments.CommentFragment"
-        tools:listitem="@layout/item_post" />
+        tools:listitem="@layout/item_comment_constraint" />
 </android.support.v4.widget.SwipeRefreshLayout>

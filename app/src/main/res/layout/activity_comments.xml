@@ -24,7 +24,7 @@
             <com.facebook.drawee.view.SimpleDraweeView
                 android:id="@+id/parallaxImage"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="230dp"
                 android:visibility="visible"
                 app:actualImageScaleType="centerCrop"
                 app:layout_collapseMode="parallax" />
