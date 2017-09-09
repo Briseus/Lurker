@@ -17,5 +17,5 @@
 #}
 
 -dontwarn java.lang.invoke.*
--dontwarn **$$Lambda$*
+-dontwarn com.google.errorprone.annotations.*
 -keep class android.support.v7.widget.ShareActionProvider { *; }
