@@ -32,4 +32,6 @@
     <string name="toast_logout_success">Logged out</string>
 
     <string name="comment_notification">You are viewing a single comment\'s thread</string>
+    <string name="not_found">not found</string>
+    <string name="does_not_exist">Link does not seems to work</string>
 </resources>

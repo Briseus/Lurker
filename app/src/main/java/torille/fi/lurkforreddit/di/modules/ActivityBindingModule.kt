@@ -14,6 +14,7 @@ import torille.fi.lurkforreddit.subreddit.SubredditModule
 import torille.fi.lurkforreddit.subreddit.SubredditPresenterModule
 import torille.fi.lurkforreddit.subreddits.SubredditsActivity
 import torille.fi.lurkforreddit.subreddits.SubredditsPresenterModule
+import torille.fi.lurkforreddit.utils.AppLinkActivity
 
 @Module
 abstract class ActivityBindingModule {
@@ -34,4 +35,7 @@ abstract class ActivityBindingModule {
     @ContributesAndroidInjector(modules = arrayOf(FullscreenPresenterModule::class))
     abstract fun fullscreenActivity(): FullscreenActivity
 
+    @ActivityScoped
+    @ContributesAndroidInjector()
+    abstract fun appLinkActivity(): AppLinkActivity
 }

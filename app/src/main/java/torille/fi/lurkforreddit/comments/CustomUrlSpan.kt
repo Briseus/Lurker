@@ -8,6 +8,7 @@ import timber.log.Timber
 import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.media.FullscreenActivity
 import torille.fi.lurkforreddit.subreddit.SubredditActivity
+import torille.fi.lurkforreddit.utils.AppLinkActivity
 import torille.fi.lurkforreddit.utils.MediaHelper
 import java.util.regex.Pattern
 
@@ -34,8 +35,8 @@ internal class CustomUrlSpan(url: String) : URLSpan(url) {
             }
             checkForReddit(url) -> {
                 Timber.d("Going to checkout subreddit $url")
-                intent = Intent(context, SubredditActivity::class.java)
-                intent.putExtra(SubredditActivity.EXTRA_SUBREDDITNAME, url)
+                intent = Intent(context, AppLinkActivity::class.java)
+                intent.data = Uri.parse(url)
                 context.startActivity(intent)
             }
             else -> super.onClick(widget)
