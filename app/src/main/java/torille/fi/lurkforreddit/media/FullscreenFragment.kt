@@ -160,8 +160,7 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
-                    progressBarHorizontal.progress = 0
-                    progressBarHorizontal.visibility = GONE
+                    progressBarHorizontal.hide()
                     removeMarginTop()
                     videoView.visibility = View.VISIBLE
                 }
@@ -184,7 +183,8 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
     }
 
     override fun showNoVideoFound() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        progressBarHorizontal.hide()
+        notFound.visibility = View.VISIBLE
     }
 
     private fun removeMarginTop() {

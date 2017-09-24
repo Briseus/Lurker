@@ -44,10 +44,10 @@ internal constructor(val post: Post,
                     override fun onNext(@io.reactivex.annotations.NonNull streamableVideo: StreamableVideo) {
                         var videoUrl = "https:"
                         val mobileVideo = streamableVideo.videos.mobileVideo
-                        if (mobileVideo != null) {
-                            videoUrl += mobileVideo.url!!
+                        videoUrl += if (mobileVideo != null) {
+                            mobileVideo.url!!
                         } else {
-                            videoUrl += streamableVideo.videos.video.url!!
+                            streamableVideo.videos.video.url!!
                         }
                         Timber.d("Got streamable with url " + videoUrl)
                         if (videoUrl == "https:") {
