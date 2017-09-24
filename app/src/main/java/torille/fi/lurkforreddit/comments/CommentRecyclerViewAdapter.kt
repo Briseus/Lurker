@@ -14,7 +14,7 @@ import torille.fi.lurkforreddit.data.models.view.Comment
 import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.data.models.view.kind
 
-internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any>, private val mClickListener: CommentFragment.CommentClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any>, private val mClickListener: CommentFragment.CommentClickListener, private val quoteColor: Int) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
@@ -123,7 +123,7 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
         private val flairText: TextView = view.findViewById(R.id.comment_post_flair)
 
         init {
-            selftext.transformationMethod = CustomLinkTransformationMethod()
+            selftext.transformationMethod = CustomLinkTransformationMethod(quoteColor)
             selftext.movementMethod = LinkMovementMethod.getInstance()
             selftext.linksClickable = true
         }
@@ -165,7 +165,7 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
 
         init {
             commentText.linksClickable = true
-            commentText.transformationMethod = CustomLinkTransformationMethod()
+            commentText.transformationMethod = CustomLinkTransformationMethod(quoteColor)
             commentText.movementMethod = LinkMovementMethod.getInstance()
         }
 

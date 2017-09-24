@@ -3,7 +3,6 @@ package torille.fi.lurkforreddit.comments
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
@@ -22,13 +21,15 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
 
     @Inject internal lateinit var post: Post
     @Inject internal lateinit var actionsListener: CommentContract.Presenter
-    @Inject @JvmField var singleCommentThread: Boolean = false
+    @Inject
+    @JvmField
+    var singleCommentThread: Boolean = false
 
     private lateinit var commentAdapter: CommentRecyclerViewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        commentAdapter = CommentRecyclerViewAdapter(setupList(post), mClickListener)
+        commentAdapter = CommentRecyclerViewAdapter(setupList(post), mClickListener, ContextCompat.getColor(context, R.color.colorAccent))
     }
 
     private fun setupList(post: Post): MutableList<Any> {
