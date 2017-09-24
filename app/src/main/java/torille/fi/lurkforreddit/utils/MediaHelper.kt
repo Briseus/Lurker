@@ -29,9 +29,9 @@ object MediaHelper {
             return false
         }
 
-        when (domain) {
-            "gfycat.com", "i.reddituploads.com", "streamable.com" -> return true
-            else -> return false
+        return when {
+            domain == "gfycat.com" || domain == "i.reddituploads.com" || domain == "streamable.com" -> true
+            else -> false
         }
     }
 
