@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.Toast
@@ -148,7 +147,9 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
 
         val loopingSource = LoopingMediaSource(videoSource)
 
-        player.addListener(object : ExoPlayer.EventListener {
+        player.addListener(object : Player.EventListener {
+            override fun onRepeatModeChanged(repeatMode: Int) {}
+
             override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {}
 
             override fun onTracksChanged(trackGroups: TrackGroupArray?, trackSelections: TrackSelectionArray?) {}
