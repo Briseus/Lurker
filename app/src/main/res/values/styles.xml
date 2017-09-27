@@ -10,7 +10,7 @@
         <item name="android:textColorSecondary">@android:color/secondary_text_dark</item>
         <item name="android:textColorTertiary">@android:color/tertiary_text_dark</item>
         <item name="android:itemBackground">@color/colorPrimary</item>
-
+        <item name="android:navigationBarColor">@android:color/black</item>
     </style>
 
     <style name="AppTheme.Launcher" parent="AppTheme">
