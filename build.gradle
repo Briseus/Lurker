@@ -51,7 +51,8 @@ ext {
     gsonVersion = '2.8.2'
     daggerVersion = '2.11'
     rxAndroidVersion = '2.0.1'
-    rxJavaVersion =  '2.1.0'
+    rxJavaVersion =  '2.1.4'
+    rxKotlinVersion =  '2.1.0'
 
     //testing
     junitVersion = '4.12'
