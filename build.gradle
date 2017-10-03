@@ -43,7 +43,7 @@ ext {
     retrofitVersion = '2.3.0'
     okHttpVersion = '3.9.0'
     paperParcelVersion = '2.0.4'
-    frescoVersion = '1.4.0'
+    frescoVersion = '1.5.0'
     timberVersion = '4.5.1'
     photoDraweeViewVersion = '1.1.2'
     exoplayerVersion = 'r2.5.3'
