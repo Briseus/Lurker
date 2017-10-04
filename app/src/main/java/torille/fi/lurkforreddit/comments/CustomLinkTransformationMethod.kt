@@ -29,9 +29,9 @@ internal class CustomLinkTransformationMethod(val color: Int) : TransformationMe
                 text.removeSpan(oldSpan)
                 text.setSpan(CustomUrlSpan(url, color), start, end, flags)
             }
-            val test = text.getSpans(0, view.length(), QuoteSpan::class.java)
-            for (quote in test.indices.reversed()) {
-                val oldSpan = test[quote]
+            val quoteSpan = text.getSpans(0, view.length(), QuoteSpan::class.java)
+            for (quote in quoteSpan.indices.reversed()) {
+                val oldSpan = quoteSpan[quote]
                 val start = text.getSpanStart(oldSpan)
                 val end = text.getSpanEnd(oldSpan)
                 val flags = text.getSpanFlags(oldSpan)
