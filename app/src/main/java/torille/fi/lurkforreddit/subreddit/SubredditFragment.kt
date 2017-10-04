@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -17,7 +16,6 @@ import com.facebook.drawee.backends.pipeline.Fresco
 import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_subreddit.*
 import timber.log.Timber
-import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.comments.CommentActivity
 import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper
@@ -89,7 +87,7 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
                         mListAdapter.prefetchImages(lastFetch, PREFETCH_SIZE, totalItemCount)
                     }
 
-                    if (!refreshing && scrolledItems >= totalItemCount) {
+                    if (!refreshing && scrolledItems >= totalItemCount - 4) {
                         refreshing = true
                         Timber.d("Last item reached, getting more!")
                         recyclerV?.post { mActionsListener.loadMorePosts() }
