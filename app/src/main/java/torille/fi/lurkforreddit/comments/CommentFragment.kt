@@ -11,9 +11,11 @@ import android.view.ViewGroup
 import android.widget.Toast
 import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_comments.*
+import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Comment
 import torille.fi.lurkforreddit.data.models.view.Post
+import torille.fi.lurkforreddit.utils.AppLinkActivity
 import java.util.*
 import javax.inject.Inject
 
@@ -112,9 +114,8 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
         }
 
         override fun onContinueThreadClick(permaLinkurl: String) {
-
-            val intent = Intent(context, CommentActivity::class.java)
-            intent.action = Intent.ACTION_VIEW
+            Timber.d("Opening comments for $permaLinkurl")
+            val intent = Intent(context, AppLinkActivity::class.java)
             intent.data = Uri.parse(permaLinkurl)
             startActivity(intent)
         }
