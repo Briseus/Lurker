@@ -63,7 +63,8 @@ data class PostDetails(
         @SerializedName("link_flair_text")
         val linkFlairText: String?,
         @SerializedName("preview")
-        val images: ImagePreview?
+        val images: ImagePreview?,
+        val media: Media?
 )
 
 /**
@@ -72,4 +73,18 @@ data class PostDetails(
 data class ImagePreview(
         @SerializedName("images")
         val images: List<Image>
+)
+
+data class Media(
+        @SerializedName("reddit_video")
+        val redditVideo: RedditVideo?
+)
+
+data class RedditVideo(
+        @SerializedName("dash_url")
+        val dashUrl: String,
+        @SerializedName("fallback_url")
+        val fallbackUrl: String,
+        @SerializedName("transcoding_status")
+        val transcodingStatus: String
 )

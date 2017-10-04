@@ -147,7 +147,7 @@ object TextHelper {
     val funcFormatPost = Function { postDetails: PostDetails ->
         val formatScore = TextHelper.formatScore(postDetails.score)
         var selfText: CharSequence = ""
-        var previewImageUrl: String = ""
+        var previewImageUrl = ""
         val thumbnail = postDetails.thumbnail
         var title: CharSequence = TextHelper.fromHtml(postDetails.title)
         var flair: Spanned = SpannableStringBuilder.valueOf("")
@@ -176,7 +176,15 @@ object TextHelper {
             }
             else -> previewImageUrl = DisplayHelper.getBestPreviewPicture(postDetails)
         }
-
+        val dashUrl = postDetails.media?.redditVideo?.dashUrl
+        val fallbackUrl = postDetails.media?.redditVideo?.fallbackUrl
+        val url: String = if (!dashUrl.isNullOrEmpty() && postDetails.media?.redditVideo?.transcodingStatus == "completed") {
+            dashUrl!!
+        } else if (!fallbackUrl.isNullOrEmpty()){
+            fallbackUrl!!
+        } else {
+            postDetails.url
+        }
         /*if (postDetails.isOver18()) {
         title = TextHelper.fromHtml("<font color='#FF1744'> NSFW </font>" + postDetails.title());
         }*/
@@ -186,7 +194,7 @@ object TextHelper {
                 id = postDetails.name,
                 thumbnail = thumbnail,
                 domain = postDetails.domain,
-                url = postDetails.url,
+                url = url,
                 score = formatScore,
                 flairText = flair,
                 selfText = selfText,

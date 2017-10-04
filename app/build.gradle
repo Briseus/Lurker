@@ -130,6 +130,7 @@ dependencies {
     // Exoplayer
     implementation "com.google.android.exoplayer:exoplayer-core:$rootProject.ext.exoplayerVersion"
     implementation "com.google.android.exoplayer:exoplayer-ui:$rootProject.ext.exoplayerVersion"
+    implementation "com.google.android.exoplayer:exoplayer-dash:$rootProject.ext.exoplayerVersion"
     implementation "com.google.android.exoplayer:extension-okhttp:$rootProject.ext.exoplayerVersion"
 
     // Because RxAndroid releases are few and far between, it is recommended you also

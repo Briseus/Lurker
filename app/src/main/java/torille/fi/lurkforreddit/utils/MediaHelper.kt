@@ -18,9 +18,9 @@ object MediaHelper {
             return false
         }
 
-        when (TextHelper.getLastFourChars(url)) {
-            ".jpg", ".png", "jpeg", ".gif", ".mp4", "gifv" -> return true
-            else -> return checkDomainForMedia(domain)
+        return when (TextHelper.getLastFourChars(url)) {
+            ".jpg", ".png", "jpeg", ".gif", ".mp4", "gifv" -> true
+            else -> checkDomainForMedia(domain)
         }
     }
 
@@ -29,8 +29,8 @@ object MediaHelper {
             return false
         }
 
-        return when {
-            domain == "gfycat.com" || domain == "i.reddituploads.com" || domain == "streamable.com" -> true
+        return when (domain) {
+            "gfycat.com", "i.reddituploads.com", "streamable.com", "v.redd.it" -> true
             else -> false
         }
     }
@@ -40,9 +40,9 @@ object MediaHelper {
         if (domain == null || domain.isEmpty()) {
             return false
         }
-        when (domain) {
-            "youtube.com", "reddit.com", "youtu.be" -> return true
-            else -> return false
+        return when (domain) {
+            "youtube.com", "reddit.com", "youtu.be" -> true
+            else -> false
         }
     }
 

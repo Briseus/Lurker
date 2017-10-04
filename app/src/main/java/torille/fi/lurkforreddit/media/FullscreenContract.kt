@@ -9,7 +9,7 @@ interface FullscreenContract {
 
         fun showImage(url: String, previewImageUrl: String?)
 
-        fun showVideo(url: String)
+        fun showVideo(url: String, isDash: Boolean = false)
 
         fun checkDomain(url: String)
 

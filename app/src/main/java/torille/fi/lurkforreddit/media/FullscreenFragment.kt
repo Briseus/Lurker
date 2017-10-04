@@ -16,8 +16,9 @@ import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
 import com.google.android.exoplayer2.source.ExtractorMediaSource
-import com.google.android.exoplayer2.source.LoopingMediaSource
 import com.google.android.exoplayer2.source.TrackGroupArray
+import com.google.android.exoplayer2.source.dash.DashMediaSource
+import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray
@@ -38,14 +39,7 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
 
     @Inject lateinit var okHttpClient: OkHttpClient
 
-    private lateinit var player: SimpleExoPlayer
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory(null)
-        val trackSelector = DefaultTrackSelector(videoTrackSelectionFactory)
-        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector)
-    }
+    private var player: SimpleExoPlayer? = null
 
     override fun onResume() {
         super.onResume()
@@ -66,7 +60,7 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
     override fun onStop() {
         super.onStop()
         Timber.d("Stopping")
-        player.stop()
+        player?.stop()
     }
 
     override fun onDestroy() {
@@ -78,7 +72,7 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
 
     private fun releaseVideoPlayer() {
         Timber.d("Destroying player")
-        player.release()
+        player?.release()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -128,26 +122,37 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
         imageView.controller = controller.build()
     }
 
-    override fun showVideo(url: String) {
+    override fun showVideo(url: String, isDash: Boolean) {
         Timber.d("Got url to play $url")
         videoView.visibility = View.INVISIBLE
         val context = context
-
+        val defaultBandwidthMeter = DefaultBandwidthMeter()
         val control = CacheControl.Builder().build()
         val userAgent = Util.getUserAgent(context, getString(R.string.app_name))
         // Produces DataSource instances through which media data is loaded.
         val dataSourceFactory = OkHttpDataSourceFactory(okHttpClient,
-                userAgent, DefaultBandwidthMeter(), control)
-
+                userAgent, defaultBandwidthMeter, control)
         // Produces Extractor instances for parsing the media data.
         val extractorsFactory = DefaultExtractorsFactory()
         // This is the MediaSource representing the media to be played.
-        val videoSource = ExtractorMediaSource(Uri.parse(url),
-                dataSourceFactory, extractorsFactory, null, null)
+        val videoSource = if (isDash)
+            DashMediaSource(
+                    Uri.parse(url),
+                    dataSourceFactory,
+                    DefaultDashChunkSource.Factory(dataSourceFactory),
+                    null, null)
+        else ExtractorMediaSource(
+                Uri.parse(url),
+                dataSourceFactory,
+                extractorsFactory,
+                null, null)
 
-        val loopingSource = LoopingMediaSource(videoSource)
+        val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory(defaultBandwidthMeter)
+        val trackSelector = DefaultTrackSelector(videoTrackSelectionFactory)
+        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector)
 
-        player.addListener(object : Player.EventListener {
+        player!!.repeatMode = Player.REPEAT_MODE_ONE
+        player!!.addListener(object : Player.EventListener {
             override fun onRepeatModeChanged(repeatMode: Int) {}
 
             override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {}
@@ -160,7 +165,7 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
             }
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                if (playbackState == ExoPlayer.STATE_READY) {
+                if (playbackState == Player.STATE_READY) {
                     progressBarHorizontal.hide()
                     removeMarginTop()
                     videoView.visibility = View.VISIBLE
@@ -177,8 +182,8 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
         videoView.player = player
 
         // Prepare the player with the source.
-        player.prepare(loopingSource)
-        player.playWhenReady = true
+        player!!.prepare(videoSource)
+        player!!.playWhenReady = true
 
 
     }
@@ -211,6 +216,10 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
             "i.imgur.com", "imgur.com" -> {
                 Timber.d("Showing imgur")
                 showImage(url + ".jpg", "")
+            }
+            "v.redd.it" -> {
+                Timber.d("Got reddit video domain")
+                showVideo(url)
             }
             else -> showImage(url + ".jpg", null)
         }

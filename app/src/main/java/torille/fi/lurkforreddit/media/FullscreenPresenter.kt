@@ -32,6 +32,9 @@ internal constructor(val post: Post,
             "webm", ".mp4" -> {
                 fullscreenView?.showVideo(post.url)
             }
+            ".mpd" -> {
+                fullscreenView?.showVideo(post.url, true)
+            }
             else -> fullscreenView?.checkDomain(post.url)
         }
     }
