@@ -2,6 +2,7 @@ package torille.fi.lurkforreddit.utils
 
 import android.content.Context
 import io.reactivex.rxkotlin.toObservable
+import timber.log.Timber
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails
 
 /**
@@ -9,7 +10,9 @@ import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails
  */
 
 object DisplayHelper {
-    private var mDisplayDPI: Int = 0
+
+    private var displayDPI: Int = 0
+
     /**
      * @param postDetails model containing data
      * *
@@ -17,17 +20,21 @@ object DisplayHelper {
      */
     fun getBestPreviewPicture(postDetails: PostDetails): String {
         val imagesPreviews = postDetails.images
-        if (imagesPreviews != null) {
-            return imagesPreviews.images[0].resolutions.toObservable()
+        return if (imagesPreviews != null) {
+            imagesPreviews.images[0].resolutions.toObservable()
                     .filter({ imageResolution ->
                         val pictureWidth = imageResolution.width
-                        val result = compareWidth(mDisplayDPI, pictureWidth)
+                        val result = compareWidth(displayDPI, pictureWidth)
+                        Timber.d("Result is $result for ${imageResolution.url}")
                         (result in 0.7..1.3)
                     })
-                    .map { it.url.orEmpty() }
-                    .first("").blockingGet()
+                    .map {
+                        Timber.d("Chose ${it.width}")
+                        it.url.orEmpty()
+                    }
+                    .last("").blockingGet()
         } else {
-            return ""
+            ""
         }
     }
 
@@ -42,6 +49,6 @@ object DisplayHelper {
     }
 
     fun init(context: Context) {
-        mDisplayDPI = getDisplayDPI(context.applicationContext)
+        displayDPI = getDisplayDPI(context.applicationContext)
     }
 }
