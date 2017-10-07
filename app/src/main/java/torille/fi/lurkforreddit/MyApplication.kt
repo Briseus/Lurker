@@ -17,14 +17,14 @@ import javax.inject.Inject
 class MyApplication : DaggerApplication() {
 
     @Inject
-    internal lateinit var mOkHttpClient: OkHttpClient
+    internal lateinit var okHttpClient: OkHttpClient
 
     override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
-        val client_id = resources.getString(R.string.client_id)
+        val clientId = resources.getString(R.string.client_id)
         val appComponent: AppComponent = DaggerAppComponent.builder()
                 .appModule(AppModule(this))
                 .netModule(NetModule())
-                .redditAuthModule(RedditAuthModule(client_id, "https://www.reddit.com/api/v1/"))
+                .redditAuthModule(RedditAuthModule(clientId, "https://www.reddit.com/api/v1/"))
                 .redditModule(RedditModule("https://oauth.reddit.com/"))
                 .streamableModule(StreamableModule("https://api.streamable.com/"))
                 .redditRepositoryModule(RedditRepositoryModule())
@@ -44,7 +44,7 @@ class MyApplication : DaggerApplication() {
         LeakCanary.install(this)
 
         val config = OkHttpImagePipelineConfigFactory
-                .newBuilder(this, mOkHttpClient)
+                .newBuilder(this, okHttpClient)
                 .setResizeAndRotateEnabledForNetwork(true)
                 .setProgressiveJpegConfig(SimpleProgressiveJpegConfig())
                 .setDownsampleEnabled(true)

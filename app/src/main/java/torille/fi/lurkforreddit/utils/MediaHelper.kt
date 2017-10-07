@@ -24,7 +24,7 @@ object MediaHelper {
         }
     }
 
-    fun checkDomainForMedia(domain: String?): Boolean {
+    private fun checkDomainForMedia(domain: String?): Boolean {
         if (domain.isNullOrEmpty()) {
             return false
         }

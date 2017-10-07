@@ -8,27 +8,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Utility class to get stuff from sharedpreferences
+ * Utility class to get values from SharedPreferences
  */
 @Singleton
 class Store @Inject
 constructor(context: Context) {
 
-    private val mSharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+    private val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
 
     var token: String
-        get() = mSharedPreferences.getString(TOKEN, "")
-        set(token) = mSharedPreferences.edit().putString(TOKEN, token).apply()
+        get() = sharedPreferences.getString(TOKEN, "")
+        set(token) = sharedPreferences.edit().putString(TOKEN, token).apply()
 
     var refreshToken: String
-        get() = mSharedPreferences.getString(REFRESH_TOKEN, "")
-        set(token) = mSharedPreferences.edit().putString(REFRESH_TOKEN, token).apply()
+        get() = sharedPreferences.getString(REFRESH_TOKEN, "")
+        set(token) = sharedPreferences.edit().putString(REFRESH_TOKEN, token).apply()
 
     val isLoggedIn: Boolean
-        get() = mSharedPreferences.getBoolean(LOGGED_IN, false)
+        get() = sharedPreferences.getBoolean(LOGGED_IN, false)
 
     fun loggedIn(loggedIn: Boolean?) {
-        mSharedPreferences.edit().putBoolean(LOGGED_IN, loggedIn!!).apply()
+        sharedPreferences.edit().putBoolean(LOGGED_IN, loggedIn!!).apply()
     }
 
     companion object {
