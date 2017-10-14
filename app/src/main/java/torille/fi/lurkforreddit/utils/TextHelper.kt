@@ -25,25 +25,21 @@ object TextHelper {
     }
 
     fun fromHtml(html: String): Spanned {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
         } else {
-            return Html.fromHtml(html)
+            Html.fromHtml(html)
         }
     }
 
     fun formatScore(score: Int): String {
         val value = score.toString()
-        if (score < 1000) {
-            return value
-        } else if (score < 10000) {
-            return value[0] + "." + value[1] + "k"
-        } else if (score < 100000) {
-            return value[0] + "" + value[1] + "k"
-        } else if (score < 10000000) {
-            return value[0] + "" + value[1] + "" + value[2] + "k"
-        } else {
-            return value
+        return when {
+            score < 1000 -> value
+            score < 10000 -> value[0] + "." + value[1] + "k"
+            score < 100000 -> value[0] + "" + value[1] + "k"
+            score < 10000000 -> value[0] + "" + value[1] + "" + value[2] + "k"
+            else -> value
         }
     }
 
@@ -53,8 +49,8 @@ object TextHelper {
                 .subscribeOn(Schedulers.computation())
                 .map { Observable.fromIterable(it) }
                 .concatMap { commentChildObservable -> formatCommentData(commentChildObservable, level) }
-                .collectInto(comments) { _, comments2 ->
-                    comments.addAll(comments2)
+                .collectInto(comments) { _, newComments ->
+                    comments.addAll(newComments)
                 }
                 .blockingGet()
     }
@@ -87,13 +83,13 @@ object TextHelper {
                     var author: CharSequence = ""
                     var kind: kind = kind.MORE
 
-                    if (it.bodyHtml.isNotEmpty()) {
-                        kind = torille.fi.lurkforreddit.data.models.view.kind.DEFAULT
-                        commentText = formatTextToHtml(it.bodyHtml)
-                    } else if (it.id == "_") {
-                        commentText = "Continue this thread"
-                    } else if (it.children.isNotEmpty()) {
-                        commentText = "Load more comments (" + it.count + ")"
+                    when {
+                        it.bodyHtml.isNotEmpty() -> {
+                            kind = torille.fi.lurkforreddit.data.models.view.kind.DEFAULT
+                            commentText = formatTextToHtml(it.bodyHtml)
+                        }
+                        it.id == "_" -> commentText = "Continue this thread"
+                        it.children.isNotEmpty() -> commentText = "Load more comments (" + it.count + ")"
                     }
 
                     val responseAuthor = it.author
@@ -134,12 +130,10 @@ object TextHelper {
                         Observable.fromArray(commentChildList)
                                 .map { commentChildren -> Observable.fromIterable(commentChildren) }
                                 .concatMap { commentChildObservable2 -> formatCommentData(commentChildObservable2, level + 1) }
-                                .collectInto<List<Comment>>(commentList) { comments1, comments2 -> commentList.addAll(comments2) }
-                                .map { _ ->
-                                    commentList
-                                }.blockingGet()
+                                .collectInto<List<Comment>>(commentList) { _, newComments -> commentList.addAll(newComments) }
+                                .blockingGet()
                     } else {
-                        Arrays.asList(formattedComment)
+                        listOf(formattedComment)
                     }
                 }
     }
@@ -180,7 +174,7 @@ object TextHelper {
         val fallbackUrl = postDetails.media?.redditVideo?.fallbackUrl
         val url: String = if (!dashUrl.isNullOrEmpty() && postDetails.media?.redditVideo?.transcodingStatus == "completed") {
             dashUrl!!
-        } else if (!fallbackUrl.isNullOrEmpty()){
+        } else if (!fallbackUrl.isNullOrEmpty()) {
             fallbackUrl!!
         } else {
             postDetails.url
@@ -240,8 +234,8 @@ object TextHelper {
             Observable.zip<Subreddit, SubredditChildren, SearchResult>(
                     formatSubreddit(subredditChildObservable),
                     subredditChildObservable,
-                    io.reactivex.functions.BiFunction({
-                        subreddit: Subreddit, subredditChild: SubredditChildren ->
+                    io.reactivex.functions.BiFunction({ subreddit: Subreddit, subredditChild: SubredditChildren ->
+
                         val subredditResponse = subredditChild.subreddit
                         val descriptionHtml = subredditResponse.descriptionHtml
 
@@ -251,22 +245,22 @@ object TextHelper {
 
                         val infoText = subredditResponse.subscribers.toString() + " subscribers, Community since " + DateUtils.getRelativeTimeSpanString(subredditResponse.createdUtc * 1000)
 
-                        if (subredditResponse.over18) {
-                            formattedTitle = TextHelper.fromHtml(subredditResponse.url + "<font color='#FF1744'> NSFW</font>")
+                        formattedTitle = if (subredditResponse.over18) {
+                            TextHelper.fromHtml(subredditResponse.url + "<font color='#FF1744'> NSFW</font>")
                         } else {
-                            formattedTitle = subredditResponse.url
+                            subredditResponse.url
                         }
 
-                        if (subredditResponse.subscribed) {
-                            formattedSubscription = "Subscribed"
+                        formattedSubscription = if (subredditResponse.subscribed) {
+                            "Subscribed"
                         } else {
-                            formattedSubscription = "Not subscribed"
+                            "Not subscribed"
                         }
 
-                        if (!descriptionHtml.isNullOrEmpty()) {
-                            formattedDescription = formatTextToHtml(descriptionHtml)
+                        formattedDescription = if (!descriptionHtml.isNullOrEmpty()) {
+                            formatTextToHtml(descriptionHtml)
                         } else {
-                            formattedDescription = "No description"
+                            "No description"
                         }
 
                         SearchResult(
@@ -311,7 +305,7 @@ object TextHelper {
         return source.subSequence(0, i + 1)
     }
 
-    fun formatTextToHtml(bodyText: String?): CharSequence {
+    private fun formatTextToHtml(bodyText: String?): CharSequence {
         if (bodyText == null) {
             return ""
         }
