@@ -49,23 +49,23 @@ object MediaHelper {
     fun createCustomTabIntent(context: Context,
                               session: CustomTabsSession): CustomTabsIntent {
 
-        return io.reactivex.Observable.fromArray(session)
-                .map { CustomTabsIntent.Builder(it) }
-                .map { intentBuilder ->
-                    val toolbarColor = ContextCompat.getColor(context, R.color.colorPrimary)
-                    val secondaryColor = ContextCompat.getColor(context, R.color.colorPrimaryDark)
-                    intentBuilder.setToolbarColor(toolbarColor)
-                    intentBuilder.setSecondaryToolbarColor(secondaryColor)
+        val intentBuilder = CustomTabsIntent.Builder(session)
 
-                    intentBuilder.addDefaultShareMenuItem()
-                    intentBuilder.enableUrlBarHiding()
-                    intentBuilder.setShowTitle(true)
+        val toolbarColor = ContextCompat.getColor(context, R.color.colorPrimary)
+        val secondaryColor = ContextCompat.getColor(context, R.color.colorPrimaryDark)
 
-                    intentBuilder.setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left)
-                    intentBuilder.setExitAnimations(context, android.R.anim.slide_in_left,
-                            android.R.anim.slide_out_right)
-                    intentBuilder.build()
-                }.blockingFirst()
+        intentBuilder.setToolbarColor(toolbarColor)
+        intentBuilder.setSecondaryToolbarColor(secondaryColor)
 
+        intentBuilder.addDefaultShareMenuItem()
+        intentBuilder.enableUrlBarHiding()
+        intentBuilder.setShowTitle(true)
+        intentBuilder.setInstantAppsEnabled(true)
+
+        intentBuilder.setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left)
+        intentBuilder.setExitAnimations(context, android.R.anim.slide_in_left,
+                android.R.anim.slide_out_right)
+
+        return intentBuilder.build()
     }
 }

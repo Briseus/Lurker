@@ -34,7 +34,7 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
     @Inject internal lateinit var store: Store
     @Inject internal lateinit var redditAuthApi: RedditService.Auth
 
-    private val customTabActivityHelper = CustomTabActivityHelper()
+    private val customTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
     private val disposables = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -196,6 +196,7 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             startActivity(intent)
         }
+
     }
 
     companion object {

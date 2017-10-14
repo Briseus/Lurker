@@ -33,7 +33,7 @@ import javax.inject.Inject
  */
 class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContract.View {
 
-    private val mCustomTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
+    private val customTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
     private var refreshing: Boolean = false
 
     private lateinit var mListAdapter: PostsAdapter
@@ -115,13 +115,13 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
 
     override fun onStart() {
         super.onStart()
-        mCustomTabActivityHelper.bindCustomTabsService(activity)
+        customTabActivityHelper.bindCustomTabsService(activity)
     }
 
     override fun onStop() {
         super.onStop()
         setProgressIndicator(false)
-        mCustomTabActivityHelper.unbindCustomTabsService(activity)
+        customTabActivityHelper.unbindCustomTabsService(activity)
     }
 
     override fun onDestroy() {
@@ -174,7 +174,7 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
     override fun showCustomTabsUI(url: String) {
         CustomTabActivityHelper.openCustomTab(activity,
                 MediaHelper.createCustomTabIntent(activity,
-                        mCustomTabActivityHelper.session),
+                        customTabActivityHelper.session),
                 url
         ) { _, _ ->
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
