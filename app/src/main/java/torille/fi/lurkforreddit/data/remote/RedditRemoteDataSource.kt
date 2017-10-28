@@ -26,16 +26,16 @@ import javax.inject.Inject
  */
 @Remote
 class RedditRemoteDataSource @Inject
-internal constructor(private val mRedditApi: RedditService.Reddit,
-                     private val mSettingsStore: Store,
-                     private val mCommentsStreamingParser: CommentsStreamingParser) : RedditDataSource {
+internal constructor(private val redditApi: RedditService.Reddit,
+                     private val store: Store,
+                     private val commentsStreamingParser: CommentsStreamingParser) : RedditDataSource {
 
     override fun getSubreddits(): Observable<List<Subreddit>> {
         Timber.d("Fetching subs!")
         val subreddits: Observable<SubredditListing>
-        if (mSettingsStore.isLoggedIn) {
+        if (store.isLoggedIn) {
             Timber.d("Was logged in, getting personal subreddits")
-            subreddits = mRedditApi.getMySubreddits(200)
+            subreddits = redditApi.getMySubreddits(200)
 
             return Observable.zip(fetchSubreddits(subreddits), getUserMultireddits(),
                     BiFunction({
@@ -46,7 +46,7 @@ internal constructor(private val mRedditApi: RedditService.Reddit,
                     .observeOn(AndroidSchedulers.mainThread())
         } else {
             Timber.d("Was not logged in, getting default subreddits")
-            subreddits = mRedditApi.getDefaultSubreddits(100)
+            subreddits = redditApi.getDefaultSubreddits(100)
 
             return fetchSubreddits(subreddits)
                     .observeOn(AndroidSchedulers.mainThread())
@@ -54,14 +54,14 @@ internal constructor(private val mRedditApi: RedditService.Reddit,
     }
 
     override fun getSubredditPosts(subredditUrl: String): Observable<Pair<String, List<Post>>> {
-        return mRedditApi
+        return redditApi
                 .getSubreddit(subredditUrl)
                 .observeOn(Schedulers.computation())
                 .map(funcFormatPostData)
     }
 
     override fun getMoreSubredditPosts(subredditUrl: String, nextpageId: String): Observable<Pair<String, List<Post>>> {
-        return mRedditApi.getSubredditNextPage(subredditUrl, nextpageId)
+        return redditApi.getSubredditNextPage(subredditUrl, nextpageId)
                 .observeOn(Schedulers.computation())
                 .map(funcFormatPostData)
     }
@@ -72,12 +72,12 @@ internal constructor(private val mRedditApi: RedditService.Reddit,
 
     override fun getCommentsForPost(permaLinkUrl: String,
                                     isSingleCommentThread: Boolean): Observable<PostAndComments> {
-        return mRedditApi.getComments(permaLinkUrl)
+        return redditApi.getComments(permaLinkUrl)
                 .map { responseBody ->
                     responseBody.byteStream().use { stream ->
                         InputStreamReader(stream, "UTF-8").use { input ->
                             JsonReader(input).use { reader ->
-                                mCommentsStreamingParser.readCommentListingArray(reader)
+                                commentsStreamingParser.readCommentListingArray(reader)
                             }
                         }
                     }
@@ -95,15 +95,17 @@ internal constructor(private val mRedditApi: RedditService.Reddit,
     override fun getMoreCommentsForPostAt(childCommentIds: List<String>,
                                           linkId: String,
                                           commentLevel: Int): Observable<List<Comment>> {
-        return mRedditApi.getMoreComments(linkId,
-                TextUtils.join(",", childCommentIds),
-                "json")
+        return redditApi.getMoreComments(linkId,
+                TextUtils.join(
+                        ",",
+                        childCommentIds),
+                        "json")
                 .observeOn(Schedulers.computation())
                 .map { responseBody ->
                     responseBody.byteStream().use { stream ->
                         InputStreamReader(stream, "UTF-8").use { input ->
                             JsonReader(input).use { reader ->
-                                mCommentsStreamingParser.readMoreComments(reader)
+                                commentsStreamingParser.readMoreComments(reader)
                             }
                         }
                     }
@@ -113,19 +115,19 @@ internal constructor(private val mRedditApi: RedditService.Reddit,
 
     override fun getSearchResults(query: String): Observable<Pair<String, List<SearchResult>>> {
 
-        return mRedditApi.searchSubreddits(query, "relevance")
+        return redditApi.searchSubreddits(query, "relevance")
                 .observeOn(Schedulers.computation())
                 .map(formatSearchData)
     }
 
     override fun getMoreSearchResults(query: String, after: String): Observable<Pair<String, List<SearchResult>>> {
-        return mRedditApi.searchSubredditsNextPage(query, "relevance", after)
+        return redditApi.searchSubredditsNextPage(query, "relevance", after)
                 .observeOn(Schedulers.computation())
                 .map(formatSearchData)
     }
 
     fun getUserMultireddits(): Observable<List<Subreddit>> {
-        return mRedditApi.getUserMultireddits()
+        return redditApi.getUserMultireddits()
                 .observeOn(Schedulers.computation())
                 .map { multiredditListingArray ->
                     multiredditListingArray.map { (multireddit) ->
