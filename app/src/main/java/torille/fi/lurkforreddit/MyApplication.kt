@@ -3,6 +3,7 @@ package torille.fi.lurkforreddit
 import android.content.ComponentCallbacks2
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory
+import com.facebook.imagepipeline.core.DefaultExecutorSupplier
 import com.facebook.imagepipeline.decoder.SimpleProgressiveJpegConfig
 import com.squareup.leakcanary.LeakCanary
 import dagger.android.AndroidInjector
@@ -45,9 +46,11 @@ class MyApplication : DaggerApplication() {
 
         val config = OkHttpImagePipelineConfigFactory
                 .newBuilder(this, okHttpClient)
-                .setResizeAndRotateEnabledForNetwork(true)
+                .setResizeAndRotateEnabledForNetwork(false)
                 .setProgressiveJpegConfig(SimpleProgressiveJpegConfig())
                 .setDownsampleEnabled(true)
+                .setExecutorSupplier(DefaultExecutorSupplier(Runtime.getRuntime().availableProcessors()))
+                .experiment().setWebpSupportEnabled(true)
                 .build()
 
         Fresco.initialize(this, config)
