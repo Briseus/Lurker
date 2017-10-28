@@ -11,7 +11,6 @@ import android.view.MenuItem
 import android.view.View
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_fullscreen.*
-import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Post
 import javax.inject.Inject

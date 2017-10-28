@@ -1,20 +1,13 @@
 package torille.fi.lurkforreddit.di.components
 
-import android.app.Application
-import com.google.gson.Gson
-import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector
 import dagger.android.DaggerApplication
 import dagger.android.support.AndroidSupportInjectionModule
-import okhttp3.OkHttpClient
 import torille.fi.lurkforreddit.MyApplication
 import torille.fi.lurkforreddit.RedditRepositoryModule
 import torille.fi.lurkforreddit.data.RedditRepository
-import torille.fi.lurkforreddit.data.RedditService
-import torille.fi.lurkforreddit.data.VideositeService
 import torille.fi.lurkforreddit.di.modules.*
-import torille.fi.lurkforreddit.utils.Store
 import javax.inject.Singleton
 
 

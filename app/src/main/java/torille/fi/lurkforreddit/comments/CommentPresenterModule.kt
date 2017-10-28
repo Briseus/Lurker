@@ -7,7 +7,6 @@ import dagger.android.ContributesAndroidInjector
 import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.di.scope.ActivityScoped
 import torille.fi.lurkforreddit.di.scope.FragmentScoped
-import javax.annotation.Nullable
 
 @Module
 abstract class CommentPresenterModule {
