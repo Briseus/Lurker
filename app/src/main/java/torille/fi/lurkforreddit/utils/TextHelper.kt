@@ -24,7 +24,7 @@ object TextHelper {
         return url.substring(url.length - 4)
     }
 
-    fun fromHtml(html: String): Spanned {
+    private fun fromHtml(html: String): Spanned {
         return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
         } else {
@@ -32,7 +32,7 @@ object TextHelper {
         }
     }
 
-    fun formatScore(score: Int): String {
+    private fun formatScore(score: Int): String {
         val value = score.toString()
         return when {
             score < 1000 -> value
@@ -276,40 +276,11 @@ object TextHelper {
         }
     }
 
-    /**
-     * Trims trailing whitespace. Removes any of these characters:
-     * 0009, HORIZONTAL TABULATION
-     * 000A, LINE FEED
-     * 000B, VERTICAL TABULATION
-     * 000C, FORM FEED
-     * 000D, CARRIAGE RETURN
-     * 001C, FILE SEPARATOR
-     * 001D, GROUP SEPARATOR
-     * 001E, RECORD SEPARATOR
-     * 001F, UNIT SEPARATOR
-
-     * @return "" if source is null, otherwise string with all trailing whitespace removed
-     */
-
-    private fun trimTrailingWhitespace(source: CharSequence?): CharSequence {
-
-        if (source == null)
-            return ""
-
-        var i = source.length
-
-        // loop back to the first non-whitespace character
-        while (--i >= 0 && Character.isWhitespace(source[i])) {
-        }
-
-        return source.subSequence(0, i + 1)
-    }
-
     private fun formatTextToHtml(bodyText: String?): CharSequence {
         if (bodyText == null) {
             return ""
         }
         val htmlText = fromHtml(bodyText)
-        return trimTrailingWhitespace(htmlText)
+        return htmlText.trim()
     }
 }
