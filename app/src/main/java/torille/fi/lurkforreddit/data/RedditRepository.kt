@@ -10,17 +10,18 @@ import javax.inject.Singleton
 class RedditRepository @Inject
 constructor(@Remote private val mRedditRemoteApi: RedditDataSource) : RedditDataSource {
 
-    private var mCachedSubreddits: List<Subreddit> = emptyList()
+    private var cachedSubreddits: List<Subreddit> = emptyList()
 
     override fun getSubreddits(): Observable<List<Subreddit>> {
-        if (mCachedSubreddits.isEmpty()) {
-            return mRedditRemoteApi.getSubreddits()
+        return if (cachedSubreddits.isEmpty()) {
+            mRedditRemoteApi.getSubreddits()
                     .flatMap { subreddits ->
+                        cachedSubreddits = subreddits
                         Observable.fromArray(subreddits)
-                                .doOnNext { subreddits1 -> mCachedSubreddits = subreddits1 }
+                                .doOnNext { list -> cachedSubreddits = list }
                     }
         } else {
-            return Observable.fromArray(mCachedSubreddits)
+            Observable.fromArray(cachedSubreddits)
         }
     }
 
@@ -33,7 +34,7 @@ constructor(@Remote private val mRedditRemoteApi: RedditDataSource) : RedditData
     }
 
     override fun refreshData() {
-        mCachedSubreddits = emptyList()
+        cachedSubreddits = emptyList()
     }
 
     override fun getCommentsForPost(permaLinkUrl: String, isSingleCommentThread: Boolean): Observable<PostAndComments> {
