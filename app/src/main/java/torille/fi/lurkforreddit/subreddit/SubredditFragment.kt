@@ -46,7 +46,7 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
         super.onCreate(savedInstanceState)
         mListAdapter = PostsAdapter(mClickListener,
                 Fresco.getImagePipeline())
-        DisplayHelper.init(context)
+        DisplayHelper.init(context!!)
 
     }
 
@@ -54,9 +54,9 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
         return inflater.inflate(R.layout.fragment_subreddit, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        val context = context!!
         mLayoutManager = LinearLayoutManager(context)
         mLayoutManager.orientation = LinearLayoutManager.VERTICAL
 
@@ -173,7 +173,7 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
 
     override fun showCustomTabsUI(url: String) {
         CustomTabActivityHelper.openCustomTab(activity,
-                MediaHelper.createCustomTabIntent(activity,
+                MediaHelper.createCustomTabIntent(activity!!,
                         customTabActivityHelper.session),
                 url
         ) { _, _ ->

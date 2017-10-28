@@ -31,7 +31,7 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        commentAdapter = CommentRecyclerViewAdapter(setupList(post), mClickListener, ContextCompat.getColor(context, R.color.colorAccent))
+        commentAdapter = CommentRecyclerViewAdapter(setupList(post), mClickListener, ContextCompat.getColor(context!!, R.color.colorAccent))
     }
 
     private fun setupList(post: Post): MutableList<Any> {
@@ -57,12 +57,12 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
         return inflater.inflate(R.layout.fragment_comments, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val context = context
+        val context = context!!
 
         commentRecyclerView.setHasFixedSize(true)
-        commentRecyclerView.addItemDecoration(CommentsItemDecoration(ContextCompat.getDrawable(context, R.drawable.comment_item_decorator)))
+        commentRecyclerView.addItemDecoration(CommentsItemDecoration(ContextCompat.getDrawable(context, R.drawable.comment_item_decorator)!!))
         commentRecyclerView.layoutManager = LinearLayoutManager(context)
         commentRecyclerView.adapter = commentAdapter
 

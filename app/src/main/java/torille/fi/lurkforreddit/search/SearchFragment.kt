@@ -35,7 +35,7 @@ class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.Vi
         return inflater.inflate(R.layout.fragment_search, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         layoutManager = LinearLayoutManager(context)
         layoutManager.orientation = LinearLayoutManager.VERTICAL

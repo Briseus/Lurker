@@ -28,7 +28,7 @@ internal constructor(private val mRedditRepository: RedditRepository) : SearchCo
                 .subscribeWith(object : DisposableObserver<Pair<String, List<SearchResult>>>() {
                     override fun onNext(@io.reactivex.annotations.NonNull resultPair: Pair<String, List<SearchResult>>) {
                         searchAfter = resultPair.first
-                        mSearchView?.showResults(resultPair.second)
+                        mSearchView?.showResults(resultPair.second!!)
                     }
 
                     override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
@@ -50,7 +50,7 @@ internal constructor(private val mRedditRepository: RedditRepository) : SearchCo
                 .subscribeWith(object : DisposableObserver<Pair<String, List<SearchResult>>>() {
                     override fun onNext(@io.reactivex.annotations.NonNull resultPair: Pair<String, List<SearchResult>>) {
                         searchAfter = resultPair.first
-                        mSearchView?.showResults(resultPair.second)
+                        mSearchView?.showResults(resultPair.second!!)
                     }
 
                     override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {

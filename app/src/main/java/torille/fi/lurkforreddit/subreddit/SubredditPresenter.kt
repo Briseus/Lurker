@@ -58,7 +58,7 @@ internal constructor(private val mRedditRepository: RedditRepository,
                     override fun onNext(@io.reactivex.annotations.NonNull posts: Pair<String, List<Post>>) {
                         Timber.d("Got posts to presenter")
                         nextPageId = posts.first
-                        mSubredditsView?.showPosts(posts.second, posts.first)
+                        mSubredditsView?.showPosts(posts.second!!, posts.first!!)
                     }
 
                     override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
@@ -94,7 +94,7 @@ internal constructor(private val mRedditRepository: RedditRepository,
                         override fun onNext(@io.reactivex.annotations.NonNull postsPair: Pair<String, List<Post>>) {
                             nextPageId = postsPair.first
                             mSubredditsView?.setListProgressIndicator(false)
-                            mSubredditsView?.addMorePosts(postsPair.second, postsPair.first)
+                            mSubredditsView?.addMorePosts(postsPair.second!!, postsPair.first!!)
 
                         }
 

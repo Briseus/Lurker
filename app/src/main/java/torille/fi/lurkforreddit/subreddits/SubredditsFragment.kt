@@ -29,7 +29,7 @@ class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsCon
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        subredditsAdapter = SubredditsAdapter(mItemListener, ContextCompat.getColor(context, R.color.colorAccent))
+        subredditsAdapter = SubredditsAdapter(mItemListener, ContextCompat.getColor(context!!, R.color.colorAccent))
     }
 
     override fun onResume() {
@@ -48,9 +48,9 @@ class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsCon
         return inflater.inflate(R.layout.fragment_subreddits, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val context = context
+        val context = context!!
         subRecyclerView.adapter = subredditsAdapter
         subRecyclerView.setHasFixedSize(true)
         subRecyclerView.layoutManager = LinearLayoutManager(context)
