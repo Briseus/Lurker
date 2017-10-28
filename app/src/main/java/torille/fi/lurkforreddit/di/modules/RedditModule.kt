@@ -3,7 +3,6 @@ package torille.fi.lurkforreddit.di.modules
 import dagger.Module
 import dagger.Provides
 import okhttp3.*
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -19,21 +18,21 @@ import javax.inject.Singleton
  * Provides retrofit for Reddit API
  */
 @Module
-class RedditModule(private val mBaseUrl: String) {
+class RedditModule(private val baseUrl: String) {
 
     @Provides
     @Singleton
     @Named("rawJson")
     internal fun providesRawJsonInterceptor(): Interceptor {
         return Interceptor { chain ->
-            val original = chain.request()
-            val originalHttpUrl = original.url()
+            val originalRequest = chain.request()
+            val originalHttpUrl = originalRequest.url()
 
             val url = originalHttpUrl.newBuilder()
                     .addQueryParameter("raw_json", "1")
                     .build()
 
-            val requestBuilder = original.newBuilder()
+            val requestBuilder = originalRequest.newBuilder()
                     .url(url)
 
             val request = requestBuilder.build()
@@ -49,9 +48,7 @@ class RedditModule(private val mBaseUrl: String) {
         return Interceptor { chain ->
             val original = chain.request()
 
-            if (original.header("Authorization") != null) {
-                chain.proceed(original)
-            } else {
+            if (original.header("Authorization").isNullOrBlank()) {
                 var token: String = store.token
 
                 if (token.isEmpty()) {
@@ -66,6 +63,8 @@ class RedditModule(private val mBaseUrl: String) {
 
                 val request = requestBuilder.build()
                 chain.proceed(request)
+            } else {
+                chain.proceed(original)
             }
         }
     }
@@ -93,10 +92,8 @@ class RedditModule(private val mBaseUrl: String) {
             }
 
             internal fun responseCount(response: Response): Int {
-                @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
-                var newResponse: Response? = response
                 var result = 1
-                while ({ newResponse = response.priorResponse(); newResponse }() != null) {
+                while (response == response.priorResponse()) {
                     result++
                 }
                 return result
@@ -108,8 +105,6 @@ class RedditModule(private val mBaseUrl: String) {
     @Singleton
     internal fun providesRedditService(gsonConverterFactory: GsonConverterFactory,
                                        okHttpClient: OkHttpClient,
-                                       cache: Cache,
-                                       logger: HttpLoggingInterceptor,
                                        rxJava2CallAdapterFactory: RxJava2CallAdapterFactory,
                                        authenticator: Authenticator,
                                        @Named("rawJson") rawJsonInterceptor: Interceptor,
@@ -118,13 +113,11 @@ class RedditModule(private val mBaseUrl: String) {
 
 
         val retrofit = Retrofit.Builder()
-                .baseUrl(mBaseUrl)
+                .baseUrl(baseUrl)
                 .addConverterFactory(gsonConverterFactory)
                 .addCallAdapterFactory(rxJava2CallAdapterFactory)
                 .client(okHttpClient
                         .newBuilder()
-                        .cache(cache)
-                        .addInterceptor(logger)
                         .addInterceptor(rawJsonInterceptor)
                         .addNetworkInterceptor(tokenInterceptor)
                         .authenticator(authenticator)
