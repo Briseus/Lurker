@@ -1,7 +1,5 @@
 package torille.fi.lurkforreddit.di.modules
 
-import javax.inject.Singleton
-
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -10,12 +8,13 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import torille.fi.lurkforreddit.data.VideositeService
+import javax.inject.Singleton
 
 /**
  * Provide module for streamable videos
  */
 @Module
-class StreamableModule(private val mBaseUrl: String) {
+class StreamableModule(private val baseUrl: String) {
 
     @Singleton
     @Provides
@@ -24,7 +23,7 @@ class StreamableModule(private val mBaseUrl: String) {
                                       loggingInterceptor: HttpLoggingInterceptor,
                                       rxJava2CallAdapterFactory: RxJava2CallAdapterFactory): VideositeService.Streamable {
         val retrofit = Retrofit.Builder()
-                .baseUrl(mBaseUrl)
+                .baseUrl(baseUrl)
                 .addConverterFactory(gsonConverterFactory)
                 .addCallAdapterFactory(rxJava2CallAdapterFactory)
                 .client(okHttpClient.newBuilder()

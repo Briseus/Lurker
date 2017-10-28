@@ -2,11 +2,9 @@ package torille.fi.lurkforreddit.di.modules
 
 import dagger.Module
 import dagger.Provides
-import okhttp3.Cache
 import okhttp3.Credentials
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -19,26 +17,23 @@ import javax.inject.Singleton
  * Dagger 2 Module for Reddit Auth API
  */
 @Module
-class RedditAuthModule(private val mClientId: String, private val mBaseUrl: String) {
+class RedditAuthModule(private val clientId: String, private val baseUrl: String) {
 
     @Provides
     @Singleton
     internal fun providesRedditService(gsonConverterFactory: GsonConverterFactory,
                                        rxJava2CallAdapterFactory: RxJava2CallAdapterFactory,
-                                       okHttpClient: OkHttpClient,
-                                       cache: Cache,
-                                       logger: HttpLoggingInterceptor): RedditService.Auth {
+                                       okHttpClient: OkHttpClient): RedditService.Auth {
 
-        val basic = Credentials.basic(mClientId, "")
-
+        val basic = Credentials.basic(clientId, "")
 
         val authHeader = Interceptor { chain ->
-            val original = chain.request()
+            val originalRequest = chain.request()
 
-            val requestBuilder = original.newBuilder()
+            val requestBuilder = originalRequest.newBuilder()
                     .header("Authorization", basic)
                     .header("Accept", "application/json")
-                    .method(original.method(), original.body())
+                    .method(originalRequest.method(), originalRequest.body())
 
             val request = requestBuilder.build()
             chain.proceed(request)
@@ -46,13 +41,11 @@ class RedditAuthModule(private val mClientId: String, private val mBaseUrl: Stri
 
         val okHttpInstance = okHttpClient
                 .newBuilder()
-                .cache(cache)
-                .addNetworkInterceptor(logger)
                 .addNetworkInterceptor(authHeader)
                 .build()
 
         val retrofit = Retrofit.Builder()
-                .baseUrl(mBaseUrl)
+                .baseUrl(baseUrl)
                 .addConverterFactory(gsonConverterFactory)
                 .addCallAdapterFactory(rxJava2CallAdapterFactory)
                 .client(okHttpInstance)

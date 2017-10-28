@@ -48,9 +48,11 @@ class NetModule {
 
     @Provides
     @Singleton
-    internal fun provideOkHttpClient(cache: Cache): OkHttpClient {
+    internal fun provideOkHttpClient(cache: Cache,
+                                     loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
                 .cache(cache)
+                .addNetworkInterceptor(loggingInterceptor)
                 .build()
     }
 
