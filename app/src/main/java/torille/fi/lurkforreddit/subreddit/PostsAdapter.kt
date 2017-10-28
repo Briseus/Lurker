@@ -26,18 +26,18 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
     init {
         posts = SortedList(Post::class.java, object : SortedListAdapterCallback<Post>(this) {
             override fun compare(o1: Post, o2: Post): Int {
-                if (o1.id === o2.id) {
+                if (o1.id == o2.id) {
                     return 0
                 }
                 return -1
             }
 
             override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
-                return oldItem === newItem
+                return oldItem == newItem
             }
 
             override fun areItemsTheSame(item1: Post, item2: Post): Boolean {
-                return item1.id === item2.id
+                return item1.id == item2.id
             }
         }, 25)
     }
@@ -116,11 +116,10 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
      * that is used in the progressbar
      */
     internal fun setRefreshing(active: Boolean) {
-        val index = getIndex()
         if (active) {
             posts.add(createPost(PROGRESSBAR))
         } else {
-            posts.removeItemAt(index)
+            posts.removeItemAt(getIndex())
         }
 
     }
@@ -154,14 +153,14 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
 
     internal inner class PostViewHolder(postView: View) : RecyclerView.ViewHolder(postView) {
 
-        val title: TextView = postView.findViewById(R.id.post_title)
-        val domain: TextView = postView.findViewById(R.id.post_domain)
-        val flair: TextView = postView.findViewById(R.id.post_flair)
-        val comments: Button = postView.findViewById(R.id.post_messages)
-        val openBrowser: Button = postView.findViewById(R.id.post_open_browser)
-        val image: SimpleDraweeView = postView.findViewById(R.id.post_image)
-        val baseControllerListener: BaseControllerListener<ImageInfo>
-        val onClickListener: View.OnClickListener = View.OnClickListener { mClicklistener.onMediaClick(getItem(adapterPosition)) }
+        private val title: TextView = postView.findViewById(R.id.post_title)
+        private val domain: TextView = postView.findViewById(R.id.post_domain)
+        private val flair: TextView = postView.findViewById(R.id.post_flair)
+        private val comments: Button = postView.findViewById(R.id.post_messages)
+        private val openBrowser: Button = postView.findViewById(R.id.post_open_browser)
+        private val image: SimpleDraweeView = postView.findViewById(R.id.post_image)
+        private val baseControllerListener: BaseControllerListener<ImageInfo>
+        private val onClickListener: View.OnClickListener = View.OnClickListener { mClicklistener.onMediaClick(getItem(adapterPosition)) }
 
         init {
             postView.setOnClickListener(onClickListener)
@@ -221,7 +220,7 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
     }
 
     private class ProgressViewHolder internal constructor(v: View) : RecyclerView.ViewHolder(v) {
-        internal val progressBar: ProgressBar = v.findViewById<ProgressBar>(R.id.progressBar)
+        internal val progressBar: ProgressBar = v.findViewById(R.id.progressBar)
     }
 
     companion object {
