@@ -1,6 +1,5 @@
 package torille.fi.lurkforreddit.data.remote
 
-import android.support.v4.util.Pair
 import android.text.TextUtils
 import com.google.gson.stream.JsonReader
 import io.reactivex.Observable
@@ -53,14 +52,14 @@ internal constructor(private val redditApi: RedditService.Reddit,
         }
     }
 
-    override fun getSubredditPosts(subredditUrl: String): Observable<Pair<String, List<Post>>> {
+    override fun getSubredditPosts(subredditUrl: String): Observable<kotlin.Pair<String, List<Post>>> {
         return redditApi
                 .getSubreddit(subredditUrl)
                 .observeOn(Schedulers.computation())
                 .map(funcFormatPostData)
     }
 
-    override fun getMoreSubredditPosts(subredditUrl: String, nextpageId: String): Observable<Pair<String, List<Post>>> {
+    override fun getMoreSubredditPosts(subredditUrl: String, nextpageId: String): Observable<kotlin.Pair<String, List<Post>>> {
         return redditApi.getSubredditNextPage(subredditUrl, nextpageId)
                 .observeOn(Schedulers.computation())
                 .map(funcFormatPostData)
@@ -113,14 +112,14 @@ internal constructor(private val redditApi: RedditService.Reddit,
                 .map { commentChildren -> TextHelper.flattenAdditionalComments(commentChildren, commentLevel) }
     }
 
-    override fun getSearchResults(query: String): Observable<Pair<String, List<SearchResult>>> {
+    override fun getSearchResults(query: String): Observable<kotlin.Pair<String, List<SearchResult>>> {
 
         return redditApi.searchSubreddits(query, "relevance")
                 .observeOn(Schedulers.computation())
                 .map(formatSearchData)
     }
 
-    override fun getMoreSearchResults(query: String, after: String): Observable<Pair<String, List<SearchResult>>> {
+    override fun getMoreSearchResults(query: String, after: String): Observable<kotlin.Pair<String, List<SearchResult>>> {
         return redditApi.searchSubredditsNextPage(query, "relevance", after)
                 .observeOn(Schedulers.computation())
                 .map(formatSearchData)
@@ -187,7 +186,9 @@ internal constructor(private val redditApi: RedditService.Reddit,
 
         Observable.zip(Observable.fromArray<String>(nextPageId),
                 getAndFormatPosts(Observable.fromArray(postListing)),
-                BiFunction<String, List<Post>, Pair<String, List<Post>>> { first, second -> Pair(first, second) })
+                BiFunction<String, List<Post>, kotlin.Pair<String, List<Post>>> {
+                    first, second -> kotlin.Pair(first, second)
+                })
                 .blockingSingle()
     }
 
@@ -203,8 +204,8 @@ internal constructor(private val redditApi: RedditService.Reddit,
         val subredditListingObservable = Observable.fromArray<SubredditListing>(subredditListing)
         Observable.zip(Observable.fromArray(subredditListing.data.after),
                 getAndFormatSearchResults(subredditListingObservable),
-                BiFunction<String, List<SearchResult>, Pair<String, List<SearchResult>>> { first, second ->
-                    Pair(first, second)
+                BiFunction<String, List<SearchResult>, kotlin.Pair<String, List<SearchResult>>> { first, second ->
+                    kotlin.Pair(first, second)
                 }).blockingSingle()
     }
 
