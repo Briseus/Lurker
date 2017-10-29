@@ -9,7 +9,6 @@ import io.reactivex.functions.Function
 import io.reactivex.schedulers.Schedulers
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails
-import torille.fi.lurkforreddit.data.models.jsonResponses.PostResponse
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren
 import torille.fi.lurkforreddit.data.models.view.*
 import java.util.*
@@ -43,19 +42,21 @@ object TextHelper {
         }
     }
 
-    fun flatten(list: List<CommentChild>, level: Int): List<Comment> {
+    fun flatten(list: List<CommentChild>, level: Int): Observable<List<Comment>> {
         val comments = ArrayList<Comment>(20)
         return Observable.fromArray(list)
                 .subscribeOn(Schedulers.computation())
-                .map { Observable.fromIterable(it) }
-                .concatMap { commentChildObservable -> formatCommentData(commentChildObservable, level) }
+                .concatMapIterable { it }
+                .concatMap { formatCommentData(Observable.fromArray(it), level) }
                 .collectInto(comments) { _, newComments ->
                     comments.addAll(newComments)
-                }.blockingGet()
+                }.flattenAsObservable { listOf(it) }
+
     }
 
     fun flattenAdditionalComments(list: List<CommentChild>, level: Int): List<Comment> {
-        val additionalComments: MutableList<Comment> = flatten(list, level).toMutableList()
+
+        val additionalComments: MutableList<Comment> = flatten(list, level).blockingSingle().toMutableList()
 
         var i = 0
         val size = additionalComments.size
@@ -76,7 +77,7 @@ object TextHelper {
 
     private fun formatCommentData(commentChildObservable: Observable<CommentChild>, level: Int): Observable<List<Comment>> {
         return commentChildObservable
-                .map({ it.data!! })
+                .map { it.data!! }
                 .map {
                     var commentText: CharSequence = ""
                     var author: CharSequence = ""

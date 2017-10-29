@@ -38,8 +38,7 @@ internal constructor(private val redditApi: RedditService.Reddit,
             subreddits = redditApi.getMySubreddits(200)
 
             return Observable.zip(fetchSubreddits(subreddits), getUserMultireddits(),
-                    BiFunction({
-                        s: List<Subreddit>, m: List<Subreddit> ->
+                    BiFunction({ s: List<Subreddit>, m: List<Subreddit> ->
                         s.plus(m)
                     }))
                     .subscribeOn(Schedulers.io())
@@ -99,7 +98,7 @@ internal constructor(private val redditApi: RedditService.Reddit,
                 TextUtils.join(
                         ",",
                         childCommentIds),
-                        "json")
+                "json")
                 .observeOn(Schedulers.computation())
                 .map { responseBody ->
                     responseBody.byteStream().use { stream ->
@@ -170,7 +169,7 @@ internal constructor(private val redditApi: RedditService.Reddit,
                             .commentData
                             .commentChildren
                 }
-                .map { commentChildren -> TextHelper.flatten(commentChildren, 0) }
+                .concatMap { TextHelper.flatten(it, 0) }
                 .map { comments ->
                     if (isSingleCommentThread) {
                         val commentsMutable = comments.toMutableList()
@@ -187,8 +186,8 @@ internal constructor(private val redditApi: RedditService.Reddit,
 
         Observable.zip(Observable.fromArray<String>(nextPageId),
                 getAndFormatPosts(Observable.fromArray(postListing)),
-                BiFunction<String, List<Post>, kotlin.Pair<String, List<Post>>> {
-                    first, second -> kotlin.Pair(first, second)
+                BiFunction<String, List<Post>, kotlin.Pair<String, List<Post>>> { first, second ->
+                    kotlin.Pair(first, second)
                 })
     }
 
