@@ -182,9 +182,8 @@ internal constructor(private val redditApi: RedditService.Reddit,
     }
 
     private val funcFormatPostData = { postListing: PostListing ->
-        val nextPageId = postListing.data.nextPage
 
-        Observable.zip(Observable.fromArray<String>(nextPageId),
+        Observable.zip(Observable.fromArray<String>(postListing.data.nextPage),
                 getAndFormatPosts(Observable.fromArray(postListing)),
                 BiFunction<String, List<Post>, kotlin.Pair<String, List<Post>>> { first, second ->
                     kotlin.Pair(first, second)
