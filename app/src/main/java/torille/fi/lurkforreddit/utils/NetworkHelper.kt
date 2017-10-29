@@ -1,40 +1,37 @@
 package torille.fi.lurkforreddit.utils
 
+import timber.log.Timber
+import torille.fi.lurkforreddit.data.RedditService
 import java.io.IOException
 import java.math.BigInteger
 import java.security.SecureRandom
-
+import java.util.UUID.randomUUID
 import javax.inject.Inject
 import javax.inject.Singleton
-
-import timber.log.Timber
-import torille.fi.lurkforreddit.data.RedditService
-
-import java.util.UUID.randomUUID
 
 /**
  * Helper for creating auth calls
  */
 @Singleton
 class NetworkHelper @Inject
-constructor(private val mStore: Store,
-            private val mAuthApi: RedditService.Auth) {
+constructor(private val store: Store,
+            private val authApi: RedditService.Auth) {
 
     @Throws(IOException::class)
     fun authenticateApp(): String {
 
-        if (mStore.isLoggedIn) {
+        return if (store.isLoggedIn) {
             Timber.d("Was logged in as user, refreshing token")
-            Timber.d("Using refreshtoken: " + mStore.refreshToken)
-            return mAuthApi.refreshUserToken("refresh_token", mStore.refreshToken).map { (accessToken) ->
+            Timber.d("Using refreshtoken: " + store.refreshToken)
+            authApi.refreshUserToken("refresh_token", store.refreshToken).map { (accessToken) ->
                 Timber.d("New token: $accessToken")
-                mStore.token = accessToken
+                store.token = accessToken
                 accessToken
             }.doOnError { Timber.e(it) }.blockingSingle()
 
         } else {
             Timber.d("User was not logged in")
-            return getToken()
+            getToken()
         }
     }
 
@@ -43,9 +40,9 @@ constructor(private val mStore: Store,
         val UUID = createUUID()
         val grant_type = "https://oauth.reddit.com/grants/installed_client"
         Timber.d("Getting token")
-        return mAuthApi.getAuthToken(grant_type, UUID).map { (access_token) ->
+        return authApi.getAuthToken(grant_type, UUID).map { (access_token) ->
             Timber.d("Got new token $access_token")
-            mStore.token = access_token
+            store.token = access_token
             access_token
         }.doOnError { Timber.e(it) }.blockingSingle()
     }

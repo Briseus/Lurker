@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 class AppLinkActivity : DaggerAppCompatActivity() {
 
-    @Inject lateinit var mRedditApi: Lazy<RedditService.Reddit>
+    @Inject lateinit var redditApi: Lazy<RedditService.Reddit>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,7 +77,7 @@ class AppLinkActivity : DaggerAppCompatActivity() {
 
     private fun searchForSubredditReddit(subredditName: String) {
         Timber.d("Searching for " + subredditName)
-        val call = mRedditApi.get().getSubredditInfo(subredditName)
+        val call = redditApi.get().getSubredditInfo(subredditName)
 
         call.enqueue(object : Callback<SubredditChildren> {
             override fun onResponse(call: Call<SubredditChildren>, response: Response<SubredditChildren>) {
