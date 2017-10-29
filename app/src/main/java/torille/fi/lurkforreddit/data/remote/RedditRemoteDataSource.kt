@@ -12,6 +12,7 @@ import torille.fi.lurkforreddit.data.RedditService
 import torille.fi.lurkforreddit.data.Remote
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostListing
+import torille.fi.lurkforreddit.data.models.jsonResponses.PostResponse
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditListing
 import torille.fi.lurkforreddit.data.models.view.*
 import torille.fi.lurkforreddit.utils.CommentsStreamingParser
@@ -56,13 +57,13 @@ internal constructor(private val redditApi: RedditService.Reddit,
         return redditApi
                 .getSubreddit(subredditUrl)
                 .observeOn(Schedulers.computation())
-                .map(funcFormatPostData)
+                .concatMap(funcFormatPostData)
     }
 
     override fun getMoreSubredditPosts(subredditUrl: String, nextpageId: String): Observable<kotlin.Pair<String, List<Post>>> {
         return redditApi.getSubredditNextPage(subredditUrl, nextpageId)
                 .observeOn(Schedulers.computation())
-                .map(funcFormatPostData)
+                .concatMap(funcFormatPostData)
     }
 
     override fun refreshData() {
@@ -82,13 +83,13 @@ internal constructor(private val redditApi: RedditService.Reddit,
                     }
                 }
                 .observeOn(Schedulers.computation())
-                .map { commentListings ->
+                .concatMap { commentListings ->
                     val commentListingsObservable = Observable.fromArray(commentListings)
                     Observable.zip<Post, List<Comment>, PostAndComments>(getPost(commentListingsObservable),
                             getFormattedComments(commentListingsObservable,
                                     isSingleCommentThread),
                             BiFunction<Post, List<Comment>, PostAndComments> { post, comments -> PostAndComments(post, comments) })
-                }.map { it.blockingSingle() }
+                }
     }
 
     override fun getMoreCommentsForPostAt(childCommentIds: List<String>,
@@ -116,13 +117,13 @@ internal constructor(private val redditApi: RedditService.Reddit,
 
         return redditApi.searchSubreddits(query, "relevance")
                 .observeOn(Schedulers.computation())
-                .map(formatSearchData)
+                .concatMap(formatSearchData)
     }
 
     override fun getMoreSearchResults(query: String, after: String): Observable<kotlin.Pair<String, List<SearchResult>>> {
         return redditApi.searchSubredditsNextPage(query, "relevance", after)
                 .observeOn(Schedulers.computation())
-                .map(formatSearchData)
+                .concatMap(formatSearchData)
     }
 
     fun getUserMultireddits(): Observable<List<Subreddit>> {
@@ -189,14 +190,17 @@ internal constructor(private val redditApi: RedditService.Reddit,
                 BiFunction<String, List<Post>, kotlin.Pair<String, List<Post>>> {
                     first, second -> kotlin.Pair(first, second)
                 })
-                .blockingSingle()
     }
 
     private fun getAndFormatPosts(postListingObservable: Observable<PostListing>): Observable<List<Post>> {
         return postListingObservable
                 .map { postListing -> postListing.data.Posts }
                 .map { Observable.fromIterable(it) }
-                .flatMap(TextHelper.funcFormatPostResponse)
+                .flatMap({ postResponseObservable: Observable<PostResponse> ->
+                    postResponseObservable
+                            .map({ it.postDetails })
+                            .map(TextHelper.funcFormatPost)
+                })
                 .toList().toObservable()
     }
 
@@ -206,7 +210,7 @@ internal constructor(private val redditApi: RedditService.Reddit,
                 getAndFormatSearchResults(subredditListingObservable),
                 BiFunction<String, List<SearchResult>, kotlin.Pair<String, List<SearchResult>>> { first, second ->
                     kotlin.Pair(first, second)
-                }).blockingSingle()
+                })
     }
 
     private fun getAndFormatSearchResults(subredditListing: Observable<SubredditListing>): Observable<List<SearchResult>> {

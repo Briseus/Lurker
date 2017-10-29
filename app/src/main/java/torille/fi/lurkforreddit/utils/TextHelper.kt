@@ -51,8 +51,7 @@ object TextHelper {
                 .concatMap { commentChildObservable -> formatCommentData(commentChildObservable, level) }
                 .collectInto(comments) { _, newComments ->
                     comments.addAll(newComments)
-                }
-                .blockingGet()
+                }.blockingGet()
     }
 
     fun flattenAdditionalComments(list: List<CommentChild>, level: Int): List<Comment> {
@@ -201,11 +200,7 @@ object TextHelper {
                 createdUtc = postDetails.createdUtc
         )
     }
-    val funcFormatPostResponse = { postResponseObservable: Observable<PostResponse> ->
-        postResponseObservable
-                .map({ it.postDetails })
-                .map(funcFormatPost)
-    }
+
 
     fun formatSubreddit(subredditChildren: Observable<SubredditChildren>): Observable<Subreddit> {
 
