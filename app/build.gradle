@@ -43,6 +43,7 @@ android {
             proguardFile 'proguard-gson.pro'
             proguardFile 'proguard-retrofit.pro'
             proguardFile 'proguard-rules.pro'
+            proguardFile 'proguard-okhttp.pro'
             proguardFiles getDefaultProguardFile('proguard-android.txt')
             testProguardFile 'proguard-test.pro'
             zipAlignEnabled true
