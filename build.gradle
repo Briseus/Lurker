@@ -4,9 +4,10 @@ buildscript {
 
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.0-alpha01'
+        classpath 'com.android.tools.build:gradle:3.1.0-alpha04'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -32,10 +33,10 @@ ext {
     minSdkVersion = 21
     targetSdkVersion = 27
     compileSdkVersion = 27
-    buildToolsVersion = '27.0.0'
+    buildToolsVersion = '27.0.1'
 
     // App dependencies
-    supportLibraryVersion = '27.0.0'
+    supportLibraryVersion = '27.0.1'
     constraintVersion = '1.0.2'
     retrofitVersion = '2.3.0'
     okHttpVersion = '3.9.0'
@@ -50,6 +51,7 @@ ext {
     rxAndroidVersion = '2.0.1'
     rxJavaVersion =  '2.1.6'
     rxKotlinVersion =  '2.1.0'
+    kotlinCoroutinesVersion = '0.19.3'
 
     //testing
     junitVersion = '4.12'

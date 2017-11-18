@@ -86,7 +86,8 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinCoroutinesVersion"
+    //implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$rootProject.ext.kotlinCoroutinesVersion"
     implementation "com.google.code.gson:gson:$rootProject.ext.gsonVersion"
     implementation "nz.bradcampbell:paperparcel:$rootProject.ext.paperParcelVersion"
     kapt "nz.bradcampbell:paperparcel-compiler:$rootProject.ext.paperParcelVersion"
@@ -164,6 +165,12 @@ dependencies {
 
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
+}
+
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
 }
 
 /*
