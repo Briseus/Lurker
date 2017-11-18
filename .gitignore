@@ -54,6 +54,7 @@ captures/
 .idea/libraries
 .idea/misc.xml
 .idea/caches/
+.idea/*
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild
