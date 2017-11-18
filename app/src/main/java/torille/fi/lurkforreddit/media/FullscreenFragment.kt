@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.Toast
 import com.facebook.drawee.backends.pipeline.Fresco
+import com.facebook.drawee.controller.AbstractDraweeController
 import com.facebook.drawee.controller.BaseControllerListener
 import com.facebook.imagepipeline.image.ImageInfo
 import com.facebook.imagepipeline.request.ImageRequestBuilder
@@ -16,6 +17,7 @@ import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
 import com.google.android.exoplayer2.source.ExtractorMediaSource
+import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.TrackGroupArray
 import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource
@@ -27,6 +29,9 @@ import com.google.android.exoplayer2.util.Util
 import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_fullscreen.*
 import kotlinx.android.synthetic.main.progress_bar_horizontal.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import timber.log.Timber
@@ -39,7 +44,6 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
 
     @Inject lateinit var okHttpClient: OkHttpClient
 
-    private var player: SimpleExoPlayer? = null
 
     override fun onResume() {
         super.onResume()
@@ -60,30 +64,21 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
     override fun onStop() {
         super.onStop()
         Timber.d("Stopping")
-        player?.stop()
+        videoView?.player?.stop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Timber.d("Destroying")
-        releaseVideoPlayer()
+        videoView?.player?.release()
         actionsListener.dropView()
-    }
-
-    private fun releaseVideoPlayer() {
-        Timber.d("Destroying player")
-        player?.release()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_fullscreen, container, false)
     }
 
-    override fun showImage(url: String, previewImageUrl: String?) {
-        progressBarHorizontal.visibility = View.INVISIBLE
-        imageView.visibility = View.VISIBLE
-        imageView.hierarchy.setProgressBarImage(progressBarHorizontal.progressDrawable)
-
+    private fun setupController(url: String, previewImageUrl: String?): AbstractDraweeController<*, *> {
         val previewImgUrl = if (previewImageUrl.isNullOrEmpty()) "" else previewImageUrl
 
         val lowResRequest = ImageRequestBuilder
@@ -94,7 +89,7 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
                 .newBuilderWithSource(Uri.parse(url))
                 .build()
 
-        val controller = Fresco.newDraweeControllerBuilder()
+        return Fresco.newDraweeControllerBuilder()
                 .setAutoPlayAnimations(true)
                 .setImageRequest(imageRequest)
                 .setLowResImageRequest(lowResRequest)
@@ -117,42 +112,45 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
                         removeMarginTop()
                         imageView.update(imageInfo.width, imageInfo.height)
                     }
-                })
+                }).build()
+    }
 
-        imageView.controller = controller.build()
+    override fun showImage(url: String, previewImageUrl: String?) {
+        progressBarHorizontal.visibility = View.INVISIBLE
+        imageView.visibility = View.VISIBLE
+        imageView.hierarchy.setProgressBarImage(progressBarHorizontal.progressDrawable)
+
+        launch(UI) {
+            val controller = async { setupController(url, previewImageUrl) }
+            imageView.controller = controller.await()
+        }
+
     }
 
     override fun showVideo(url: String, isDash: Boolean) {
         Timber.d("Got url to play $url")
         videoView.visibility = View.INVISIBLE
-        val context = context
-        val defaultBandwidthMeter = DefaultBandwidthMeter()
-        val control = CacheControl.Builder().build()
-        val userAgent = Util.getUserAgent(context, getString(R.string.app_name))
-        // Produces DataSource instances through which media data is loaded.
-        val dataSourceFactory = OkHttpDataSourceFactory(okHttpClient,
-                userAgent, defaultBandwidthMeter, control)
-        // Produces Extractor instances for parsing the media data.
-        val extractorsFactory = DefaultExtractorsFactory()
-        // This is the MediaSource representing the media to be played.
-        val videoSource = if (isDash)
-            DashMediaSource(
-                    Uri.parse(url),
-                    dataSourceFactory,
-                    DefaultDashChunkSource.Factory(dataSourceFactory),
-                    null, null)
-        else ExtractorMediaSource(
-                Uri.parse(url),
-                dataSourceFactory,
-                extractorsFactory,
-                null, null)
 
+        launch(UI) {
+            val defaultBandwidthMeter = DefaultBandwidthMeter()
+
+            val player = async { setupExoPlayer(defaultBandwidthMeter) }
+            val videoSource = async { setupVideoSource(url, isDash, defaultBandwidthMeter) }
+
+            videoView.player = player.await()
+            videoView.player.prepare(videoSource.await())
+            videoView.player.playWhenReady = true
+        }
+
+    }
+
+    private fun setupExoPlayer(defaultBandwidthMeter: DefaultBandwidthMeter): SimpleExoPlayer {
         val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory(defaultBandwidthMeter)
         val trackSelector = DefaultTrackSelector(videoTrackSelectionFactory)
-        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector)
+        val exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector)
 
-        player!!.repeatMode = Player.REPEAT_MODE_ONE
-        player!!.addListener(object : Player.EventListener {
+        exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+        exoPlayer.addListener(object : Player.EventListener {
             override fun onRepeatModeChanged(repeatMode: Int) {}
 
             override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {}
@@ -161,7 +159,7 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
 
             override fun onPlayerError(error: ExoPlaybackException?) {
                 Timber.e(error)
-                Toast.makeText(getContext(), "Failed to find video", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Failed to find video", Toast.LENGTH_SHORT).show()
             }
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
@@ -179,13 +177,26 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
             override fun onTimelineChanged(timeline: Timeline?, manifest: Any?) {}
 
         })
-        videoView.player = player
+        return exoPlayer
+    }
 
-        // Prepare the player with the source.
-        player!!.prepare(videoSource)
-        player!!.playWhenReady = true
-
-
+    private fun setupVideoSource(url: String, isDash: Boolean, defaultBandwidthMeter: DefaultBandwidthMeter): MediaSource {
+        val control = CacheControl.Builder().build()
+        val userAgent = Util.getUserAgent(context, getString(R.string.app_name))
+        val dataSourceFactory = OkHttpDataSourceFactory(okHttpClient,
+                userAgent, defaultBandwidthMeter, control)
+        val extractorsFactory = DefaultExtractorsFactory()
+        return if (isDash)
+            DashMediaSource(
+                    Uri.parse(url),
+                    dataSourceFactory,
+                    DefaultDashChunkSource.Factory(dataSourceFactory),
+                    null, null)
+        else ExtractorMediaSource(
+                Uri.parse(url),
+                dataSourceFactory,
+                extractorsFactory,
+                null, null)
     }
 
     override fun showNoVideoFound() {
