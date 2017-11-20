@@ -62,7 +62,7 @@ interface RedditService {
         fun searchSubredditsNextPage(@Query(value = "q") searchQuery: String, @Query(value = "sort") sortBy: String, @Query(value = "after") after: String): Observable<SubredditListing>
 
         @GET("{subreddit}/about")
-        fun getSubredditInfo(@Path(value = "subreddit", encoded = true) subredditName: String): Call<SubredditChildren>
+        fun getSubredditInfo(@Path(value = "subreddit", encoded = true) subredditName: String): Observable<SubredditChildren>
 
     }
 }
