@@ -56,13 +56,13 @@ internal constructor(private val redditApi: RedditService.Reddit,
         return redditApi
                 .getSubreddit(subredditUrl)
                 .observeOn(Schedulers.computation())
-                .concatMap(funcFormatPostData)
+                .flatMap(funcFormatPostData)
     }
 
     override fun getMoreSubredditPosts(subredditUrl: String, nextpageId: String): Observable<kotlin.Pair<String, List<Post>>> {
         return redditApi.getSubredditNextPage(subredditUrl, nextpageId)
                 .observeOn(Schedulers.computation())
-                .concatMap(funcFormatPostData)
+                .flatMap(funcFormatPostData)
     }
 
     override fun refreshData() {
