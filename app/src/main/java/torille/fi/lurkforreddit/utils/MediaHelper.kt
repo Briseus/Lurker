@@ -4,6 +4,8 @@ import android.content.Context
 import android.support.customtabs.CustomTabsIntent
 import android.support.customtabs.CustomTabsSession
 import android.support.v4.content.ContextCompat
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.async
 import torille.fi.lurkforreddit.R
 
 /**
@@ -46,8 +48,8 @@ object MediaHelper {
         }
     }
 
-    fun createCustomTabIntent(context: Context,
-                              session: CustomTabsSession): CustomTabsIntent {
+    fun createCustomTabIntentAsync(context: Context,
+                                   session: CustomTabsSession?): Deferred<CustomTabsIntent> = async {
 
         val intentBuilder = CustomTabsIntent.Builder(session)
 
@@ -66,6 +68,7 @@ object MediaHelper {
         intentBuilder.setExitAnimations(context, android.R.anim.slide_in_left,
                 android.R.anim.slide_out_right)
 
-        return intentBuilder.build()
+        intentBuilder.build()
     }
+
 }

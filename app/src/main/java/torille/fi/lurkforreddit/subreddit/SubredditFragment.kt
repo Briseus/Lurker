@@ -15,6 +15,8 @@ import android.widget.Toast
 import com.facebook.drawee.backends.pipeline.Fresco
 import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_subreddit.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.comments.CommentActivity
@@ -172,13 +174,17 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
 
 
     override fun showCustomTabsUI(url: String) {
-        CustomTabActivityHelper.openCustomTab(activity,
-                MediaHelper.createCustomTabIntent(activity!!,
-                        customTabActivityHelper.session),
-                url
-        ) { _, _ ->
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
+
+        val activity = activity
+        launch(UI) {
+            CustomTabActivityHelper.openCustomTab(activity,
+                    MediaHelper.createCustomTabIntentAsync(activity!!,
+                            customTabActivityHelper.session).await(),
+                    url
+            ) { _, _ ->
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent)
+            }
         }
     }
 

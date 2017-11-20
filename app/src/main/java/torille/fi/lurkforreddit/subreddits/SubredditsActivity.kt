@@ -13,6 +13,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper
@@ -188,13 +190,16 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
                 "&duration=$DURATION" +
                 "&scope=$SCOPE"
 
-        CustomTabActivityHelper.openCustomTab(this,
-                MediaHelper.createCustomTabIntent(this,
-                        customTabActivityHelper.session),
-                url
-        ) { _, _ ->
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
+        val activity = this
+        launch(UI) {
+            CustomTabActivityHelper.openCustomTab(activity,
+                    MediaHelper.createCustomTabIntentAsync(activity,
+                            customTabActivityHelper.session).await(),
+                    url
+            ) { _, _ ->
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent)
+            }
         }
 
     }

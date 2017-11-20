@@ -7,6 +7,8 @@ import android.support.v4.app.Fragment
 import android.view.View
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_comments.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.customTabs.CustomTabActivityHelper
@@ -59,14 +61,18 @@ class CommentActivity : DaggerAppCompatActivity() {
                     intent.putExtra(FullscreenActivity.EXTRA_POST, post)
                     startActivity(intent)
                 } else {
-                    CustomTabActivityHelper.openCustomTab(this,
-                            MediaHelper.createCustomTabIntent(this,
-                                    customTabActivityHelper.session),
-                            postUrl
-                    ) { _, _ ->
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(postUrl))
-                        startActivity(intent)
+                    val activity = this
+                    launch(UI) {
+                        CustomTabActivityHelper.openCustomTab(activity,
+                                MediaHelper.createCustomTabIntentAsync(activity,
+                                        customTabActivityHelper.session).await(),
+                                postUrl
+                        ) { _, _ ->
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(postUrl))
+                            startActivity(intent)
+                        }
                     }
+
                 }
             }
             parallaxImage.setImageURI(parallaxImageUrl)
