@@ -225,7 +225,7 @@ object TextHelper {
     }
 
     fun formatSearchResult(observable: Observable<SubredditChildren>): Observable<SearchResult> {
-        return observable.map { subredditChildren ->
+        return observable.flatMap { subredditChildren ->
             val subredditChildObservable = Observable.fromArray(subredditChildren)
             Observable.zip<Subreddit, SubredditChildren, SearchResult>(
                     formatSubreddit(subredditChildObservable),
@@ -267,7 +267,7 @@ object TextHelper {
                                 subreddit = subreddit
                         )
                     })
-            ).blockingSingle()
+            )
 
         }
     }
