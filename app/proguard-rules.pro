@@ -18,3 +18,7 @@
 
 -dontwarn com.google.errorprone.annotations.*
 -keep class android.support.v7.widget.ShareActionProvider { *; }
+
+-keepclassmembernames class kotlinx.** {
+    volatile <fields>;
+}
