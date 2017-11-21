@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Comment
@@ -34,10 +36,15 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as? CommentViewHolder)?.bind(mComments[position] as Comment) ?: if (holder is ProgressViewHolder) {
-            holder.progressBar.isIndeterminate = true
-            holder.bind(mComments[position] as Comment)
-        } else (holder as? CommentLoadMoreViewHolder)?.bind(mComments[position] as Comment) ?: (holder as? PostViewHolder)?.bind(mComments[position] as Post)
+        when (holder) {
+            is CommentViewHolder -> holder.bind(mComments[position] as Comment)
+            is CommentLoadMoreViewHolder -> holder.bind(mComments[position] as Comment)
+            is PostViewHolder -> holder.bind(mComments[position] as Post)
+            is ProgressViewHolder -> {
+                holder.progressBar.isIndeterminate = true
+                holder.bind(mComments[position] as Comment)
+            }
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -61,9 +68,14 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
     }
 
     fun replaceData(comments: List<Any>) {
-        mComments.clear()
-        mComments.addAll(comments)
-        notifyDataSetChanged()
+        launch(UI) {
+            kotlin.run {
+                mComments.clear()
+                mComments.addAll(comments)
+            }
+            notifyDataSetChanged()
+        }
+
 
     }
 
