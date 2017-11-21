@@ -169,7 +169,7 @@ internal constructor(private val redditApi: RedditService.Reddit,
                             .commentData
                             .commentChildren
                 }
-                .concatMap { TextHelper.flatten(it, 0) }
+                .map { TextHelper.flatten(it, 0) }
                 .map { comments ->
                     if (isSingleCommentThread) {
                         val commentsMutable = comments.toMutableList()

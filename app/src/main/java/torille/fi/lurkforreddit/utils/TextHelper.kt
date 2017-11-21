@@ -6,12 +6,11 @@ import android.text.Spanned
 import android.text.format.DateUtils
 import io.reactivex.Observable
 import io.reactivex.functions.Function
-import io.reactivex.schedulers.Schedulers
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild
+import torille.fi.lurkforreddit.data.models.jsonResponses.CommentResponse
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostDetails
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditChildren
 import torille.fi.lurkforreddit.data.models.view.*
-import java.util.*
 
 /**
  * Contains utility classes for parsing text
@@ -42,21 +41,13 @@ object TextHelper {
         }
     }
 
-    fun flatten(list: List<CommentChild>, level: Int): Observable<List<Comment>> {
-        val comments = ArrayList<Comment>(20)
-        return Observable.fromArray(list)
-                .subscribeOn(Schedulers.computation())
-                .concatMapIterable { it }
-                .concatMap { formatCommentData(Observable.fromArray(it), level) }
-                .collectInto(comments) { _, newComments ->
-                    comments.addAll(newComments)
-                }.flattenAsObservable { listOf(it) }
-
+    fun flatten(list: List<CommentChild>, commentDepth: Int): List<Comment> {
+        return list.flatMap { formatCommentData(it.data, commentDepth) }
     }
 
     fun flattenAdditionalComments(list: List<CommentChild>, level: Int): List<Comment> {
 
-        val additionalComments: MutableList<Comment> = flatten(list, level).blockingSingle().toMutableList()
+        val additionalComments = flatten(list, level).toMutableList()
 
         var i = 0
         val size = additionalComments.size
@@ -75,67 +66,67 @@ object TextHelper {
         return additionalComments.toList()
     }
 
-    private fun formatCommentData(commentChildObservable: Observable<CommentChild>, level: Int): Observable<List<Comment>> {
-        return commentChildObservable
-                .map { it.data!! }
-                .map {
-                    var commentText: CharSequence = ""
-                    var author: CharSequence = ""
-                    var kind: kind = kind.MORE
+    private fun formatCommentData(commentData: CommentResponse?, commentDepth: Int): List<Comment> {
 
-                    when {
-                        it.bodyHtml.isNotEmpty() -> {
-                            kind = torille.fi.lurkforreddit.data.models.view.kind.DEFAULT
-                            commentText = formatTextToHtml(it.bodyHtml)
-                        }
-                        it.id == "_" -> commentText = "Continue this thread"
-                        it.children.isNotEmpty() -> commentText = "Load more comments (" + it.count + ")"
-                    }
+        return if (commentData != null) {
+            var commentText: CharSequence = ""
+            var author: CharSequence = ""
+            var kind: kind = kind.MORE
 
-                    val responseAuthor = it.author
-                    if (responseAuthor.isNotEmpty() && it.stickied) {
-                        author = "<font color='#64FFDA'> Sticky post </font>" + responseAuthor
-                    } else if (responseAuthor.isNotEmpty()) {
-                        author = responseAuthor
-                    }
-
-                    author = fromHtml(author.toString() + " " + DateUtils.getRelativeTimeSpanString(it.createdUtc * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS))
-
-                    if (it.edited) {
-                        author = author.toString() + " (edited)"
-                    }
-
-                    val formatScore = formatScore(it.score)
-
-                    val formattedComment = Comment(
-                            id = it.id,
-                            parentId = it.parentId,
-                            name = it.name,
-                            kind = kind,
-                            author = author,
-                            childCommentIds = it.children,
-                            commentLevel = level,
-                            commentLinkId = it.linkId,
-                            commentText = commentText,
-                            formattedScore = formatScore,
-                            formattedTime = "",
-                            replies = null
-                    )
-
-                    if (it.replies != null) {
-                        val commentChildList = it.replies.commentData.commentChildren
-                        val commentList = ArrayList<Comment>(commentChildList.size)
-                        commentList.add(formattedComment)
-
-                        Observable.fromArray(commentChildList)
-                                .map { commentChildren -> Observable.fromIterable(commentChildren) }
-                                .concatMap { commentChildObservable2 -> formatCommentData(commentChildObservable2, level + 1) }
-                                .collectInto<List<Comment>>(commentList) { _, newComments -> commentList.addAll(newComments) }
-                                .blockingGet()
-                    } else {
-                        listOf(formattedComment)
-                    }
+            when {
+                commentData.bodyHtml.isNotEmpty() -> {
+                    kind = torille.fi.lurkforreddit.data.models.view.kind.DEFAULT
+                    commentText = formatTextToHtml(commentData.bodyHtml)
                 }
+                commentData.id == "_" -> commentText = "Continue this thread"
+                commentData.children.isNotEmpty() -> commentText = "Load more comments (" + commentData.count + ")"
+            }
+
+            val responseAuthor = commentData.author
+            if (responseAuthor.isNotEmpty() && commentData.stickied) {
+                author = "<font color='#64FFDA'> Sticky post </font>" + responseAuthor
+            } else if (responseAuthor.isNotEmpty()) {
+                author = responseAuthor
+            }
+
+            author = fromHtml(author.toString() + " " + DateUtils.getRelativeTimeSpanString(commentData.createdUtc * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS))
+
+            if (commentData.edited) {
+                author = author.toString() + " (edited)"
+            }
+
+            val formatScore = formatScore(commentData.score)
+
+            val formattedComment = Comment(
+                    id = commentData.id,
+                    parentId = commentData.parentId,
+                    name = commentData.name,
+                    kind = kind,
+                    author = author,
+                    childCommentIds = commentData.children,
+                    commentLevel = commentDepth,
+                    commentLinkId = commentData.linkId,
+                    commentText = commentText,
+                    formattedScore = formatScore,
+                    formattedTime = "",
+                    replies = null
+            )
+
+            val listWithOriginalComment = listOf(formattedComment)
+
+            return if (commentData.replies != null) {
+                val replies = commentData.replies.commentData.commentChildren
+                        .flatMap { formatCommentData(it.data, commentDepth + 1) }
+
+                listWithOriginalComment.plus(replies)
+            } else {
+                listWithOriginalComment
+            }
+        } else {
+            emptyList()
+        }
+
+
     }
 
     val funcFormatPost = Function { postDetails: PostDetails ->
