@@ -49,7 +49,6 @@ class MyApplication : DaggerApplication() {
                 .setResizeAndRotateEnabledForNetwork(false)
                 .setProgressiveJpegConfig(SimpleProgressiveJpegConfig())
                 .setDownsampleEnabled(true)
-                .setExecutorSupplier(DefaultExecutorSupplier(Runtime.getRuntime().availableProcessors()))
                 .experiment().setWebpSupportEnabled(true)
                 .build()
 

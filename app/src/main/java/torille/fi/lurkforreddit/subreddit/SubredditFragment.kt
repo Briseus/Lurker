@@ -86,7 +86,7 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
 
                     if (!refreshing && scrolledItems > lastFetch) {
                         lastFetch = scrolledItems + (PREFETCH_SIZE - 1)
-                        mListAdapter.prefetchImages(lastFetch, PREFETCH_SIZE, totalItemCount)
+                        launch { mListAdapter.prefetchImages(lastFetch, PREFETCH_SIZE, totalItemCount) }
                     }
 
                     if (!refreshing && scrolledItems >= totalItemCount - 4) {

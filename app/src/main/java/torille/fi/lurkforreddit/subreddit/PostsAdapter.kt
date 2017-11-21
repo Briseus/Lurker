@@ -15,6 +15,8 @@ import com.facebook.drawee.view.SimpleDraweeView
 import com.facebook.imagepipeline.core.ImagePipeline
 import com.facebook.imagepipeline.image.ImageInfo
 import com.facebook.imagepipeline.request.ImageRequest
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Post
@@ -54,11 +56,14 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is PostViewHolder) {
-            holder.bind(posts.get(position))
-        } else if (holder is ProgressViewHolder) {
-            holder.progressBar.isIndeterminate = true
+        launch(UI) {
+            if (holder is PostViewHolder) {
+                holder.bind(posts.get(position))
+            } else if (holder is ProgressViewHolder) {
+                holder.progressBar.isIndeterminate = true
+            }
         }
+
 
     }
 
@@ -96,9 +101,12 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
     }
 
     internal fun addAll(list: List<Post>) {
-        posts.beginBatchedUpdates()
-        list.map { posts.add(it) }
-        posts.endBatchedUpdates()
+        launch(UI) {
+            posts.beginBatchedUpdates()
+            posts.addAll(list)
+            posts.endBatchedUpdates()
+        }
+
     }
 
     internal fun addMorePosts(newPosts: List<Post>) {
@@ -106,8 +114,9 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
     }
 
     internal fun clear() {
-        posts.clear()
-
+        launch(UI) {
+            posts.clear()
+        }
     }
 
     /**
@@ -116,15 +125,18 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
      * that is used in the progressbar
      */
     internal fun setRefreshing(active: Boolean) {
-        if (active) {
-            posts.add(createPost(PROGRESSBAR))
-        } else {
-            posts.removeItemAt(getIndex())
+        launch(UI) {
+            if (active) {
+                posts.add(createPost(PROGRESSBAR))
+            } else {
+                posts.removeItemAt(getIndex())
+            }
         }
 
     }
 
     internal fun setListLoadingError(active: Boolean) {
+
         val index = getIndex()
         if (active) {
             posts.updateItemAt(index, createPost(ERROR))
@@ -176,7 +188,7 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
             }
         }
 
-        fun bind(postDetails: Post) {
+        suspend fun bind(postDetails: Post) {
             val previewImage = postDetails.previewImage
             val flairText = postDetails.flairText
             val infoText = postDetails.score + " |  " + postDetails.domain
@@ -208,6 +220,7 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
                 image.controller = draweeController
 
             }
+
         }
     }
 
