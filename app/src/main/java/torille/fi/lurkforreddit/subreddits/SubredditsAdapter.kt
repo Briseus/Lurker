@@ -10,7 +10,7 @@ import android.widget.Button
 import android.widget.TextView
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Subreddit
-import java.util.ArrayList
+import java.util.*
 
 /**
  * [RecyclerView.Adapter] for showing subreddits
