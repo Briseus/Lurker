@@ -1,5 +1,6 @@
 package torille.fi.lurkforreddit.data
 
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -29,13 +30,13 @@ interface RedditService {
 
     interface Reddit {
         @GET("subreddits/mine/subscriber")
-        fun getMySubreddits(@Query("limit") count: Int): Observable<SubredditListing>
+        fun getMySubreddits(@Query("limit") count: Int): Flowable<SubredditListing>
 
         @GET("subreddits/default")
-        fun getDefaultSubreddits(@Query("limit") count: Int): Observable<SubredditListing>
+        fun getDefaultSubreddits(@Query("limit") count: Int): Flowable<SubredditListing>
 
         @GET("/api/multi/mine")
-        fun getUserMultireddits(): Observable<Array<MultiredditListing>>
+        fun getUserMultireddits(): Flowable<Array<MultiredditListing>>
 
         @GET("me/m/{multipath}")
         fun getMultiRedditData(@Path(value = "multipath", encoded = true) multiPath: String): Call<ResponseBody>
@@ -56,13 +57,13 @@ interface RedditService {
         fun getMoreComments(@Query(value = "link_id") parentId: String, @Query(value = "children") childId: String, @Query(value = "api_type") json: String): Observable<ResponseBody>
 
         @GET("subreddits/search")
-        fun searchSubreddits(@Query(value = "q") searchQuery: String, @Query(value = "sort") sortBy: String): Observable<SubredditListing>
+        fun searchSubreddits(@Query(value = "q") searchQuery: String, @Query(value = "sort") sortBy: String): Flowable<SubredditListing>
 
         @GET("subreddits/search")
-        fun searchSubredditsNextPage(@Query(value = "q") searchQuery: String, @Query(value = "sort") sortBy: String, @Query(value = "after") after: String): Observable<SubredditListing>
+        fun searchSubredditsNextPage(@Query(value = "q") searchQuery: String, @Query(value = "sort") sortBy: String, @Query(value = "after") after: String): Flowable<SubredditListing>
 
         @GET("{subreddit}/about")
-        fun getSubredditInfo(@Path(value = "subreddit", encoded = true) subredditName: String): Observable<SubredditChildren>
+        fun getSubredditInfo(@Path(value = "subreddit", encoded = true) subredditName: String): Flowable<SubredditChildren>
 
     }
 }

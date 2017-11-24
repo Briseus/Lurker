@@ -182,7 +182,7 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
             baseControllerListener = object : BaseControllerListener<ImageInfo>() {
                 override fun onFailure(id: String?, throwable: Throwable?) {
                     super.onFailure(id, throwable)
-                    Timber.e("Failed to load image id: " + id + " error " + throwable!!.localizedMessage)
+                    Timber.e("Failed to load image subId: " + id + " error " + throwable!!.localizedMessage)
                     image.setImageURI(getItem(adapterPosition).thumbnail)
                 }
             }

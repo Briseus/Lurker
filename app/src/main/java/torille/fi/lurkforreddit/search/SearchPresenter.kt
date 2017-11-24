@@ -5,6 +5,8 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.observers.SafeObserver
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subscribers.DisposableSubscriber
+import io.reactivex.subscribers.ResourceSubscriber
 import timber.log.Timber
 import torille.fi.lurkforreddit.data.RedditRepository
 import torille.fi.lurkforreddit.data.models.view.SearchResult
@@ -25,7 +27,7 @@ internal constructor(private val redditRepository: RedditRepository) : SearchCon
         disposables.add(redditRepository.getSearchResults(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableObserver<kotlin.Pair<String, List<SearchResult>>>() {
+                .subscribeWith(object : DisposableSubscriber<kotlin.Pair<String, List<SearchResult>>>() {
                     override fun onNext(resultPair: kotlin.Pair<String, List<SearchResult>>) {
                         searchAfter = resultPair.first
                         searchView?.showResults(resultPair.second)
@@ -48,7 +50,7 @@ internal constructor(private val redditRepository: RedditRepository) : SearchCon
         disposables.add(redditRepository.getMoreSearchResults(searchQuery!!, searchAfter!!)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableObserver<kotlin.Pair<String, List<SearchResult>>>() {
+                .subscribeWith(object : DisposableSubscriber<kotlin.Pair<String, List<SearchResult>>>() {
                     override fun onNext(resultPair: kotlin.Pair<String, List<SearchResult>>) {
                         searchAfter = resultPair.first
                         searchView?.showResults(resultPair.second)

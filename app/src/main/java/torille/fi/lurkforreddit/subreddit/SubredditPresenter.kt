@@ -82,7 +82,7 @@ internal constructor(private val redditRepository: RedditRepository,
             Timber.d("No more posts")
             // TODO show no more posts
         } else {
-            Timber.d("Fetching more posts at ${subreddit.url} id $nextPageId")
+            Timber.d("Fetching more posts at ${subreddit.url} subId $nextPageId")
             disposables.add(redditRepository.getMoreSubredditPosts(subreddit.url, nextPageId!!)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

@@ -14,7 +14,7 @@ abstract class FrontPageModule {
         @Provides
         @ActivityScoped
         fun provideSubreddits(): Subreddit {
-            return Subreddit(id = "frontpage", displayName = "Popular")
+            return Subreddit(subId = "frontpage", displayName = "Popular")
         }
     }
 }

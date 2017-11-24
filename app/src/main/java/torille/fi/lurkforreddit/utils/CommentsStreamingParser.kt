@@ -219,7 +219,7 @@ constructor(val gson: Gson) {
                         reader.skipValue()
                     }
                 "saved" -> saved = reader.nextBoolean()
-                "id" -> id = reader.nextString()
+                "subId" -> id = reader.nextString()
                 "gilded" -> gilded = reader.nextInt()
                 "archived" -> archived = reader.nextBoolean()
                 "author" -> author = reader.nextString()

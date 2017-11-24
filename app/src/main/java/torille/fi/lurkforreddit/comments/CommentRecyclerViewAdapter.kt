@@ -212,7 +212,7 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
             val (id, _, _, permaLink) = mComments[0] as Post
             if (mComment!!.id == "_") {
 
-                //remove t1_ from start of id
+                //remove t1_ from start of subId
                 val parentId = mComment!!.parentId.substring(3)
                 val permalinkToComment = "https://www.reddit.com$permaLink$parentId"
                 Timber.d("Going to open permalink $permalinkToComment")

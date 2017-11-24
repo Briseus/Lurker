@@ -1,5 +1,8 @@
 package torille.fi.lurkforreddit.data.models.view
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.ForeignKey
+import android.arch.persistence.room.PrimaryKey
 import android.os.Parcel
 import android.os.Parcelable
 import paperparcel.PaperParcel
@@ -7,9 +10,12 @@ import paperparcel.PaperParcel
 /**
  * Model for showing subreddit posts
  */
+@Entity(foreignKeys = (arrayOf(ForeignKey(entity = Subreddit::class,
+        parentColumns = arrayOf("subId"),
+        childColumns = arrayOf("postId")))))
 @PaperParcel
 data class Post(
-        val id: String = "",
+        @PrimaryKey val id: String = "",
         val author: String = "",
         val createdUtc: Long = 0,
         val permaLink: String = "",
@@ -25,7 +31,8 @@ data class Post(
         val isSelf: Boolean = false
 ) : Parcelable {
     companion object {
-        @JvmField val CREATOR = PaperParcelPost.CREATOR
+        @JvmField
+        val CREATOR = PaperParcelPost.CREATOR
     }
 
     override fun describeContents() = 0

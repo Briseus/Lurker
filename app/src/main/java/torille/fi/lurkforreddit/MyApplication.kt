@@ -3,7 +3,6 @@ package torille.fi.lurkforreddit
 import android.content.ComponentCallbacks2
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory
-import com.facebook.imagepipeline.core.DefaultExecutorSupplier
 import com.facebook.imagepipeline.decoder.SimpleProgressiveJpegConfig
 import com.squareup.leakcanary.LeakCanary
 import dagger.android.AndroidInjector
@@ -24,6 +23,7 @@ class MyApplication : DaggerApplication() {
         val clientId = resources.getString(R.string.client_id)
         val appComponent: AppComponent = DaggerAppComponent.builder()
                 .appModule(AppModule(this))
+                .databaseModule(DatabaseModule())
                 .netModule(NetModule())
                 .redditAuthModule(RedditAuthModule(clientId, "https://www.reddit.com/api/v1/"))
                 .redditModule(RedditModule("https://oauth.reddit.com/"))

@@ -52,6 +52,7 @@ ext {
     rxJavaVersion =  '2.1.6'
     rxKotlinVersion =  '2.1.0'
     kotlinCoroutinesVersion = '0.19.3'
+    room = '1.0.0'
 
     //testing
     junitVersion = '4.12'

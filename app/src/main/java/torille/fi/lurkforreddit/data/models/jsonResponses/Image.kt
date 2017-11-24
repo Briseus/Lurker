@@ -11,7 +11,7 @@ data class Image(
         val source: ImageSource,
         @SerializedName("resolutions")
         val resolutions: List<ImageResolution>,
-        @SerializedName("id")
+        @SerializedName("subId")
         val id: String
 )
 

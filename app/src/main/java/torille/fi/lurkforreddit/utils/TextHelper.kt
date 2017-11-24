@@ -4,7 +4,7 @@ import android.text.Html
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.format.DateUtils
-import io.reactivex.Observable
+import io.reactivex.Flowable
 import io.reactivex.functions.Function
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentChild
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentResponse
@@ -194,7 +194,7 @@ object TextHelper {
     }
 
 
-    fun formatSubreddit(subredditChildren: Observable<SubredditChildren>): Observable<Subreddit> {
+    fun formatSubreddit(subredditChildren: Flowable<SubredditChildren>): Flowable<Subreddit> {
 
         return subredditChildren
                 .map { it.subreddit }
@@ -206,7 +206,7 @@ object TextHelper {
                         Subreddit(
                                 url = subredditResponse.url,
                                 bannerUrl = subredditResponse.banner,
-                                id = subredditResponse.id!!,
+                                subId = subredditResponse.id!!,
                                 keyColor = subredditResponse.keyColor,
                                 displayName = subredditResponse.displayName
                         )
@@ -215,12 +215,12 @@ object TextHelper {
                 }
     }
 
-    fun formatSearchResult(observable: Observable<SubredditChildren>): Observable<SearchResult> {
-        return observable.flatMap { subredditChildren ->
-            val subredditChildObservable = Observable.fromArray(subredditChildren)
-            Observable.zip<Subreddit, SubredditChildren, SearchResult>(
-                    formatSubreddit(subredditChildObservable),
-                    subredditChildObservable,
+    fun formatSearchResult(flowable: Flowable<SubredditChildren>): Flowable<SearchResult> {
+        return flowable.flatMap { subredditChildren ->
+            val subredditChildFlowable = Flowable.fromArray(subredditChildren)
+            Flowable.zip<Subreddit, SubredditChildren, SearchResult>(
+                    formatSubreddit(subredditChildFlowable),
+                    subredditChildFlowable,
                     io.reactivex.functions.BiFunction({ subreddit: Subreddit, subredditChild: SubredditChildren ->
 
                         val subredditResponse = subredditChild.subreddit

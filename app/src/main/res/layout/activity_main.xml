@@ -48,7 +48,7 @@
         layout="@layout/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        app:layout_anchor="@id/viewpager"
+        app:layout_anchosubId"@id/viewpager"
         app:layout_anchorGravity="bottom"/>
     -->
 </android.support.design.widget.CoordinatorLayout>

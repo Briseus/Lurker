@@ -141,6 +141,11 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:$rootProject.ext.rxJavaVersion"
     implementation "io.reactivex.rxjava2:rxkotlin:$rootProject.ext.rxKotlinVersion"
 
+    implementation "android.arch.persistence.room:runtime:$rootProject.ext.room"
+    kapt "android.arch.persistence.room:compiler:$rootProject.ext.room"
+    implementation "android.arch.persistence.room:rxjava2:$rootProject.ext.room"
+
+
     // Timber and leak canary dependencies
     implementation "com.jakewharton.timber:timber:$rootProject.ext.timberVersion"
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$rootProject.ext.leakCanaryVersion"

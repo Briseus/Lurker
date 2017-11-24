@@ -18,6 +18,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(modules = arrayOf(ActivityBindingModule::class,
         AppModule::class,
+        DatabaseModule::class,
         NetModule::class,
         RedditAuthModule::class,
         RedditModule::class,
@@ -29,6 +30,7 @@ interface AppComponent : AndroidInjector<DaggerApplication> {
     fun inject(application: MyApplication)
 
     fun redditRepository(): RedditRepository
+
 
     override fun inject(instance: DaggerApplication)
 

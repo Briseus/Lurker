@@ -5,11 +5,11 @@ import android.os.Bundle
 import android.view.View
 import dagger.Lazy
 import dagger.android.support.DaggerAppCompatActivity
-import io.reactivex.Observable
+import io.reactivex.Flowable
 import kotlinx.android.synthetic.main.activity_applink.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.rx2.awaitFirst
+import kotlinx.coroutines.experimental.reactive.awaitFirst
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.comments.CommentActivity
@@ -81,7 +81,7 @@ class AppLinkActivity : DaggerAppCompatActivity() {
         Timber.d("Searching for " + subredditName)
         val subReddit: Subreddit? = redditApi.get().getSubredditInfo(subredditName)
                 .doOnError { setNotFound("$subredditName ${this@AppLinkActivity.getString(R.string.not_found)}") }
-                .flatMap { TextHelper.formatSubreddit(Observable.fromArray(it)) }
+                .flatMap { TextHelper.formatSubreddit(Flowable.fromArray(it)) }
                 .awaitFirst()
 
         subReddit?.apply {

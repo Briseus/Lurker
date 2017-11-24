@@ -43,7 +43,7 @@ data class CommentResponse(
         val replies: CommentListing? = CommentListing("", CommentData(emptyList(), "", "")),
         @SerializedName("saved")
         val saved: Boolean = false,
-        @SerializedName("id")
+        @SerializedName("subId")
         val id: String = "",
         @SerializedName("gilded")
         val gilded: Int = -1,

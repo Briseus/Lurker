@@ -2,8 +2,8 @@ package torille.fi.lurkforreddit.subreddits
 
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subscribers.DisposableSubscriber
 import timber.log.Timber
 import torille.fi.lurkforreddit.data.RedditRepository
 import torille.fi.lurkforreddit.data.models.view.Subreddit
@@ -32,22 +32,22 @@ internal constructor(private val mRedditRepository: RedditRepository) : Subreddi
         disposables.add(mRedditRepository.getSubreddits()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableObserver<List<Subreddit>>() {
-                    override fun onNext(@io.reactivex.annotations.NonNull subreddits: List<Subreddit>) {
-                        Timber.d("Got this")
-                        mSubredditsView?.showSubreddits(subreddits)
-                    }
-
-                    override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
-                        mSubredditsView?.onError(e.toString())
-                        mSubredditsView?.setProgressIndicator(false)
-                        Timber.e(e)
-                    }
-
+                .subscribeWith(object : DisposableSubscriber<List<Subreddit>>() {
                     override fun onComplete() {
-                        EspressoIdlingResource.decrement() // Set app as idle.
+                        Timber.d("Got complete")
+                    }
+
+                    override fun onError(t: Throwable?) {
+                        mSubredditsView?.onError("Hmm ${t.toString()}")
+                        mSubredditsView?.setProgressIndicator(false)
+                        Timber.e(t)
+                    }
+
+                    override fun onNext(subreddits: List<Subreddit>?) {
+                        subreddits?.let { mSubredditsView?.showSubreddits(it)  }
                         mSubredditsView?.setProgressIndicator(false)
                     }
+
                 }))
     }
 
