@@ -47,7 +47,7 @@ ext {
     exoplayerVersion = '2.6.0'
     leakCanaryVersion = '1.5.4'
     gsonVersion = '2.8.2'
-    daggerVersion = '2.12'
+    daggerVersion = '2.13'
     rxAndroidVersion = '2.0.1'
     rxJavaVersion =  '2.1.6'
     rxKotlinVersion =  '2.1.0'
