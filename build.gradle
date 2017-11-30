@@ -49,7 +49,7 @@ ext {
     gsonVersion = '2.8.2'
     daggerVersion = '2.13'
     rxAndroidVersion = '2.0.1'
-    rxJavaVersion =  '2.1.6'
+    rxJavaVersion =  '2.1.7'
     rxKotlinVersion =  '2.1.0'
     kotlinCoroutinesVersion = '0.19.3'
     room = '1.0.0'
