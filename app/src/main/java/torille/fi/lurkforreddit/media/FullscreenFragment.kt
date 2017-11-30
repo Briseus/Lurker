@@ -151,6 +151,12 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
 
         exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
         exoPlayer.addListener(object : Player.EventListener {
+            override fun onPositionDiscontinuity(reason: Int) {}
+
+            override fun onSeekProcessed() {}
+
+            override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {}
+
             override fun onRepeatModeChanged(repeatMode: Int) {}
 
             override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {}
@@ -171,8 +177,6 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
             }
 
             override fun onLoadingChanged(isLoading: Boolean) {}
-
-            override fun onPositionDiscontinuity() {}
 
             override fun onTimelineChanged(timeline: Timeline?, manifest: Any?) {}
 
