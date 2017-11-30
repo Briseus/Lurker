@@ -43,7 +43,7 @@ ext {
     paperParcelVersion = '2.0.4'
     frescoVersion = '1.5.0'
     timberVersion = '4.5.1'
-    photoDraweeViewVersion = '1.1.2'
+    photoDraweeViewVersion = '1.1.3'
     exoplayerVersion = 'r2.5.3'
     leakCanaryVersion = '1.5.4'
     gsonVersion = '2.8.2'
