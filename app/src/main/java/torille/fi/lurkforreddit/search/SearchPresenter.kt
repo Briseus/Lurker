@@ -2,11 +2,8 @@ package torille.fi.lurkforreddit.search
 
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.observers.DisposableObserver
-import io.reactivex.observers.SafeObserver
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subscribers.DisposableSubscriber
-import io.reactivex.subscribers.ResourceSubscriber
 import timber.log.Timber
 import torille.fi.lurkforreddit.data.RedditRepository
 import torille.fi.lurkforreddit.data.models.view.SearchResult
