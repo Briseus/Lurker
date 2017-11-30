@@ -12,7 +12,8 @@
         android:theme="@style/AppTheme.NoActionBar">
         <activity
             android:name=".subreddits.SubredditsActivity"
-            android:theme="@style/AppTheme.Launcher">
+            android:theme="@style/AppTheme.Launcher"
+            android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
