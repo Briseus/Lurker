@@ -4,16 +4,19 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
-import torille.fi.lurkforreddit.di.scope.Local
 import torille.fi.lurkforreddit.data.RedditDataSource
 import torille.fi.lurkforreddit.data.SubredditDao
 import torille.fi.lurkforreddit.data.models.view.*
-import java.util.concurrent.Callable
+import torille.fi.lurkforreddit.di.scope.Local
 import javax.inject.Inject
 
 @Local
 class RedditLocalDataSource @Inject
 internal constructor(private val subredditDao: SubredditDao) : RedditDataSource {
+
+    override fun saveSubreddits(subreddits: List<Subreddit>) {
+        subredditDao.insertAll(subreddits)
+    }
 
     override fun getSubreddits(): Flowable<List<Subreddit>> {
         return subredditDao.getSubreddits()

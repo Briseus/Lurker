@@ -13,6 +13,8 @@ interface RedditDataSource {
 
     fun saveSubreddit(subreddit: Subreddit)
 
+    fun saveSubreddits(subreddits: List<Subreddit>)
+
     fun getSubredditPosts(subredditUrl: String): Observable<kotlin.Pair<String, List<Post>>>
 
     fun getMoreSubredditPosts(subredditUrl: String,

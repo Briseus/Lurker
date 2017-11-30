@@ -3,7 +3,6 @@ package torille.fi.lurkforreddit.data
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import timber.log.Timber
 import torille.fi.lurkforreddit.data.models.view.*
 import torille.fi.lurkforreddit.di.scope.Local
 import torille.fi.lurkforreddit.di.scope.Remote
@@ -14,7 +13,9 @@ import javax.inject.Singleton
 class RedditRepository @Inject
 constructor(@Remote private val redditRemoteApi: RedditDataSource, @Local private val redditLocalApi: RedditDataSource) : RedditDataSource {
 
-    private var cachedSubreddits: List<Subreddit> = emptyList()
+    override fun saveSubreddits(subreddits: List<Subreddit>) {
+       return redditLocalApi.saveSubreddits(subreddits)
+    }
 
     override fun getSubreddits(): Flowable<List<Subreddit>> {
         return redditLocalApi
@@ -26,10 +27,10 @@ constructor(@Remote private val redditRemoteApi: RedditDataSource, @Local privat
                         redditRemoteApi.getSubreddits()
                                 .observeOn(Schedulers.io())
                                 .doOnNext {
-                                    it.map { redditLocalApi.saveSubreddit(it) }
+                                    redditLocalApi.saveSubreddits(it)
                                 }
                     }
-                }.concatMap { it }
+                }.flatMap { it }
 
     }
 
@@ -46,7 +47,6 @@ constructor(@Remote private val redditRemoteApi: RedditDataSource, @Local privat
     }
 
     override fun refreshData() {
-        Timber.d("Nuking")
         redditLocalApi.refreshData()
     }
 

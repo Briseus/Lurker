@@ -31,6 +31,10 @@ internal constructor(private val redditApi: RedditService.Reddit,
                      private val store: Store,
                      private val commentsStreamingParser: CommentsStreamingParser) : RedditDataSource {
 
+    override fun saveSubreddits(subreddit: List<Subreddit>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun saveSubreddit(subreddit: Subreddit) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
