@@ -2,6 +2,8 @@
 # Created by https://www.gitignore.io/api/android,androidstudio
 
 # Custom
+
+/app/prod/
  
 #Config
 app/src/main/res/values/values.xml
