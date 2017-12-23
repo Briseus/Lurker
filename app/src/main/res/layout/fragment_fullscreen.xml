@@ -2,11 +2,17 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginTop="-7dp">
+    android:layout_height="match_parent">
 
-    <me.relex.photodraweeview.PhotoDraweeView
+    <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
         android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/fullscreen_image"
+        android:visibility="gone" />
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/gifView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/fullscreen_image"
@@ -23,6 +29,7 @@
         layout="@layout/progress_bar_horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="-7dp"
         android:visibility="visible" />
 
     <TextView

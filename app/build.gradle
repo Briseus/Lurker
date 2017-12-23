@@ -100,6 +100,7 @@ dependencies {
     implementation "com.android.support:customtabs:$rootProject.supportLibraryVersion"
     implementation "com.android.support:support-core-utils:$rootProject.supportLibraryVersion"
     implementation "com.android.support:support-fragment:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:exifinterface:$rootProject.supportLibraryVersion"
     implementation "com.android.support.test.espresso:espresso-idling-resource:$rootProject.ext.espressoVersion"
     implementation "com.android.support.constraint:constraint-layout:$rootProject.constraintVersion"
 
@@ -126,14 +127,18 @@ dependencies {
     implementation "com.facebook.fresco:fresco:$rootProject.ext.frescoVersion"
     implementation "com.facebook.fresco:animated-gif:$rootProject.ext.frescoVersion"
     implementation "com.facebook.fresco:animated-webp:$rootProject.ext.frescoVersion"
-    implementation "com.facebook.fresco:imagepipeline-okhttp3:$rootProject.ext.frescoVersion"
-    implementation "me.relex:photodraweeview:$rootProject.ext.photoDraweeViewVersion"
+    implementation ("com.facebook.fresco:imagepipeline-okhttp3:$rootProject.ext.frescoVersion"){
+        exclude module: 'okhttp'
+    }
+    implementation "com.davemorrissey.labs:subsampling-scale-image-view:$rootProject.ext.subSamplingScaleImageViewVersion"
 
     // Exoplayer
     implementation "com.google.android.exoplayer:exoplayer-core:$rootProject.ext.exoplayerVersion"
     implementation "com.google.android.exoplayer:exoplayer-ui:$rootProject.ext.exoplayerVersion"
     implementation "com.google.android.exoplayer:exoplayer-dash:$rootProject.ext.exoplayerVersion"
-    implementation "com.google.android.exoplayer:extension-okhttp:$rootProject.ext.exoplayerVersion"
+    implementation ("com.google.android.exoplayer:extension-okhttp:$rootProject.ext.exoplayerVersion"){
+        exclude module: 'okhttp'
+    }
 
     // Because RxAndroid releases are few and far between, it is recommended you also
     // explicitly depend on RxJava's latest version for bug fixes and new features.

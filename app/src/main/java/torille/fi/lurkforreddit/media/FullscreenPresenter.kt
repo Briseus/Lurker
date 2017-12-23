@@ -23,8 +23,11 @@ internal constructor(val post: Post,
     override fun checkType() {
         Timber.d("Presenter got ${post.url} $previewUrl")
         when (TextHelper.getLastFourChars(post.url)) {
-            ".gif", "webp", ".png", ".jpg", "jpeg" -> {
+            ".png", ".jpg", "jpeg" -> {
                 fullscreenView?.showImage(post.url, previewUrl)
+            }
+            ".gif", "webp" -> {
+                fullscreenView?.showGif(post.url, previewUrl)
             }
             "gifv" -> {
                 fullscreenView?.showVideo(post.url.substring(0, post.url.length - 4) + "mp4")

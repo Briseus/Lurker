@@ -8,6 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.Toast
+import com.davemorrissey.labs.subscaleview.ImageSource
+import com.facebook.common.executors.UiThreadImmediateExecutorService
+import com.facebook.common.memory.PooledByteBuffer
+import com.facebook.common.memory.PooledByteBufferInputStream
+import com.facebook.common.references.CloseableReference
+import com.facebook.datasource.BaseDataSubscriber
+import com.facebook.datasource.DataSource
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.drawee.controller.AbstractDraweeController
 import com.facebook.drawee.controller.BaseControllerListener
@@ -36,6 +43,7 @@ import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenContract.View {
@@ -78,6 +86,47 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
         return inflater.inflate(R.layout.fragment_fullscreen, container, false)
     }
 
+    override fun showImage(url: String, previewImageUrl: String?) {
+        imageView.visibility = View.VISIBLE
+
+        val imageRequest = ImageRequestBuilder
+                .newBuilderWithSource(Uri.parse(url))
+                .build()
+
+        val dataSource = Fresco.getImagePipeline().fetchEncodedImage(imageRequest, this)
+        dataSource.subscribe(object : BaseDataSubscriber<CloseableReference<PooledByteBuffer>>() {
+            override fun onNewResultImpl(dataSource: DataSource<CloseableReference<PooledByteBuffer>>?) {
+                dataSource?.let {
+                    if (!it.isFinished) {
+                        return
+                    }
+                    it.result?.let { result ->
+                        val tempFile = createTempFile("tempimage", ".tmp")
+                        PooledByteBufferInputStream(result.get()).use { inputStream ->
+                            FileOutputStream(tempFile).use { outputStream ->
+                                inputStream.copyTo(outputStream)
+                                progressBarHorizontal.hide()
+                                imageView.setImage(ImageSource.uri(tempFile.toURI().path))
+                            }
+                        }
+                        CloseableReference.closeSafely(result)
+                    }
+                }
+            }
+
+            override fun onFailureImpl(dataSource: DataSource<CloseableReference<PooledByteBuffer>>?) {
+                progressBarHorizontal.hide()
+            }
+
+        }, UiThreadImmediateExecutorService.getInstance())
+
+    }
+
+    override fun showGif(url: String, previewImageUrl: String?) {
+        gifView.visibility = View.VISIBLE
+        gifView.controller = setupController(url, previewImageUrl)
+    }
+
     private fun setupController(url: String, previewImageUrl: String?): AbstractDraweeController<*, *> {
         val previewImgUrl = if (previewImageUrl.isNullOrEmpty()) "" else previewImageUrl
 
@@ -93,15 +142,8 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
                 .setAutoPlayAnimations(true)
                 .setImageRequest(imageRequest)
                 .setLowResImageRequest(lowResRequest)
-                .setOldController(imageView.controller)
+                .setOldController(gifView.controller)
                 .setControllerListener(object : BaseControllerListener<ImageInfo>() {
-                    override fun onIntermediateImageSet(id: String?, imageInfo: ImageInfo?) {
-                        super.onIntermediateImageSet(id, imageInfo)
-                        if (imageInfo == null) {
-                            return
-                        }
-                        imageView.update(imageInfo.width, imageInfo.height)
-                    }
 
                     override fun onFinalImageSet(id: String?, imageInfo: ImageInfo?, animatable: Animatable?) {
                         super.onFinalImageSet(id, imageInfo, animatable)
@@ -109,22 +151,14 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
                             Timber.d("Had an error")
                             return
                         }
-                        removeMarginTop()
-                        imageView.update(imageInfo.width, imageInfo.height)
+                        progressBarHorizontal.hide()
+                    }
+
+                    override fun onFailure(id: String?, throwable: Throwable?) {
+                        super.onFailure(id, throwable)
+                        progressBarHorizontal.hide()
                     }
                 }).build()
-    }
-
-    override fun showImage(url: String, previewImageUrl: String?) {
-        progressBarHorizontal.visibility = View.INVISIBLE
-        imageView.visibility = View.VISIBLE
-        imageView.hierarchy.setProgressBarImage(progressBarHorizontal.progressDrawable)
-
-        launch(UI) {
-            val controller = async { setupController(url, previewImageUrl) }
-            imageView.controller = controller.await()
-        }
-
     }
 
     override fun showVideo(url: String, isDash: Boolean) {
@@ -165,13 +199,13 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
 
             override fun onPlayerError(error: ExoPlaybackException?) {
                 Timber.e(error)
+                progressBarHorizontal.hide()
                 Toast.makeText(context, "Failed to find video", Toast.LENGTH_SHORT).show()
             }
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == Player.STATE_READY) {
                     progressBarHorizontal.hide()
-                    removeMarginTop()
                     videoView.visibility = View.VISIBLE
                 }
             }
@@ -206,11 +240,6 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
     override fun showNoVideoFound() {
         progressBarHorizontal.hide()
         notFound.visibility = View.VISIBLE
-    }
-
-    private fun removeMarginTop() {
-        val params = container.layoutParams as FrameLayout.LayoutParams
-        params.setMargins(0, 0, 0, 0)
     }
 
     override fun checkDomain(url: String) {
