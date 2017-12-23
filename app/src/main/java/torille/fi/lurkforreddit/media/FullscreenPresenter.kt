@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 class FullscreenPresenter @Inject
 internal constructor(val post: Post,
-                     val previewUrl: String?) : FullscreenContract.Presenter {
+                     private val previewUrl: String?) : FullscreenContract.Presenter {
 
     @Inject lateinit var streamableApi: Lazy<VideositeService.Streamable>
     private val disposables = CompositeDisposable()

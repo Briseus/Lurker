@@ -134,7 +134,7 @@ internal constructor(private val redditApi: RedditService.Reddit,
                 .concatMap(formatSearchData)
     }
 
-    fun getUserMultireddits(): Flowable<List<Subreddit>> {
+    private fun getUserMultireddits(): Flowable<List<Subreddit>> {
         return redditApi.getUserMultireddits()
                 .observeOn(Schedulers.computation())
                 .map { multiredditListingArray ->

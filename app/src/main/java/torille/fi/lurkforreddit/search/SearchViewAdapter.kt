@@ -37,10 +37,10 @@ internal class SearchViewAdapter internal constructor(private val mClickListener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
-        when (viewType) {
-            VIEW_ITEM -> return SearchViewHolder(LayoutInflater.from(parent.context)
+        return when (viewType) {
+            VIEW_ITEM -> SearchViewHolder(LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_search, parent, false))
-            else -> return ProgressViewHolder(LayoutInflater.from(parent.context)
+            else -> ProgressViewHolder(LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_progressbar, parent, false))
         }
     }
@@ -54,10 +54,10 @@ internal class SearchViewAdapter internal constructor(private val mClickListener
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (results.get(position).title == "Progressbar") {
-            return VIEW_PROGRESS
+        return if (results.get(position).title == "Progressbar") {
+            VIEW_PROGRESS
         } else {
-            return VIEW_ITEM
+            VIEW_ITEM
         }
     }
 
@@ -71,7 +71,7 @@ internal class SearchViewAdapter internal constructor(private val mClickListener
         addAll(newResults)
     }
 
-    internal fun addAll(newResults: List<SearchResult>) {
+    private fun addAll(newResults: List<SearchResult>) {
         results.beginBatchedUpdates()
         newResults.map { results.add(it) }
         results.endBatchedUpdates()
@@ -89,9 +89,9 @@ internal class SearchViewAdapter internal constructor(private val mClickListener
 
     internal inner class SearchViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val title: TextView = v.findViewById(R.id.subreddit_title)
-        val infoText: TextView = v.findViewById(R.id.subreddits_infotext)
-        val description: TextView = v.findViewById(R.id.subreddit_description)
-        val subscribe: Button = v.findViewById(R.id.subreddit_subscribe)
+        private val infoText: TextView = v.findViewById(R.id.subreddits_infotext)
+        private val description: TextView = v.findViewById(R.id.subreddit_description)
+        private val subscribe: Button = v.findViewById(R.id.subreddit_subscribe)
 
         init {
             description.movementMethod = LinkMovementMethod.getInstance()

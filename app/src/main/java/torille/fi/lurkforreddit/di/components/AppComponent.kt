@@ -16,15 +16,7 @@ import javax.inject.Singleton
  */
 
 @Singleton
-@Component(modules = arrayOf(ActivityBindingModule::class,
-        AppModule::class,
-        DatabaseModule::class,
-        NetModule::class,
-        RedditAuthModule::class,
-        RedditModule::class,
-        StreamableModule::class,
-        RedditRepositoryModule::class,
-        AndroidSupportInjectionModule::class))
+@Component(modules = [(ActivityBindingModule::class), (AppModule::class), (DatabaseModule::class), (NetModule::class), (RedditAuthModule::class), (RedditModule::class), (StreamableModule::class), (RedditRepositoryModule::class), (AndroidSupportInjectionModule::class)])
 interface AppComponent : AndroidInjector<DaggerApplication> {
 
     fun inject(application: MyApplication)

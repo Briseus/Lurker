@@ -13,9 +13,9 @@ import java.util.*
 import javax.inject.Inject
 
 class CommentPresenter @Inject
-internal constructor(val redditRepository: RedditRepository,
+internal constructor(private val redditRepository: RedditRepository,
                      val post: Post,
-                     val isSingleCommentThread: Boolean) : CommentContract.Presenter {
+                     private val isSingleCommentThread: Boolean) : CommentContract.Presenter {
 
     private lateinit var commentsView: CommentContract.View
     private val disposables = CompositeDisposable()

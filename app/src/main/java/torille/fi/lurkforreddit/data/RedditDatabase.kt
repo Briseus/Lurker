@@ -6,7 +6,7 @@ import torille.fi.lurkforreddit.data.models.view.Subreddit
 import javax.inject.Singleton
 
 @Singleton
-@Database(entities = arrayOf(Subreddit::class),
+@Database(entities = [(Subreddit::class)],
         version = 1)
 abstract class RedditDatabase : RoomDatabase() {
 

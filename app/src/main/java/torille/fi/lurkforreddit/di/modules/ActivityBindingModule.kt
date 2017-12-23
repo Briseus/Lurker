@@ -20,19 +20,19 @@ import torille.fi.lurkforreddit.utils.AppLinkActivity
 abstract class ActivityBindingModule {
 
     @ActivityScoped
-    @ContributesAndroidInjector(modules = arrayOf(SubredditPresenterModule::class, SubredditModule::class))
+    @ContributesAndroidInjector(modules = [(SubredditPresenterModule::class), (SubredditModule::class)])
     abstract fun subredditActivity(): SubredditActivity
 
     @ActivityScoped
-    @ContributesAndroidInjector(modules = arrayOf(SubredditsPresenterModule::class, SearchPresenterModule::class, SubredditPresenterModule::class, FrontPageModule::class))
+    @ContributesAndroidInjector(modules = [(SubredditsPresenterModule::class), (SearchPresenterModule::class), (SubredditPresenterModule::class), (FrontPageModule::class)])
     abstract fun subredditsActivity(): SubredditsActivity
 
     @ActivityScoped
-    @ContributesAndroidInjector(modules = arrayOf(CommentPresenterModule::class))
+    @ContributesAndroidInjector(modules = [(CommentPresenterModule::class)])
     abstract fun commentActivity(): CommentActivity
 
     @ActivityScoped
-    @ContributesAndroidInjector(modules = arrayOf(FullscreenPresenterModule::class))
+    @ContributesAndroidInjector(modules = [(FullscreenPresenterModule::class)])
     abstract fun fullscreenActivity(): FullscreenActivity
 
     @ActivityScoped
