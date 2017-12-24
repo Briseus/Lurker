@@ -30,7 +30,7 @@ android {
         applicationId "torille.fi.lurkforreddit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 25
+        versionCode 26
         versionName "0.8.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -39,12 +39,12 @@ android {
         release {
             shrinkResources true
             minifyEnabled true
-            proguardFile 'proguard-fresco.pro'
-            proguardFile 'proguard-gson.pro'
-            proguardFile 'proguard-retrofit.pro'
-            proguardFile 'proguard-rules.pro'
-            proguardFile 'proguard-okhttp.pro'
-            proguardFiles getDefaultProguardFile('proguard-android.txt')
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                    'proguard-fresco.pro',
+                    'proguard-gson.pro',
+                    'proguard-retrofit.pro',
+                    'proguard-rules.pro',
+                    'proguard-okhttp.pro'
             testProguardFile 'proguard-test.pro'
             zipAlignEnabled true
         }
