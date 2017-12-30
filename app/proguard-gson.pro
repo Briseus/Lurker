@@ -10,7 +10,7 @@
 -keep class com.google.gson.stream.** { *; }
 
 # Application classes that will be serialized/deserialized over Gson
--keep class torille.fi.lurkforreddit.data.models.** { *; }
+-keep class torille.fi.lurkforreddit.data.models.jsonResponses.** { *; }
 
 # Prevent proguard from stripping interface information from TypeAdapterFactory,
 # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
