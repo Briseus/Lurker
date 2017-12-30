@@ -3,21 +3,22 @@ package torille.fi.lurkforreddit.media
 import android.graphics.drawable.Animatable
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.Toast
 import com.davemorrissey.labs.subscaleview.ImageSource
+import com.facebook.binaryresource.FileBinaryResource
 import com.facebook.common.executors.UiThreadImmediateExecutorService
-import com.facebook.common.memory.PooledByteBuffer
-import com.facebook.common.memory.PooledByteBufferInputStream
-import com.facebook.common.references.CloseableReference
 import com.facebook.datasource.BaseDataSubscriber
 import com.facebook.datasource.DataSource
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.drawee.controller.AbstractDraweeController
 import com.facebook.drawee.controller.BaseControllerListener
 import com.facebook.imagepipeline.image.ImageInfo
+import com.facebook.imagepipeline.request.ImageRequest
 import com.facebook.imagepipeline.request.ImageRequestBuilder
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory
@@ -42,7 +43,6 @@ import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import timber.log.Timber
 import torille.fi.lurkforreddit.R
-import java.io.FileOutputStream
 import javax.inject.Inject
 
 class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenContract.View {
@@ -92,41 +92,66 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
                 .newBuilderWithSource(Uri.parse(url))
                 .build()
 
-        val dataSource = Fresco.getImagePipeline().fetchEncodedImage(imageRequest, this)
-        dataSource.subscribe(object : BaseDataSubscriber<CloseableReference<PooledByteBuffer>>() {
-            override fun onNewResultImpl(dataSource: DataSource<CloseableReference<PooledByteBuffer>>?) {
+        if (Fresco.getImagePipeline().isInDiskCache(imageRequest).result == true) {
+            setImage(imageRequest)
+        } else {
+            prefetchImage(imageRequest)
+        }
+
+    }
+
+    private fun setImage(imageRequest: ImageRequest) {
+        progressBarHorizontal.hide()
+        val cacheKey = Fresco.getImagePipeline().cacheKeyFactory.getEncodedCacheKey(imageRequest, this)
+        val file: FileBinaryResource = Fresco.getImagePipelineFactory().mainFileCache.getResource(cacheKey) as FileBinaryResource
+        imageView.setImage(ImageSource.uri(file.file.absolutePath))
+
+    }
+
+    private fun prefetchImage(imageRequest: ImageRequest) {
+        val dataSource = Fresco.getImagePipeline().prefetchToDiskCache(imageRequest, this)
+        progressBarHorizontal.isIndeterminate = false
+        dataSource.subscribe(object : BaseDataSubscriber<Void>() {
+            override fun onNewResultImpl(dataSource: DataSource<Void>?) {
                 dataSource?.let {
-                    if (!it.isFinished) {
-                        return
-                    }
-                    it.result?.let { result ->
-                        val tempFile = createTempFile("tempimage", ".tmp")
-                        PooledByteBufferInputStream(result.get()).use { inputStream ->
-                            FileOutputStream(tempFile).use { outputStream ->
-                                inputStream.copyTo(outputStream)
-                                progressBarHorizontal.hide()
-                                imageView.setImage(ImageSource.uri(tempFile.toURI().path))
-                            }
-                        }
-                        CloseableReference.closeSafely(result)
+                    Timber.d("Finished")
+                    it.isFinished.let {
+                        Handler().postDelayed({
+                            setImage(imageRequest)
+                        }, 50) // need a delay as the file not always already
                     }
                 }
             }
 
-            override fun onFailureImpl(dataSource: DataSource<CloseableReference<PooledByteBuffer>>?) {
+            override fun onFailureImpl(dataSource: DataSource<Void>?) {
                 progressBarHorizontal.hide()
             }
 
-        }, UiThreadImmediateExecutorService.getInstance())
+            override fun onProgressUpdate(dataSource: DataSource<Void>?) {
+                super.onProgressUpdate(dataSource)
+                dataSource?.let {
+                    progressBarHorizontal.progress = (it.progress * 100).toInt()
+                }
 
+            }
+        }, UiThreadImmediateExecutorService.getInstance())
     }
 
     override fun showGif(url: String, previewImageUrl: String?) {
         gifView.visibility = View.VISIBLE
         gifView.controller = setupController(url, previewImageUrl)
+        setTopMargin(-20)
+    }
+
+    private fun setTopMargin(topMargin: Int) {
+        val params = container.layoutParams as FrameLayout.LayoutParams
+        params.setMargins(0, topMargin, 0, 0)
     }
 
     private fun setupController(url: String, previewImageUrl: String?): AbstractDraweeController<*, *> {
+        progressBarHorizontal.visibility = View.INVISIBLE
+        gifView.hierarchy.setProgressBarImage(progressBarHorizontal.progressDrawable)
+
         val previewImgUrl = if (previewImageUrl.isNullOrEmpty()) "" else previewImageUrl
 
         val lowResRequest = ImageRequestBuilder
@@ -143,21 +168,12 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
                 .setLowResImageRequest(lowResRequest)
                 .setOldController(gifView.controller)
                 .setControllerListener(object : BaseControllerListener<ImageInfo>() {
-
                     override fun onFinalImageSet(id: String?, imageInfo: ImageInfo?, animatable: Animatable?) {
                         super.onFinalImageSet(id, imageInfo, animatable)
-                        if (imageInfo == null) {
-                            Timber.d("Had an error")
-                            return
-                        }
-                        progressBarHorizontal.hide()
+                        setTopMargin(0)
                     }
-
-                    override fun onFailure(id: String?, throwable: Throwable?) {
-                        super.onFailure(id, throwable)
-                        progressBarHorizontal.hide()
-                    }
-                }).build()
+                })
+                .build()
     }
 
     override fun showVideo(url: String, isDash: Boolean) {
