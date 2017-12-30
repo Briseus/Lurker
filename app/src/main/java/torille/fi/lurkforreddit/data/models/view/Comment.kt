@@ -1,13 +1,12 @@
 package torille.fi.lurkforreddit.data.models.view
 
-import android.os.Parcel
 import android.os.Parcelable
-import paperparcel.PaperParcel
+import kotlinx.android.parcel.Parcelize
 
 /**
  * Data class for comments
  */
-@PaperParcel
+@Parcelize
 data class Comment(
         val id: String = "",
         val name: String = "",
@@ -21,15 +20,4 @@ data class Comment(
         val formattedScore: String = "",
         val childCommentIds: List<String>? = null,
         val replies: List<Comment>? = null
-) : Parcelable {
-    companion object {
-        @JvmField val CREATOR = PaperParcelComment.CREATOR
-    }
-
-    override fun describeContents() = 0
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-        PaperParcelComment.writeToParcel(this, dest, flags)
-    }
-}
-
+) : Parcelable

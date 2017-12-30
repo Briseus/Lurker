@@ -3,6 +3,10 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
+androidExtensions {
+    experimental = true
+}
+
 // Create a variable called keystorePropertiesFile, and initialize it to
 // keystore.properties file, in the rootProject folder.
 def keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -11,7 +15,6 @@ def keystoreProperties = new Properties()
 
 // Load keystore.properties file into the keystoreProperties object.
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-
 android {
 
     signingConfigs {
@@ -89,8 +92,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$rootProject.ext.kotlinCoroutinesVersion"
     implementation "com.google.code.gson:gson:$rootProject.ext.gsonVersion"
-    implementation "nz.bradcampbell:paperparcel:$rootProject.ext.paperParcelVersion"
-    kapt "nz.bradcampbell:paperparcel-compiler:$rootProject.ext.paperParcelVersion"
 
     // App dependencies
     implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
