@@ -101,10 +101,12 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
     }
 
     private fun setImage(imageRequest: ImageRequest) {
-        progressBarHorizontal.hide()
+        progressBarHorizontal?.hide()
         val cacheKey = Fresco.getImagePipeline().cacheKeyFactory.getEncodedCacheKey(imageRequest, this)
-        val file: FileBinaryResource = Fresco.getImagePipelineFactory().mainFileCache.getResource(cacheKey) as FileBinaryResource
-        imageView.setImage(ImageSource.uri(file.file.absolutePath))
+        Fresco.getImagePipelineFactory().mainFileCache.getResource(cacheKey)?.let {
+            val resource: FileBinaryResource = it as FileBinaryResource
+            imageView.setImage(ImageSource.uri(resource.file.absolutePath))
+        }
 
     }
 
@@ -124,13 +126,13 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
             }
 
             override fun onFailureImpl(dataSource: DataSource<Void>?) {
-                progressBarHorizontal.hide()
+                progressBarHorizontal?.hide()
             }
 
             override fun onProgressUpdate(dataSource: DataSource<Void>?) {
                 super.onProgressUpdate(dataSource)
                 dataSource?.let {
-                    progressBarHorizontal.progress = (it.progress * 100).toInt()
+                    progressBarHorizontal?.progress = (it.progress * 100).toInt()
                 }
 
             }
