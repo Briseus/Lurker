@@ -106,7 +106,7 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
 
     fun changeToErrorAt(position: Int) {
         val error = mComments[position] as Comment
-        val errorComment = Comment(
+        val errorComment = error.copy(
                 kind = kind.MORE,
                 id = "Retry",
                 commentText = "Retry",
