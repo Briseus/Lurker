@@ -78,8 +78,8 @@ object TextHelper {
                     kind = torille.fi.lurkforreddit.data.models.view.kind.DEFAULT
                     commentText = formatTextToHtml(commentData.bodyHtml)
                 }
-                commentData.id == "_" -> commentText = "Continue this thread"
                 commentData.children.isNotEmpty() -> commentText = "Load more comments (" + commentData.count + ")"
+                commentData.id == "" -> commentText = "Continue this thread"
             }
 
             val responseAuthor = commentData.author

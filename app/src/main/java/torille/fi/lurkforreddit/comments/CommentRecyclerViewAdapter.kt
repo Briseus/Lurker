@@ -208,18 +208,21 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
         }
 
         override fun onClick(v: View) {
-            Timber.d(mComment!!.toString())
+            val clickedComment = mComment
+            Timber.d(clickedComment?.toString())
             val (id, _, _, permaLink) = mComments[0] as Post
-            if (mComment!!.id == "_") {
-
-                //remove t1_ from start of subId
-                val parentId = mComment!!.parentId.substring(3)
-                val permalinkToComment = "https://www.reddit.com$permaLink$parentId"
-                Timber.d("Going to open permalink $permalinkToComment")
-                mClickListener.onContinueThreadClick(permalinkToComment)
-            } else {
-                mClickListener.onClick(mComment!!, id, adapterPosition)
+            clickedComment?.let {
+                if (it.childCommentIds != null && it.childCommentIds.isNotEmpty()) {
+                    mClickListener.onClick(mComment!!, id, adapterPosition)
+                } else {
+                    //remove t1_ from start of subId
+                    val parentId = clickedComment.parentId.substring(3)
+                    val permalinkToComment = "https://www.reddit.com$permaLink$parentId"
+                    Timber.d("Going to open permalink $permalinkToComment")
+                    mClickListener.onContinueThreadClick(permalinkToComment)
+                }
             }
+
         }
 
     }
