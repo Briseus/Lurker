@@ -159,10 +159,11 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
                 flairText.text = mClickedPost.flairText
             }
 
-            if (selftext.isNotEmpty()) {
-                this.selftext.text = selftext
+            if (selfText.isNotEmpty()) {
+                selftext.visibility = View.VISIBLE
+                selftext.text = selfText
             } else {
-                this.selftext.visibility = View.GONE
+                selftext.visibility = View.GONE
             }
 
         }
