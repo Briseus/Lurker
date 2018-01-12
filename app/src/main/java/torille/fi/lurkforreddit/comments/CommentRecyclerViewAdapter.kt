@@ -16,7 +16,11 @@ import torille.fi.lurkforreddit.data.models.view.Comment
 import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.data.models.view.kind
 
-internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any>, private val mClickListener: CommentFragment.CommentClickListener, private val quoteColor: Int) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+internal class CommentRecyclerViewAdapter(
+        private var comments: MutableList<Any>,
+        private val clickListener: CommentFragment.CommentClickListener,
+        private val quoteColor: Int
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
@@ -37,12 +41,12 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is CommentViewHolder -> holder.bind(mComments[position] as Comment)
-            is CommentLoadMoreViewHolder -> holder.bind(mComments[position] as Comment)
-            is PostViewHolder -> holder.bind(mComments[position] as Post)
+            is CommentViewHolder -> holder.bind(comments[position] as Comment)
+            is CommentLoadMoreViewHolder -> holder.bind(comments[position] as Comment)
+            is PostViewHolder -> holder.bind(comments[position] as Post)
             is ProgressViewHolder -> {
                 holder.progressBar.isIndeterminate = true
-                holder.bind(mComments[position] as Comment)
+                holder.bind(comments[position] as Comment)
             }
         }
     }
@@ -51,8 +55,8 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
 
         if (position == 0) {
             return COMMENT_ORIGINAL
-        } else if (mComments[position] is Comment) {
-            return when ((mComments[position] as Comment).kind) {
+        } else if (comments[position] is Comment) {
+            return when ((comments[position] as Comment).kind) {
                 kind.SINGLECOMMENTTOP -> COMMENT_TOP
                 kind.MORE -> COMMENT_LOAD_MORE
                 kind.PROGRESSBAR -> COMMENT_PROGRESSBAR
@@ -64,18 +68,17 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
     }
 
     override fun getItemCount(): Int {
-        return mComments.size
+        return comments.size
     }
 
     fun replaceData(comments: List<Any>) {
         launch(UI) {
             kotlin.run {
-                mComments.clear()
-                mComments.addAll(comments)
+                this@CommentRecyclerViewAdapter.comments.clear()
+                this@CommentRecyclerViewAdapter.comments.addAll(comments)
             }
             notifyDataSetChanged()
         }
-
 
     }
 
@@ -94,10 +97,10 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
     fun addProgressbar(position: Int, level: Int) {
         Timber.d("Adding to " + position)
         if (position > 1) {
-            mComments[position] = createProgressbar(level)
+            comments[position] = createProgressbar(level)
             notifyItemChanged(position)
         } else {
-            mComments.add(position, createProgressbar(level))
+            comments.add(position, createProgressbar(level))
             notifyItemInserted(position)
 
         }
@@ -105,25 +108,25 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
     }
 
     fun changeToErrorAt(position: Int) {
-        val error = mComments[position] as Comment
+        val error = comments[position] as Comment
         val errorComment = error.copy(
                 kind = kind.MORE,
                 id = "Retry",
                 commentText = "Retry",
                 commentLevel = error.commentLevel)
-        mComments[position] = errorComment
+        comments[position] = errorComment
         notifyItemChanged(position, error)
 
     }
 
     fun removeAt(position: Int) {
-        mComments.removeAt(position)
+        comments.removeAt(position)
         notifyItemRemoved(position)
 
     }
 
     fun addAllCommentsTo(position: Int, comments: List<Comment>) {
-        mComments.addAll(position, comments)
+        this.comments.addAll(position, comments)
         notifyItemRangeInserted(position, comments.size)
 
     }
@@ -141,15 +144,15 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
         }
 
         fun bind(mClickedPost: Post) {
-            val selftext = mClickedPost.selfText
-
+            val selfText = mClickedPost.selfText
+            
             if (mClickedPost.title.isEmpty()) {
                 author.text = ""
                 title.text = ""
             } else {
                 val time = DateUtils.getRelativeTimeSpanString(mClickedPost.createdUtc * 1000)
-                val author = "${mClickedPost.score} points | Submitted $time by ${mClickedPost.author}"
-                this.author.text = author
+                val formattedAuthor = "${mClickedPost.score} points | Submitted $time by ${mClickedPost.author}"
+                author.text = formattedAuthor
                 title.text = mClickedPost.title
             }
             if (mClickedPost.flairText.isEmpty()) {
@@ -183,16 +186,16 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
         }
 
         fun bind(comment: Comment) {
-            mComment = comment
-            commentText.text = mComment!!.commentText
-            commentAuthor.text = mComment!!.author
-            commentScore.text = mComment!!.formattedScore
+            this.comment = comment
+            commentText.text = this.comment!!.commentText
+            commentAuthor.text = this.comment!!.author
+            commentScore.text = this.comment!!.formattedScore
         }
 
     }
 
     internal open inner class CommentNormalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var mComment: Comment? = null
+        var comment: Comment? = null
 
     }
 
@@ -204,23 +207,23 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
         }
 
         fun bind(commentChild: Comment) {
-            mComment = commentChild
-            clickMore.text = mComment!!.commentText
+            comment = commentChild
+            clickMore.text = comment!!.commentText
         }
 
         override fun onClick(v: View) {
-            val clickedComment = mComment
+            val clickedComment = comment
             Timber.d(clickedComment?.toString())
-            val (id, _, _, permaLink) = mComments[0] as Post
+            val (id, _, _, permaLink) = comments[0] as Post
             clickedComment?.let {
                 if (it.childCommentIds != null && it.childCommentIds.isNotEmpty()) {
-                    mClickListener.onClick(mComment!!, id, adapterPosition)
+                    clickListener.onClick(comment!!, id, adapterPosition)
                 } else {
                     //remove t1_ from start of subId
                     val parentId = clickedComment.parentId.substring(3)
                     val permalinkToComment = "https://www.reddit.com$permaLink$parentId"
                     Timber.d("Going to open permalink $permalinkToComment")
-                    mClickListener.onContinueThreadClick(permalinkToComment)
+                    clickListener.onContinueThreadClick(permalinkToComment)
                 }
             }
 
@@ -232,7 +235,7 @@ internal class CommentRecyclerViewAdapter(private var mComments: MutableList<Any
         val progressBar: ProgressBar = view.findViewById(R.id.progressBar)
 
         fun bind(commentChild: Comment) {
-            mComment = commentChild
+            comment = commentChild
         }
     }
 

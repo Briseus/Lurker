@@ -23,9 +23,9 @@ internal class CommentsItemDecoration(private val mDivider: Drawable) : Recycler
                 .map { parent.getChildAt(it) }
                 .forEach {
                     if (parent.getChildViewHolder(it) is CommentRecyclerViewAdapter.CommentViewHolder) {
-                        draw((parent.getChildViewHolder(it) as CommentRecyclerViewAdapter.CommentViewHolder).mComment!!, it, canvas)
+                        draw((parent.getChildViewHolder(it) as CommentRecyclerViewAdapter.CommentViewHolder).comment!!, it, canvas)
                     } else if (parent.getChildViewHolder(it) is CommentRecyclerViewAdapter.CommentLoadMoreViewHolder) {
-                        draw((parent.getChildViewHolder(it) as CommentRecyclerViewAdapter.CommentLoadMoreViewHolder).mComment!!, it, canvas)
+                        draw((parent.getChildViewHolder(it) as CommentRecyclerViewAdapter.CommentLoadMoreViewHolder).comment!!, it, canvas)
                     }
                 }
 
@@ -53,9 +53,9 @@ internal class CommentsItemDecoration(private val mDivider: Drawable) : Recycler
         }
 
         when {
-            parent.getChildViewHolder(view) is CommentRecyclerViewAdapter.CommentViewHolder -> setPadding((parent.getChildViewHolder(view) as CommentRecyclerViewAdapter.CommentViewHolder).mComment!!, outRect)
-            parent.getChildViewHolder(view) is CommentRecyclerViewAdapter.CommentLoadMoreViewHolder -> setPadding((parent.getChildViewHolder(view) as CommentRecyclerViewAdapter.CommentLoadMoreViewHolder).mComment!!, outRect)
-            parent.getChildViewHolder(view) is CommentRecyclerViewAdapter.ProgressViewHolder -> setPadding((parent.getChildViewHolder(view) as CommentRecyclerViewAdapter.ProgressViewHolder).mComment!!, outRect)
+            parent.getChildViewHolder(view) is CommentRecyclerViewAdapter.CommentViewHolder -> setPadding((parent.getChildViewHolder(view) as CommentRecyclerViewAdapter.CommentViewHolder).comment!!, outRect)
+            parent.getChildViewHolder(view) is CommentRecyclerViewAdapter.CommentLoadMoreViewHolder -> setPadding((parent.getChildViewHolder(view) as CommentRecyclerViewAdapter.CommentLoadMoreViewHolder).comment!!, outRect)
+            parent.getChildViewHolder(view) is CommentRecyclerViewAdapter.ProgressViewHolder -> setPadding((parent.getChildViewHolder(view) as CommentRecyclerViewAdapter.ProgressViewHolder).comment!!, outRect)
         }
 
     }
