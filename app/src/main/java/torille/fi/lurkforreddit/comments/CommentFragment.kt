@@ -16,7 +16,6 @@ import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Comment
 import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.utils.AppLinkActivity
-import java.util.*
 import javax.inject.Inject
 
 class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.View {
@@ -31,13 +30,7 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        commentAdapter = CommentRecyclerViewAdapter(setupList(post), mClickListener, ContextCompat.getColor(context!!, R.color.colorAccent))
-    }
-
-    private fun setupList(post: Post): MutableList<Any> {
-        val list = ArrayList<Any>()
-        list.add(post)
-        return mutableListOf(post)
+        commentAdapter = CommentRecyclerViewAdapter(mutableListOf(post), clickListener, ContextCompat.getColor(context!!, R.color.colorAccent))
     }
 
     override fun onResume() {
@@ -59,20 +52,21 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val context = context!!
+        context?.let { context ->
+            commentRecyclerView.setHasFixedSize(true)
+            commentRecyclerView.addItemDecoration(CommentsItemDecoration(ContextCompat.getDrawable(context, R.drawable.comment_item_decorator)!!))
+            commentRecyclerView.layoutManager = LinearLayoutManager(context)
+            commentRecyclerView.adapter = commentAdapter
 
-        commentRecyclerView.setHasFixedSize(true)
-        commentRecyclerView.addItemDecoration(CommentsItemDecoration(ContextCompat.getDrawable(context, R.drawable.comment_item_decorator)!!))
-        commentRecyclerView.layoutManager = LinearLayoutManager(context)
-        commentRecyclerView.adapter = commentAdapter
 
+            refreshLayout.setColorSchemeColors(
+                    ContextCompat.getColor(context, R.color.colorPrimary),
+                    ContextCompat.getColor(context, R.color.colorAccent),
+                    ContextCompat.getColor(context, R.color.colorPrimaryDark))
 
-        refreshLayout.setColorSchemeColors(
-                ContextCompat.getColor(context, R.color.colorPrimary),
-                ContextCompat.getColor(context, R.color.colorAccent),
-                ContextCompat.getColor(context, R.color.colorPrimaryDark))
+            refreshLayout.setOnRefreshListener { actionsListener.loadComments(post.permaLink, singleCommentThread) }
+        }
 
-        refreshLayout.setOnRefreshListener { actionsListener.loadComments(post.permaLink, singleCommentThread) }
     }
 
     override fun showComments(comments: List<Any>) {
@@ -108,7 +102,7 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
     /**
      * Listener for clicks on notes in the RecyclerView.
      */
-    private val mClickListener = object : CommentClickListener {
+    private val clickListener = object : CommentClickListener {
         override fun onClick(parentComment: Comment, linkId: String, position: Int) {
             actionsListener.loadMoreCommentsAt(parentComment, linkId, position)
         }
