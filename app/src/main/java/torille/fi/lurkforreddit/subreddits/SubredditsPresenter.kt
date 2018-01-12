@@ -38,7 +38,6 @@ internal constructor(private val mRedditRepository: RedditRepository) : Subreddi
                     }
 
                     override fun onError(t: Throwable?) {
-                        mSubredditsView?.onError("Hmm ${t.toString()}")
                         mSubredditsView?.setProgressIndicator(false)
                         Timber.e(t)
                     }

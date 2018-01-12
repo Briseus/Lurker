@@ -30,7 +30,7 @@ internal constructor(private val redditRepository: RedditRepository) : SearchCon
                         searchView?.showResults(resultPair.second)
                     }
 
-                    override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
+                    override fun onError(e: Throwable) {
                         Timber.e(e)
                         searchView?.showError(e.toString())
                     }
@@ -53,7 +53,7 @@ internal constructor(private val redditRepository: RedditRepository) : SearchCon
                         searchView?.showResults(resultPair.second)
                     }
 
-                    override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
+                    override fun onError(e: Throwable) {
                         Timber.e(e)
                         searchView?.showError(e.toString())
                     }

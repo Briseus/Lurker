@@ -47,7 +47,7 @@ internal constructor(val post: Post,
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<StreamableVideo>() {
-                    override fun onNext(@io.reactivex.annotations.NonNull streamableVideo: StreamableVideo) {
+                    override fun onNext(streamableVideo: StreamableVideo) {
                         var videoUrl = "https:"
                         val mobileVideo = streamableVideo.videos.mobileVideo
                         videoUrl += if (mobileVideo != null) {

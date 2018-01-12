@@ -28,14 +28,15 @@ internal constructor(private val redditRepository: RedditRepository,
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<PostAndComments>() {
-                    override fun onNext(@io.reactivex.annotations.NonNull postAndComments: PostAndComments) {
+                    override fun onNext(postAndComments: PostAndComments) {
                         val comments = ArrayList<Any>(postAndComments.comments.size + 1)
+                        Timber.d("Hmm ${postAndComments.originalPost}")
                         comments.add(postAndComments.originalPost)
                         comments.addAll(postAndComments.comments)
                         commentsView.showComments(comments)
                     }
 
-                    override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
+                    override fun onError(e: Throwable) {
                         Timber.e(e)
                         commentsView.setProgressIndicator(false)
                         commentsView.showError(e.toString())
@@ -57,12 +58,12 @@ internal constructor(private val redditRepository: RedditRepository,
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(object : DisposableObserver<List<Comment>>() {
-                        override fun onNext(@io.reactivex.annotations.NonNull comments: List<Comment>) {
+                        override fun onNext(comments: List<Comment>) {
                             commentsView.hideProgressbarAt(position)
                             commentsView.addCommentsAt(comments, position)
                         }
 
-                        override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
+                        override fun onError(e: Throwable) {
                             Timber.e(e)
                             commentsView.showErrorAt(position)
                         }

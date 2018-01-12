@@ -51,13 +51,13 @@ internal constructor(private val redditRepository: RedditRepository,
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<kotlin.Pair<String, List<Post>>>() {
-                    override fun onNext(@io.reactivex.annotations.NonNull posts: kotlin.Pair<String, List<Post>>) {
+                    override fun onNext(posts: kotlin.Pair<String, List<Post>>) {
                         Timber.d("Got posts to presenter")
                         nextPageId = posts.first
                         subredditsView?.showPosts(posts.second, posts.first)
                     }
 
-                    override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
+                    override fun onError(e: Throwable) {
                         Timber.e("Got error")
                         Timber.e(e)
                         subredditsView?.onError(e.toString())
