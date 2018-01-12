@@ -10,12 +10,12 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import torille.fi.lurkforreddit.data.RedditDataSource
 import torille.fi.lurkforreddit.data.RedditService
-import torille.fi.lurkforreddit.di.scope.Remote
 import torille.fi.lurkforreddit.data.models.jsonResponses.CommentListing
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostListing
 import torille.fi.lurkforreddit.data.models.jsonResponses.PostResponse
 import torille.fi.lurkforreddit.data.models.jsonResponses.SubredditListing
 import torille.fi.lurkforreddit.data.models.view.*
+import torille.fi.lurkforreddit.di.scope.Remote
 import torille.fi.lurkforreddit.utils.CommentsStreamingParser
 import torille.fi.lurkforreddit.utils.Store
 import torille.fi.lurkforreddit.utils.TextHelper
@@ -93,10 +93,10 @@ internal constructor(private val redditApi: RedditService.Reddit,
                 .observeOn(Schedulers.computation())
                 .concatMap { commentListings ->
                     val commentListingsObservable = Observable.fromArray(commentListings)
-                    Observable.zip<Post, List<Comment>, PostAndComments>(getPost(commentListingsObservable),
-                            getFormattedComments(commentListingsObservable,
-                                    isSingleCommentThread),
-                            BiFunction<Post, List<Comment>, PostAndComments> { post, comments -> PostAndComments(post, comments) })
+                    Observable.zip<Post, List<Comment>, PostAndComments>(
+                            getPost(commentListingsObservable),
+                            getFormattedComments(commentListingsObservable, isSingleCommentThread),
+                            BiFunction { post, comments -> PostAndComments(post, comments) })
                 }
     }
 
