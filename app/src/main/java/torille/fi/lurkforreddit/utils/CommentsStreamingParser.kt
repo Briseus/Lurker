@@ -92,7 +92,7 @@ constructor(val gson: Gson) {
 
     @Throws(IOException::class)
     private fun readCommentListing(reader: JsonReader): CommentListing {
-        var kind: String = ""
+        var kind = ""
         var commentData: CommentData = CommentData(emptyList(), "", "")
 
         reader.beginObject()
@@ -114,8 +114,8 @@ constructor(val gson: Gson) {
     @Throws(IOException::class)
     private fun readCommentData(reader: JsonReader): CommentData {
         var commentChildren: List<CommentChild> = emptyList()
-        var after: String = ""
-        var before: String = ""
+        var after = ""
+        var before = ""
 
         reader.beginObject()
         while (reader.hasNext()) {
@@ -158,7 +158,7 @@ constructor(val gson: Gson) {
 
     @Throws(IOException::class)
     private fun readCommentChild(reader: JsonReader): CommentChild {
-        var kind: String = ""
+        var kind = ""
         var postDetails: PostDetails? = null
         var comment = CommentResponse()
 
@@ -183,25 +183,25 @@ constructor(val gson: Gson) {
 
     @Throws(IOException::class)
     private fun readComment(reader: JsonReader): CommentResponse {
-        var subredditId: String = ""
-        var linkId: String = ""
+        var subredditId = ""
+        var linkId = ""
         var replies: CommentListing = CommentListing()
         var saved = false
-        var id: String = ""
+        var id = ""
         var gilded = 0
         var archived = false
-        var author: String = ""
-        var parendId: String = ""
+        var author = ""
+        var parendId = ""
         var score = 0
         var controversiality = 0
-        var bodyHtml: String = ""
+        var bodyHtml = ""
         var stickied = false
-        var subreddit: String = ""
+        var subreddit = ""
         var scoreHidden = false
         var edited = false
-        var name: String = ""
+        var name = ""
         var createdUtc: Long = 0
-        var authorFlairText: String = ""
+        var authorFlairText = ""
         var ups = 0
         var count = 0
         var childrenIds: List<String> = emptyList()
