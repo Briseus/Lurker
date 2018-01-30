@@ -29,11 +29,11 @@ class RedditModule(private val baseUrl: String) {
             val originalHttpUrl = originalRequest.url()
 
             val url = originalHttpUrl.newBuilder()
-                    .addQueryParameter("raw_json", "1")
-                    .build()
+                .addQueryParameter("raw_json", "1")
+                .build()
 
             val requestBuilder = originalRequest.newBuilder()
-                    .url(url)
+                .url(url)
 
             val request = requestBuilder.build()
             chain.proceed(request)
@@ -43,8 +43,10 @@ class RedditModule(private val baseUrl: String) {
     @Provides
     @Singleton
     @Named("tokenInterceptor")
-    internal fun providesTokenInterceptor(store: Store,
-                                          networkHelper: NetworkHelper): Interceptor {
+    internal fun providesTokenInterceptor(
+        store: Store,
+        networkHelper: NetworkHelper
+    ): Interceptor {
         return Interceptor { chain ->
             val original = chain.request()
 
@@ -58,8 +60,8 @@ class RedditModule(private val baseUrl: String) {
                 }
 
                 val requestBuilder = original.newBuilder()
-                        .header("Authorization", "bearer " + token)
-                        .method(original.method(), original.body())
+                    .header("Authorization", "bearer " + token)
+                    .method(original.method(), original.body())
 
                 val request = requestBuilder.build()
                 chain.proceed(request)
@@ -87,8 +89,8 @@ class RedditModule(private val baseUrl: String) {
                     return null
                 }
                 return response.request().newBuilder()
-                        .addHeader("Authorization", "bearer " + newAccessToken)
-                        .build()
+                    .addHeader("Authorization", "bearer " + newAccessToken)
+                    .build()
             }
 
             internal fun responseCount(response: Response): Int {
@@ -103,26 +105,30 @@ class RedditModule(private val baseUrl: String) {
 
     @Provides
     @Singleton
-    internal fun providesRedditService(gsonConverterFactory: GsonConverterFactory,
-                                       okHttpClient: OkHttpClient,
-                                       rxJava2CallAdapterFactory: RxJava2CallAdapterFactory,
-                                       authenticator: Authenticator,
-                                       @Named("rawJson") rawJsonInterceptor: Interceptor,
-                                       @Named("tokenInterceptor") tokenInterceptor: Interceptor)
+    internal fun providesRedditService(
+        gsonConverterFactory: GsonConverterFactory,
+        okHttpClient: OkHttpClient,
+        rxJava2CallAdapterFactory: RxJava2CallAdapterFactory,
+        authenticator: Authenticator,
+        @Named("rawJson") rawJsonInterceptor: Interceptor,
+        @Named("tokenInterceptor") tokenInterceptor: Interceptor
+    )
             : RedditService.Reddit {
 
 
         val retrofit = Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .addConverterFactory(gsonConverterFactory)
-                .addCallAdapterFactory(rxJava2CallAdapterFactory)
-                .client(okHttpClient
-                        .newBuilder()
-                        .addInterceptor(rawJsonInterceptor)
-                        .addNetworkInterceptor(tokenInterceptor)
-                        .authenticator(authenticator)
-                        .build())
-                .build()
+            .baseUrl(baseUrl)
+            .addConverterFactory(gsonConverterFactory)
+            .addCallAdapterFactory(rxJava2CallAdapterFactory)
+            .client(
+                okHttpClient
+                    .newBuilder()
+                    .addInterceptor(rawJsonInterceptor)
+                    .addNetworkInterceptor(tokenInterceptor)
+                    .authenticator(authenticator)
+                    .build()
+            )
+            .build()
 
         return retrofit.create(RedditService.Reddit::class.java)
     }

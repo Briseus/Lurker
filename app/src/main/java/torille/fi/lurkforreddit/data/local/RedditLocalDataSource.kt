@@ -31,19 +31,30 @@ internal constructor(private val subredditDao: SubredditDao) : RedditDataSource 
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getMoreSubredditPosts(subredditUrl: String, nextpageId: String): Observable<Pair<String, List<Post>>> {
+    override fun getMoreSubredditPosts(
+        subredditUrl: String,
+        nextpageId: String
+    ): Observable<Pair<String, List<Post>>> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun refreshData() {
-        Observable.fromCallable({ subredditDao.deleteAllSubreddits() }).subscribeOn(Schedulers.io()).subscribe()
+        Observable.fromCallable({ subredditDao.deleteAllSubreddits() }).subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
-    override fun getCommentsForPost(permaLinkUrl: String, isSingleCommentThread: Boolean): Observable<PostAndComments> {
+    override fun getCommentsForPost(
+        permaLinkUrl: String,
+        isSingleCommentThread: Boolean
+    ): Observable<PostAndComments> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getMoreCommentsForPostAt(childCommentIds: List<String>, linkId: String, commentLevel: Int): Observable<List<Comment>> {
+    override fun getMoreCommentsForPostAt(
+        childCommentIds: List<String>,
+        linkId: String,
+        commentLevel: Int
+    ): Observable<List<Comment>> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -51,7 +62,10 @@ internal constructor(private val subredditDao: SubredditDao) : RedditDataSource 
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getMoreSearchResults(query: String, after: String): Flowable<Pair<String, List<SearchResult>>> {
+    override fun getMoreSearchResults(
+        query: String,
+        after: String
+    ): Flowable<Pair<String, List<SearchResult>>> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

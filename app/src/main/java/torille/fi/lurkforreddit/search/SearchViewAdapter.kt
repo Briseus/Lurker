@@ -13,35 +13,45 @@ import android.widget.TextView
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.SearchResult
 
-internal class SearchViewAdapter internal constructor(private val mClickListener: SearchFragment.SearchClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+internal class SearchViewAdapter internal constructor(private val mClickListener: SearchFragment.SearchClickListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val results: SortedList<SearchResult>
 
     init {
-        results = SortedList(SearchResult::class.java, object : SortedListAdapterCallback<SearchResult>(this) {
-            override fun compare(o1: SearchResult, o2: SearchResult): Int {
-                if (o1.title == o2.title) {
-                    return 0
+        results = SortedList(
+            SearchResult::class.java,
+            object : SortedListAdapterCallback<SearchResult>(this) {
+                override fun compare(o1: SearchResult, o2: SearchResult): Int {
+                    if (o1.title == o2.title) {
+                        return 0
+                    }
+                    return -1
                 }
-                return -1
-            }
 
-            override fun areContentsTheSame(oldItem: SearchResult, newItem: SearchResult): Boolean {
-                return oldItem == newItem
-            }
+                override fun areContentsTheSame(
+                    oldItem: SearchResult,
+                    newItem: SearchResult
+                ): Boolean {
+                    return oldItem == newItem
+                }
 
-            override fun areItemsTheSame(item1: SearchResult, item2: SearchResult): Boolean {
-                return item1.title == item2.title
-            }
-        })
+                override fun areItemsTheSame(item1: SearchResult, item2: SearchResult): Boolean {
+                    return item1.title == item2.title
+                }
+            })
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
         return when (viewType) {
-            VIEW_ITEM -> SearchViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_search, parent, false))
-            else -> ProgressViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_progressbar, parent, false))
+            VIEW_ITEM -> SearchViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_search, parent, false)
+            )
+            else -> ProgressViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_progressbar, parent, false)
+            )
         }
     }
 

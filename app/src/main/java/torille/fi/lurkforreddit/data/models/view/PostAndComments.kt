@@ -8,6 +8,6 @@ import kotlinx.android.parcel.Parcelize
  */
 @Parcelize
 data class PostAndComments(
-        val originalPost: Post,
-        val comments: List<Comment>
+    val originalPost: Post,
+    val comments: List<Comment>
 ) : Parcelable

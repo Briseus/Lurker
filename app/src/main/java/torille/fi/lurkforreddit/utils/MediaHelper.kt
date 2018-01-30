@@ -48,8 +48,10 @@ object MediaHelper {
         }
     }
 
-    fun createCustomTabIntentAsync(context: Context,
-                                   session: CustomTabsSession?): Deferred<CustomTabsIntent> = async {
+    fun createCustomTabIntentAsync(
+        context: Context,
+        session: CustomTabsSession?
+    ): Deferred<CustomTabsIntent> = async {
 
         val intentBuilder = CustomTabsIntent.Builder(session)
 
@@ -65,8 +67,10 @@ object MediaHelper {
         intentBuilder.setInstantAppsEnabled(true)
 
         intentBuilder.setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left)
-        intentBuilder.setExitAnimations(context, android.R.anim.slide_in_left,
-                android.R.anim.slide_out_right)
+        intentBuilder.setExitAnimations(
+            context, android.R.anim.slide_in_left,
+            android.R.anim.slide_out_right
+        )
 
         intentBuilder.build()
     }

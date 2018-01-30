@@ -15,7 +15,10 @@ import java.util.*
 /**
  * [RecyclerView.Adapter] for showing subreddits
  */
-internal class SubredditsAdapter internal constructor(private val mItemListener: SubredditsFragment.SubredditItemListener, color: Int) : RecyclerView.Adapter<SubredditsAdapter.ViewHolder>() {
+internal class SubredditsAdapter internal constructor(
+    private val mItemListener: SubredditsFragment.SubredditItemListener,
+    color: Int
+) : RecyclerView.Adapter<SubredditsAdapter.ViewHolder>() {
 
     private val mSubreddits: MutableList<Subreddit> = ArrayList(25)
     private val mDefaultColor: ColorStateList = ColorStateList.valueOf(color)
@@ -33,7 +36,8 @@ internal class SubredditsAdapter internal constructor(private val mItemListener:
         if (keyColor.isNullOrEmpty()) {
             viewHolder.colorButton.backgroundTintList = mDefaultColor
         } else {
-            viewHolder.colorButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(keyColor))
+            viewHolder.colorButton.backgroundTintList =
+                    ColorStateList.valueOf(Color.parseColor(keyColor))
         }
     }
 
@@ -47,7 +51,8 @@ internal class SubredditsAdapter internal constructor(private val mItemListener:
         return mSubreddits.size
     }
 
-    internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
+        View.OnClickListener {
         val title: TextView = itemView.findViewById(R.id.item_subreddit_title)
         val colorButton: Button = itemView.findViewById(R.id.item_subreddit_circle)
 

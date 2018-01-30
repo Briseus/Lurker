@@ -16,7 +16,8 @@ import javax.inject.Inject
 
 class FullscreenActivity : DaggerAppCompatActivity() {
 
-    @Inject lateinit var post: Post
+    @Inject
+    lateinit var post: Post
 
     private lateinit var shareActionProvider: ShareActionProvider
 
@@ -57,9 +58,15 @@ class FullscreenActivity : DaggerAppCompatActivity() {
         super.onConfigurationChanged(newConfig)
         if (fullscreen_content != null) {
             if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                fullscreen_content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                fullscreen_content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
             } else {
-                fullscreen_content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                fullscreen_content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
             }
         }
     }

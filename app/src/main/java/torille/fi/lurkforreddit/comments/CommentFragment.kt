@@ -20,8 +20,10 @@ import javax.inject.Inject
 
 class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.View {
 
-    @Inject internal lateinit var post: Post
-    @Inject internal lateinit var actionsListener: CommentContract.Presenter
+    @Inject
+    internal lateinit var post: Post
+    @Inject
+    internal lateinit var actionsListener: CommentContract.Presenter
     @Inject
     @JvmField
     var singleCommentThread: Boolean = false
@@ -30,7 +32,11 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        commentAdapter = CommentRecyclerViewAdapter(mutableListOf(post), clickListener, ContextCompat.getColor(context!!, R.color.colorAccent))
+        commentAdapter = CommentRecyclerViewAdapter(
+            mutableListOf(post),
+            clickListener,
+            ContextCompat.getColor(context!!, R.color.colorAccent)
+        )
     }
 
     override fun onResume() {
@@ -43,9 +49,11 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
         actionsListener.dropView()
     }
 
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
         return inflater.inflate(R.layout.fragment_comments, container, false)
     }
@@ -54,17 +62,30 @@ class CommentFragment @Inject constructor() : DaggerFragment(), CommentContract.
         super.onViewCreated(view, savedInstanceState)
         context?.let { context ->
             commentRecyclerView.setHasFixedSize(true)
-            commentRecyclerView.addItemDecoration(CommentsItemDecoration(ContextCompat.getDrawable(context, R.drawable.comment_item_decorator)!!))
+            commentRecyclerView.addItemDecoration(
+                CommentsItemDecoration(
+                    ContextCompat.getDrawable(
+                        context,
+                        R.drawable.comment_item_decorator
+                    )!!
+                )
+            )
             commentRecyclerView.layoutManager = LinearLayoutManager(context)
             commentRecyclerView.adapter = commentAdapter
 
 
             refreshLayout.setColorSchemeColors(
-                    ContextCompat.getColor(context, R.color.colorPrimary),
-                    ContextCompat.getColor(context, R.color.colorAccent),
-                    ContextCompat.getColor(context, R.color.colorPrimaryDark))
+                ContextCompat.getColor(context, R.color.colorPrimary),
+                ContextCompat.getColor(context, R.color.colorAccent),
+                ContextCompat.getColor(context, R.color.colorPrimaryDark)
+            )
 
-            refreshLayout.setOnRefreshListener { actionsListener.loadComments(post.permaLink, singleCommentThread) }
+            refreshLayout.setOnRefreshListener {
+                actionsListener.loadComments(
+                    post.permaLink,
+                    singleCommentThread
+                )
+            }
         }
 
     }

@@ -36,12 +36,13 @@ class SimpleCountingIdlingResource
 
  * @param resourceName the resource name this resource should report to Espresso.
  */
-(private val mResourceName: String) : IdlingResource {
+    (private val mResourceName: String) : IdlingResource {
 
     private val counter = AtomicInteger(0)
 
     // written from main thread, read from any thread.
-    @Volatile private var resourceCallback: IdlingResource.ResourceCallback? = null
+    @Volatile
+    private var resourceCallback: IdlingResource.ResourceCallback? = null
 
     override fun getName(): String {
         return mResourceName

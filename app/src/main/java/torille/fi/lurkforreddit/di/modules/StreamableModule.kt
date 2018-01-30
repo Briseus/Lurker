@@ -18,18 +18,22 @@ class StreamableModule(private val baseUrl: String) {
 
     @Singleton
     @Provides
-    internal fun provideStreamableApi(okHttpClient: OkHttpClient,
-                                      gsonConverterFactory: GsonConverterFactory,
-                                      loggingInterceptor: HttpLoggingInterceptor,
-                                      rxJava2CallAdapterFactory: RxJava2CallAdapterFactory): VideositeService.Streamable {
+    internal fun provideStreamableApi(
+        okHttpClient: OkHttpClient,
+        gsonConverterFactory: GsonConverterFactory,
+        loggingInterceptor: HttpLoggingInterceptor,
+        rxJava2CallAdapterFactory: RxJava2CallAdapterFactory
+    ): VideositeService.Streamable {
         val retrofit = Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .addConverterFactory(gsonConverterFactory)
-                .addCallAdapterFactory(rxJava2CallAdapterFactory)
-                .client(okHttpClient.newBuilder()
-                        .addNetworkInterceptor(loggingInterceptor)
-                        .build())
-                .build()
+            .baseUrl(baseUrl)
+            .addConverterFactory(gsonConverterFactory)
+            .addCallAdapterFactory(rxJava2CallAdapterFactory)
+            .client(
+                okHttpClient.newBuilder()
+                    .addNetworkInterceptor(loggingInterceptor)
+                    .build()
+            )
+            .build()
 
         return retrofit.create(VideositeService.Streamable::class.java)
     }

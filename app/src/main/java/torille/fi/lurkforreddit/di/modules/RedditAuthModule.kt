@@ -21,9 +21,11 @@ class RedditAuthModule(private val clientId: String, private val baseUrl: String
 
     @Provides
     @Singleton
-    internal fun providesRedditService(gsonConverterFactory: GsonConverterFactory,
-                                       rxJava2CallAdapterFactory: RxJava2CallAdapterFactory,
-                                       okHttpClient: OkHttpClient): RedditService.Auth {
+    internal fun providesRedditService(
+        gsonConverterFactory: GsonConverterFactory,
+        rxJava2CallAdapterFactory: RxJava2CallAdapterFactory,
+        okHttpClient: OkHttpClient
+    ): RedditService.Auth {
 
         val basic = Credentials.basic(clientId, "")
 
@@ -31,25 +33,25 @@ class RedditAuthModule(private val clientId: String, private val baseUrl: String
             val originalRequest = chain.request()
 
             val requestBuilder = originalRequest.newBuilder()
-                    .header("Authorization", basic)
-                    .header("Accept", "application/json")
-                    .method(originalRequest.method(), originalRequest.body())
+                .header("Authorization", basic)
+                .header("Accept", "application/json")
+                .method(originalRequest.method(), originalRequest.body())
 
             val request = requestBuilder.build()
             chain.proceed(request)
         }
 
         val okHttpInstance = okHttpClient
-                .newBuilder()
-                .addNetworkInterceptor(authHeader)
-                .build()
+            .newBuilder()
+            .addNetworkInterceptor(authHeader)
+            .build()
 
         val retrofit = Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .addConverterFactory(gsonConverterFactory)
-                .addCallAdapterFactory(rxJava2CallAdapterFactory)
-                .client(okHttpInstance)
-                .build()
+            .baseUrl(baseUrl)
+            .addConverterFactory(gsonConverterFactory)
+            .addCallAdapterFactory(rxJava2CallAdapterFactory)
+            .client(okHttpInstance)
+            .build()
 
         return retrofit.create(RedditService.Auth::class.java)
     }

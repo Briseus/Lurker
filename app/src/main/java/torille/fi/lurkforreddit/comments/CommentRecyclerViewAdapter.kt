@@ -17,25 +17,35 @@ import torille.fi.lurkforreddit.data.models.view.Post
 import torille.fi.lurkforreddit.data.models.view.kind
 
 internal class CommentRecyclerViewAdapter(
-        private var comments: MutableList<Any>,
-        private val clickListener: CommentFragment.CommentClickListener,
-        private val quoteColor: Int
+    private var comments: MutableList<Any>,
+    private val clickListener: CommentFragment.CommentClickListener,
+    private val quoteColor: Int
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            COMMENT_ORIGINAL -> PostViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_comment_clicked_post, parent, false))
-            COMMENT_LOAD_MORE -> CommentLoadMoreViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_comment_loadmore, parent, false))
-            COMMENT_PROGRESSBAR -> ProgressViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_progressbar, parent, false))
-            COMMENT_TOP -> TopSingleCommentThreadViewHolder(LayoutInflater
+            COMMENT_ORIGINAL -> PostViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_comment_clicked_post, parent, false)
+            )
+            COMMENT_LOAD_MORE -> CommentLoadMoreViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_comment_loadmore, parent, false)
+            )
+            COMMENT_PROGRESSBAR -> ProgressViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_progressbar, parent, false)
+            )
+            COMMENT_TOP -> TopSingleCommentThreadViewHolder(
+                LayoutInflater
                     .from(parent.context)
-                    .inflate(R.layout.item_comment_top_comment, parent, false))
+                    .inflate(R.layout.item_comment_top_comment, parent, false)
+            )
         //COMMENT_NORMAL,
-            else -> CommentViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_comment_constraint, parent, false))
+            else -> CommentViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_comment_constraint, parent, false)
+            )
         }
     }
 
@@ -110,10 +120,11 @@ internal class CommentRecyclerViewAdapter(
     fun changeToErrorAt(position: Int) {
         val error = comments[position] as Comment
         val errorComment = error.copy(
-                kind = kind.MORE,
-                id = "Retry",
-                commentText = "Retry",
-                commentLevel = error.commentLevel)
+            kind = kind.MORE,
+            id = "Retry",
+            commentText = "Retry",
+            commentLevel = error.commentLevel
+        )
         comments[position] = errorComment
         notifyItemChanged(position, error)
 
@@ -145,13 +156,14 @@ internal class CommentRecyclerViewAdapter(
 
         fun bind(mClickedPost: Post) {
             val selfText = mClickedPost.selfText
-            
+
             if (mClickedPost.title.isEmpty()) {
                 author.text = ""
                 title.text = ""
             } else {
                 val time = DateUtils.getRelativeTimeSpanString(mClickedPost.createdUtc * 1000)
-                val formattedAuthor = "${mClickedPost.score} points | Submitted $time by ${mClickedPost.author}"
+                val formattedAuthor =
+                    "${mClickedPost.score} points | Submitted $time by ${mClickedPost.author}"
                 author.text = formattedAuthor
                 title.text = mClickedPost.title
             }
@@ -194,12 +206,14 @@ internal class CommentRecyclerViewAdapter(
 
     }
 
-    internal open inner class CommentNormalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    internal open inner class CommentNormalViewHolder(itemView: View) :
+        RecyclerView.ViewHolder(itemView) {
         var comment: Comment? = null
 
     }
 
-    internal inner class CommentLoadMoreViewHolder(view: View) : CommentNormalViewHolder(view), View.OnClickListener {
+    internal inner class CommentLoadMoreViewHolder(view: View) : CommentNormalViewHolder(view),
+        View.OnClickListener {
         private val clickMore: TextView = view.findViewById(R.id.comment_loadmore)
 
         init {

@@ -32,7 +32,10 @@ abstract class CommentPresenterModule {
         @Provides
         @ActivityScoped
         internal fun provideIsSingleCommentThread(commentActivity: CommentActivity): Boolean {
-            return commentActivity.intent.getBooleanExtra(CommentActivity.IS_SINGLE_COMMENT_THREAD, false)
+            return commentActivity.intent.getBooleanExtra(
+                CommentActivity.IS_SINGLE_COMMENT_THREAD,
+                false
+            )
         }
     }
 }

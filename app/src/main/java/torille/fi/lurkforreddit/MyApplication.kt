@@ -22,14 +22,14 @@ class MyApplication : DaggerApplication() {
     override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
         val clientId = resources.getString(R.string.client_id)
         val appComponent: AppComponent = DaggerAppComponent.builder()
-                .appModule(AppModule(this))
-                .databaseModule(DatabaseModule())
-                .netModule(NetModule())
-                .redditAuthModule(RedditAuthModule(clientId, "https://www.reddit.com/api/v1/"))
-                .redditModule(RedditModule("https://oauth.reddit.com/"))
-                .streamableModule(StreamableModule("https://api.streamable.com/"))
-                .redditRepositoryModule(RedditRepositoryModule())
-                .build()
+            .appModule(AppModule(this))
+            .databaseModule(DatabaseModule())
+            .netModule(NetModule())
+            .redditAuthModule(RedditAuthModule(clientId, "https://www.reddit.com/api/v1/"))
+            .redditModule(RedditModule("https://oauth.reddit.com/"))
+            .streamableModule(StreamableModule("https://api.streamable.com/"))
+            .redditRepositoryModule(RedditRepositoryModule())
+            .build()
         appComponent.inject(this)
         return appComponent
     }
@@ -45,12 +45,12 @@ class MyApplication : DaggerApplication() {
         LeakCanary.install(this)
 
         val config = OkHttpImagePipelineConfigFactory
-                .newBuilder(this, okHttpClient)
-                .setResizeAndRotateEnabledForNetwork(false)
-                .setProgressiveJpegConfig(SimpleProgressiveJpegConfig())
-                .setDownsampleEnabled(true)
-                .experiment().setWebpSupportEnabled(true)
-                .build()
+            .newBuilder(this, okHttpClient)
+            .setResizeAndRotateEnabledForNetwork(false)
+            .setProgressiveJpegConfig(SimpleProgressiveJpegConfig())
+            .setDownsampleEnabled(true)
+            .experiment().setWebpSupportEnabled(true)
+            .build()
 
         Fresco.initialize(this, config)
 

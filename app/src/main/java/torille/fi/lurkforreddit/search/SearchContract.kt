@@ -18,7 +18,7 @@ interface SearchContract {
 
     }
 
-    interface Presenter: BasePresenter<View> {
+    interface Presenter : BasePresenter<View> {
 
         fun searchSubreddits(query: String)
 

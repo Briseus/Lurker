@@ -13,8 +13,10 @@ import torille.fi.lurkforreddit.utils.test.EspressoIdlingResource
 import javax.inject.Inject
 
 class SubredditPresenter @Inject
-internal constructor(private val redditRepository: RedditRepository,
-                     private val subreddit: Subreddit) : SubredditContract.Presenter {
+internal constructor(
+    private val redditRepository: RedditRepository,
+    private val subreddit: Subreddit
+) : SubredditContract.Presenter {
 
     private var subredditsView: SubredditContract.View? = null
     private var nextPageId: String? = null
@@ -35,7 +37,9 @@ internal constructor(private val redditRepository: RedditRepository,
         val url = post.url
         when {
             MediaHelper.isContentMedia(url, domain) -> subredditsView?.showMedia(post)
-            MediaHelper.launchCustomActivity(post.domain) -> subredditsView?.launchCustomActivity(post)
+            MediaHelper.launchCustomActivity(post.domain) -> subredditsView?.launchCustomActivity(
+                post
+            )
             post.isSelf -> openComments(post)
             else -> subredditsView?.showCustomTabsUI(url)
         }
@@ -47,7 +51,8 @@ internal constructor(private val redditRepository: RedditRepository,
         // The network request might be handled in a different thread so make sure Espresso knows
         // that the appm is busy until the response is handled.
         EspressoIdlingResource.increment() // App is busy until further notice
-        disposables.add(redditRepository.getSubredditPosts(subreddit.url)
+        disposables.add(
+            redditRepository.getSubredditPosts(subreddit.url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<kotlin.Pair<String, List<Post>>>() {
@@ -84,25 +89,26 @@ internal constructor(private val redditRepository: RedditRepository,
         } else {
             Timber.d("Fetching more posts at ${subreddit.url} subId $nextPageId")
             disposables.add(redditRepository.getMoreSubredditPosts(subreddit.url, nextPageId!!)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeWith(object : DisposableObserver<kotlin.Pair<String, List<Post>>>() {
-                        override fun onNext(@io.reactivex.annotations.NonNull postsPair: kotlin.Pair<String, List<Post>>) {
-                            nextPageId = postsPair.first
-                            subredditsView?.setListProgressIndicator(false)
-                            subredditsView?.addMorePosts(postsPair.second, postsPair.first)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(object : DisposableObserver<kotlin.Pair<String, List<Post>>>() {
+                    override fun onNext(@io.reactivex.annotations.NonNull postsPair: kotlin.Pair<String, List<Post>>) {
+                        nextPageId = postsPair.first
+                        subredditsView?.setListProgressIndicator(false)
+                        subredditsView?.addMorePosts(postsPair.second, postsPair.first)
 
-                        }
+                    }
 
-                        override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
-                            subredditsView?.onError(e.toString())
-                            subredditsView?.setListErrorButton(true)
-                        }
+                    override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
+                        subredditsView?.onError(e.toString())
+                        subredditsView?.setListErrorButton(true)
+                    }
 
-                        override fun onComplete() {
-                            EspressoIdlingResource.decrement()
-                        }
-                    }))
+                    override fun onComplete() {
+                        EspressoIdlingResource.decrement()
+                    }
+                })
+            )
         }
 
     }

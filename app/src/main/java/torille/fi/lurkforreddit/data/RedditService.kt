@@ -20,7 +20,11 @@ interface RedditService {
 
         @FormUrlEncoded
         @POST("access_token")
-        fun getUserAuthToken(@Field("grant_type") grant_type: String, @Field("code") code: String, @Field("redirect_uri") redirectUri: String): Observable<RedditToken>
+        fun getUserAuthToken(
+            @Field("grant_type") grant_type: String, @Field("code") code: String, @Field(
+                "redirect_uri"
+            ) redirectUri: String
+        ): Observable<RedditToken>
 
         @FormUrlEncoded
         @POST("access_token")
@@ -39,31 +43,69 @@ interface RedditService {
         fun getUserMultireddits(): Flowable<Array<MultiredditListing>>
 
         @GET("me/m/{multipath}")
-        fun getMultiRedditData(@Path(value = "multipath", encoded = true) multiPath: String): Call<ResponseBody>
+        fun getMultiRedditData(
+            @Path(
+                value = "multipath",
+                encoded = true
+            ) multiPath: String
+        ): Call<ResponseBody>
 
         @GET("me/m/{multipath}")
-        fun getMultiRedditDataNextPage(@Path(value = "multipath", encoded = true) multiPath: String, @Query("after") afterPage: String): Call<ResponseBody>
+        fun getMultiRedditDataNextPage(
+            @Path(
+                value = "multipath",
+                encoded = true
+            ) multiPath: String, @Query("after") afterPage: String
+        ): Call<ResponseBody>
 
         @GET("{subreddit}")
-        fun getSubreddit(@Path(value = "subreddit", encoded = true) subredditUrl: String): Observable<PostListing>
+        fun getSubreddit(
+            @Path(
+                value = "subreddit",
+                encoded = true
+            ) subredditUrl: String
+        ): Observable<PostListing>
 
         @GET("{subreddit}")
-        fun getSubredditNextPage(@Path(value = "subreddit", encoded = true) subredditUrl: String, @Query("after") afterPageId: String): Observable<PostListing>
+        fun getSubredditNextPage(
+            @Path(
+                value = "subreddit",
+                encoded = true
+            ) subredditUrl: String, @Query("after") afterPageId: String
+        ): Observable<PostListing>
 
         @GET("{comments}")
-        fun getComments(@Path(value = "comments", encoded = true) commentUrl: String): Observable<ResponseBody>
+        fun getComments(
+            @Path(
+                value = "comments",
+                encoded = true
+            ) commentUrl: String
+        ): Observable<ResponseBody>
 
         @GET("api/morechildren")
-        fun getMoreComments(@Query(value = "link_id") parentId: String, @Query(value = "children") childId: String, @Query(value = "api_type") json: String): Observable<ResponseBody>
+        fun getMoreComments(
+            @Query(value = "link_id") parentId: String, @Query(value = "children") childId: String, @Query(
+                value = "api_type"
+            ) json: String
+        ): Observable<ResponseBody>
 
         @GET("subreddits/search")
         fun searchSubreddits(@Query(value = "q") searchQuery: String, @Query(value = "sort") sortBy: String): Flowable<SubredditListing>
 
         @GET("subreddits/search")
-        fun searchSubredditsNextPage(@Query(value = "q") searchQuery: String, @Query(value = "sort") sortBy: String, @Query(value = "after") after: String): Flowable<SubredditListing>
+        fun searchSubredditsNextPage(
+            @Query(value = "q") searchQuery: String, @Query(value = "sort") sortBy: String, @Query(
+                value = "after"
+            ) after: String
+        ): Flowable<SubredditListing>
 
         @GET("{subreddit}/about")
-        fun getSubredditInfo(@Path(value = "subreddit", encoded = true) subredditName: String): Flowable<SubredditChildren>
+        fun getSubredditInfo(
+            @Path(
+                value = "subreddit",
+                encoded = true
+            ) subredditName: String
+        ): Flowable<SubredditChildren>
 
     }
 }

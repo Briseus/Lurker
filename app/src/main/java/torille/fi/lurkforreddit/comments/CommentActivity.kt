@@ -19,7 +19,8 @@ import javax.inject.Inject
 
 class CommentActivity : DaggerAppCompatActivity() {
 
-    @Inject lateinit var post: Post
+    @Inject
+    lateinit var post: Post
 
     private val customTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
 
@@ -40,7 +41,7 @@ class CommentActivity : DaggerAppCompatActivity() {
         setupImage()
 
         val commentFragment: CommentFragment? = supportFragmentManager
-                .findFragmentById(R.id.contentFrame) as? CommentFragment
+            .findFragmentById(R.id.contentFrame) as? CommentFragment
 
         if (commentFragment == null) {
             initFragment(CommentFragment())
@@ -63,10 +64,13 @@ class CommentActivity : DaggerAppCompatActivity() {
                 } else {
                     val activity = this
                     launch(UI) {
-                        CustomTabActivityHelper.openCustomTab(activity,
-                                MediaHelper.createCustomTabIntentAsync(activity,
-                                        customTabActivityHelper.session).await(),
-                                postUrl
+                        CustomTabActivityHelper.openCustomTab(
+                            activity,
+                            MediaHelper.createCustomTabIntentAsync(
+                                activity,
+                                customTabActivityHelper.session
+                            ).await(),
+                            postUrl
                         ) { _, _ ->
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(postUrl))
                             startActivity(intent)

@@ -27,7 +27,8 @@ import javax.inject.Inject
 
 class AppLinkActivity : DaggerAppCompatActivity() {
 
-    @Inject lateinit var redditApi: Lazy<RedditService.Reddit>
+    @Inject
+    lateinit var redditApi: Lazy<RedditService.Reddit>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,9 +81,9 @@ class AppLinkActivity : DaggerAppCompatActivity() {
     private suspend fun searchForSubredditReddit(subredditName: String) {
         Timber.d("Searching for " + subredditName)
         val subReddit: Subreddit? = redditApi.get().getSubredditInfo(subredditName)
-                .doOnError { setNotFound("$subredditName ${this@AppLinkActivity.getString(R.string.not_found)}") }
-                .flatMap { TextHelper.formatSubreddit(Flowable.fromArray(it)) }
-                .awaitFirst()
+            .doOnError { setNotFound("$subredditName ${this@AppLinkActivity.getString(R.string.not_found)}") }
+            .flatMap { TextHelper.formatSubreddit(Flowable.fromArray(it)) }
+            .awaitFirst()
 
         subReddit?.apply {
             val subIntent = Intent(applicationContext, SubredditActivity::class.java)

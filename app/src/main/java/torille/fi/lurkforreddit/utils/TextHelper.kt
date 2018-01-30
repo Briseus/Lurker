@@ -78,7 +78,8 @@ object TextHelper {
                     kind = torille.fi.lurkforreddit.data.models.view.kind.DEFAULT
                     commentText = formatTextToHtml(commentData.bodyHtml)
                 }
-                commentData.children.isNotEmpty() -> commentText = "Load more comments (" + commentData.count + ")"
+                commentData.children.isNotEmpty() -> commentText = "Load more comments (" +
+                        commentData.count + ")"
                 commentData.id == "" -> commentText = "Continue this thread"
             }
 
@@ -89,7 +90,13 @@ object TextHelper {
                 author = responseAuthor
             }
 
-            author = fromHtml(author.toString() + " " + DateUtils.getRelativeTimeSpanString(commentData.createdUtc * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS))
+            author = fromHtml(
+                author.toString() + " " + DateUtils.getRelativeTimeSpanString(
+                    commentData.createdUtc * 1000,
+                    System.currentTimeMillis(),
+                    DateUtils.MINUTE_IN_MILLIS
+                )
+            )
 
             if (commentData.edited) {
                 author = author.toString() + " (edited)"
@@ -98,25 +105,25 @@ object TextHelper {
             val formatScore = formatScore(commentData.score)
 
             val formattedComment = Comment(
-                    id = commentData.id,
-                    parentId = commentData.parentId,
-                    name = commentData.name,
-                    kind = kind,
-                    author = author,
-                    childCommentIds = commentData.children,
-                    commentLevel = commentDepth,
-                    commentLinkId = commentData.linkId,
-                    commentText = commentText,
-                    formattedScore = formatScore,
-                    formattedTime = "",
-                    replies = null
+                id = commentData.id,
+                parentId = commentData.parentId,
+                name = commentData.name,
+                kind = kind,
+                author = author,
+                childCommentIds = commentData.children,
+                commentLevel = commentDepth,
+                commentLinkId = commentData.linkId,
+                commentText = commentText,
+                formattedScore = formatScore,
+                formattedTime = "",
+                replies = null
             )
 
             val listWithOriginalComment = listOf(formattedComment)
 
             return if (commentData.replies != null) {
                 val replies = commentData.replies.commentData.commentChildren
-                        .flatMap { formatCommentData(it.data, commentDepth + 1) }
+                    .flatMap { formatCommentData(it.data, commentDepth + 1) }
 
                 listWithOriginalComment.plus(replies)
             } else {
@@ -163,33 +170,34 @@ object TextHelper {
         }
         val dashUrl = postDetails.media?.redditVideo?.dashUrl
         val fallbackUrl = postDetails.media?.redditVideo?.fallbackUrl
-        val url: String = if (!dashUrl.isNullOrEmpty() && postDetails.media?.redditVideo?.transcodingStatus == "completed") {
-            dashUrl!!
-        } else if (!fallbackUrl.isNullOrEmpty()) {
-            fallbackUrl!!
-        } else {
-            postDetails.url
-        }
+        val url: String =
+            if (!dashUrl.isNullOrEmpty() && postDetails.media?.redditVideo?.transcodingStatus == "completed") {
+                dashUrl!!
+            } else if (!fallbackUrl.isNullOrEmpty()) {
+                fallbackUrl!!
+            } else {
+                postDetails.url
+            }
         /*if (postDetails.isOver18()) {
         title = TextHelper.fromHtml("<font color='#FF1744'> NSFW </font>" + postDetails.title());
         }*/
 
         val numberOfComments = postDetails.numberOfComments
         Post(
-                id = postDetails.name,
-                thumbnail = thumbnail,
-                domain = postDetails.domain,
-                url = url,
-                score = formatScore,
-                flairText = flair,
-                selfText = selfText,
-                isSelf = postDetails.isSelf,
-                numberOfComments = numberOfComments.toString(),
-                title = title,
-                previewImage = previewImageUrl,
-                permaLink = postDetails.permalink,
-                author = postDetails.author,
-                createdUtc = postDetails.createdUtc
+            id = postDetails.name,
+            thumbnail = thumbnail,
+            domain = postDetails.domain,
+            url = url,
+            score = formatScore,
+            flairText = flair,
+            selfText = selfText,
+            isSelf = postDetails.isSelf,
+            numberOfComments = numberOfComments.toString(),
+            title = title,
+            previewImage = previewImageUrl,
+            permaLink = postDetails.permalink,
+            author = postDetails.author,
+            createdUtc = postDetails.createdUtc
         )
     }
 
@@ -197,67 +205,70 @@ object TextHelper {
     fun formatSubreddit(subredditChildren: Flowable<SubredditChildren>): Flowable<Subreddit> {
 
         return subredditChildren
-                .map { it.subreddit }
-                .map { subredditResponse ->
-                    // TODO("If subreddit isnt found return something else than empty")
-                    if (subredditResponse.id.isNullOrBlank()) {
-                        Subreddit()
-                    } else {
-                        Subreddit(
-                                url = subredditResponse.url,
-                                bannerUrl = subredditResponse.banner,
-                                subId = subredditResponse.id!!,
-                                keyColor = subredditResponse.keyColor,
-                                displayName = subredditResponse.displayName
-                        )
-                    }
-
+            .map { it.subreddit }
+            .map { subredditResponse ->
+                // TODO("If subreddit isnt found return something else than empty")
+                if (subredditResponse.id.isNullOrBlank()) {
+                    Subreddit()
+                } else {
+                    Subreddit(
+                        url = subredditResponse.url,
+                        bannerUrl = subredditResponse.banner,
+                        subId = subredditResponse.id!!,
+                        keyColor = subredditResponse.keyColor,
+                        displayName = subredditResponse.displayName
+                    )
                 }
+
+            }
     }
 
     fun formatSearchResult(flowable: Flowable<SubredditChildren>): Flowable<SearchResult> {
         return flowable.flatMap { subredditChildren ->
             val subredditChildFlowable = Flowable.fromArray(subredditChildren)
             Flowable.zip<Subreddit, SubredditChildren, SearchResult>(
-                    formatSubreddit(subredditChildFlowable),
-                    subredditChildFlowable,
-                    io.reactivex.functions.BiFunction({ subreddit: Subreddit, subredditChild: SubredditChildren ->
+                formatSubreddit(subredditChildFlowable),
+                subredditChildFlowable,
+                io.reactivex.functions.BiFunction({ subreddit: Subreddit, subredditChild: SubredditChildren ->
 
-                        val subredditResponse = subredditChild.subreddit
-                        val descriptionHtml = subredditResponse.descriptionHtml
+                    val subredditResponse = subredditChild.subreddit
+                    val descriptionHtml = subredditResponse.descriptionHtml
 
-                        val formattedTitle: CharSequence
-                        val formattedSubscription: String
-                        val formattedDescription: CharSequence
+                    val formattedTitle: CharSequence
+                    val formattedSubscription: String
+                    val formattedDescription: CharSequence
 
-                        val infoText = subredditResponse.subscribers.toString() + " subscribers, Community since " + DateUtils.getRelativeTimeSpanString(subredditResponse.createdUtc * 1000)
-
-                        formattedTitle = if (subredditResponse.over18) {
-                            TextHelper.fromHtml(subredditResponse.url + "<font color='#FF1744'> NSFW</font>")
-                        } else {
-                            subredditResponse.url
-                        }
-
-                        formattedSubscription = if (subredditResponse.subscribed) {
-                            "Subscribed"
-                        } else {
-                            "Not subscribed"
-                        }
-
-                        formattedDescription = if (!descriptionHtml.isNullOrEmpty()) {
-                            formatTextToHtml(descriptionHtml)
-                        } else {
-                            "No description"
-                        }
-
-                        SearchResult(
-                                title = formattedTitle,
-                                description = formattedDescription,
-                                infoText = infoText,
-                                subscriptionInfo = formattedSubscription,
-                                subreddit = subreddit
+                    val infoText =
+                        subredditResponse.subscribers.toString() + " subscribers, Community since " + DateUtils.getRelativeTimeSpanString(
+                            subredditResponse.createdUtc * 1000
                         )
-                    })
+
+                    formattedTitle = if (subredditResponse.over18) {
+                        TextHelper.fromHtml(subredditResponse.url + "<font color='#FF1744'> NSFW</font>")
+                    } else {
+                        subredditResponse.url
+                    }
+
+                    formattedSubscription = if (subredditResponse.subscribed) {
+                        "Subscribed"
+                    } else {
+                        "Not subscribed"
+                    }
+
+                    formattedDescription = if (!descriptionHtml.isNullOrEmpty()) {
+                        formatTextToHtml(descriptionHtml)
+                    } else {
+                        "No description"
+                    }
+
+                    SearchResult(
+                        title = formattedTitle,
+                        description = formattedDescription,
+                        infoText = infoText,
+                        subscriptionInfo = formattedSubscription,
+                        subreddit = subreddit
+                    )
+                })
             )
 
         }

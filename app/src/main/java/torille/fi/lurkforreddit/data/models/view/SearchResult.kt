@@ -8,9 +8,9 @@ import kotlinx.android.parcel.Parcelize
  */
 @Parcelize
 data class SearchResult(
-        val title: CharSequence = "",
-        val subscriptionInfo: String = "",
-        val infoText: String = "",
-        val description: CharSequence = "",
-        val subreddit: Subreddit = Subreddit()
+    val title: CharSequence = "",
+    val subscriptionInfo: String = "",
+    val infoText: String = "",
+    val description: CharSequence = "",
+    val subreddit: Subreddit = Subreddit()
 ) : Parcelable

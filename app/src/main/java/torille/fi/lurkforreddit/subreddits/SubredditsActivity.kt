@@ -31,10 +31,13 @@ import javax.inject.Inject
  * The apps main activity that starts with the app
  */
 
-class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
+class SubredditsActivity : DaggerAppCompatActivity(),
+    BottomNavigationView.OnNavigationItemSelectedListener {
 
-    @Inject internal lateinit var store: Store
-    @Inject internal lateinit var redditAuthApi: RedditService.Auth
+    @Inject
+    internal lateinit var store: Store
+    @Inject
+    internal lateinit var redditAuthApi: RedditService.Auth
 
     private val customTabActivityHelper: CustomTabActivityHelper = CustomTabActivityHelper()
     private val disposables = CompositeDisposable()
@@ -108,7 +111,11 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
                 } else if (uri.getQueryParameter("error") != null) {
                     // show an error message here
                     Timber.e("Got error ${uri.getQueryParameter("error")}")
-                    Toast.makeText(this, "Got error ${uri.getQueryParameter("error")}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this,
+                        "Got error ${uri.getQueryParameter("error")}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             } else {
                 Timber.e("$state does not match $STATE" + STATE)
@@ -120,25 +127,34 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
     private fun getToken(code: String) {
         val grant_type = "authorization_code"
         disposables.add(redditAuthApi.getUserAuthToken(grant_type, code, REDIRECT_URI)
-                .map { redditToken -> redditToken }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableObserver<RedditToken>() {
-                    override fun onNext(redditToken: RedditToken) {
-                        store.token = redditToken.accessToken
-                        store.refreshToken = redditToken.refreshToken!!
-                        store.loggedIn(true)
+            .map { redditToken -> redditToken }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(object : DisposableObserver<RedditToken>() {
+                override fun onNext(redditToken: RedditToken) {
+                    store.token = redditToken.accessToken
+                    store.refreshToken = redditToken.refreshToken!!
+                    store.loggedIn(true)
 
-                    }
+                }
 
-                    override fun onError(throwable: Throwable) {
-                        Timber.e(throwable)
-                        Toast.makeText(this@SubredditsActivity, R.string.toast_login_failed, Toast.LENGTH_LONG).show()
-                    }
+                override fun onError(throwable: Throwable) {
+                    Timber.e(throwable)
+                    Toast.makeText(
+                        this@SubredditsActivity,
+                        R.string.toast_login_failed,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
 
-                    override fun onComplete() {
-                        Toast.makeText(this@SubredditsActivity, R.string.toast_login_success, Toast.LENGTH_LONG).show()
-                    }
-                }))
+                override fun onComplete() {
+                    Toast.makeText(
+                        this@SubredditsActivity,
+                        R.string.toast_login_success,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            })
+        )
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -192,10 +208,13 @@ class SubredditsActivity : DaggerAppCompatActivity(), BottomNavigationView.OnNav
 
         val activity = this
         launch(UI) {
-            CustomTabActivityHelper.openCustomTab(activity,
-                    MediaHelper.createCustomTabIntentAsync(activity,
-                            customTabActivityHelper.session).await(),
-                    url
+            CustomTabActivityHelper.openCustomTab(
+                activity,
+                MediaHelper.createCustomTabIntentAsync(
+                    activity,
+                    customTabActivityHelper.session
+                ).await(),
+                url
             ) { _, _ ->
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)

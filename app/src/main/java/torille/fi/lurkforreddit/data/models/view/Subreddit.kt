@@ -13,9 +13,9 @@ import kotlinx.android.parcel.Parcelize
 @Entity(tableName = "subreddits")
 @Parcelize
 data class Subreddit(
-        @PrimaryKey @ColumnInfo(name = "reddit_id") var subId: String = "",
-        var url: String = "",
-        @ColumnInfo(name = "display_name") var displayName: String = "",
-        @ColumnInfo(name = "banner_url") var bannerUrl: String? = "",
-        @ColumnInfo(name = "key_color") var keyColor: String? = ""
+    @PrimaryKey @ColumnInfo(name = "reddit_id") var subId: String = "",
+    var url: String = "",
+    @ColumnInfo(name = "display_name") var displayName: String = "",
+    @ColumnInfo(name = "banner_url") var bannerUrl: String? = "",
+    @ColumnInfo(name = "key_color") var keyColor: String? = ""
 ) : Parcelable

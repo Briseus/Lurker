@@ -13,10 +13,13 @@ import torille.fi.lurkforreddit.utils.TextHelper
 import javax.inject.Inject
 
 class FullscreenPresenter @Inject
-internal constructor(val post: Post,
-                     private val previewUrl: String?) : FullscreenContract.Presenter {
+internal constructor(
+    val post: Post,
+    private val previewUrl: String?
+) : FullscreenContract.Presenter {
 
-    @Inject lateinit var streamableApi: Lazy<VideositeService.Streamable>
+    @Inject
+    lateinit var streamableApi: Lazy<VideositeService.Streamable>
     private val disposables = CompositeDisposable()
     private var fullscreenView: FullscreenContract.View? = null
 
@@ -44,33 +47,34 @@ internal constructor(val post: Post,
 
     override fun checkStreamableVideo(id: String) {
         disposables.add(streamableApi.get().getVideo(id)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableObserver<StreamableVideo>() {
-                    override fun onNext(streamableVideo: StreamableVideo) {
-                        var videoUrl = "https:"
-                        val mobileVideo = streamableVideo.videos.mobileVideo
-                        videoUrl += if (mobileVideo != null) {
-                            mobileVideo.url!!
-                        } else {
-                            streamableVideo.videos.video.url!!
-                        }
-                        Timber.d("Got streamable with url " + videoUrl)
-                        if (videoUrl == "https:") {
-                            onError(Throwable("No video found"))
-                        } else {
-                            fullscreenView?.showVideo(videoUrl)
-                        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(object : DisposableObserver<StreamableVideo>() {
+                override fun onNext(streamableVideo: StreamableVideo) {
+                    var videoUrl = "https:"
+                    val mobileVideo = streamableVideo.videos.mobileVideo
+                    videoUrl += if (mobileVideo != null) {
+                        mobileVideo.url!!
+                    } else {
+                        streamableVideo.videos.video.url!!
                     }
-
-                    override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
-                        fullscreenView?.showNoVideoFound()
+                    Timber.d("Got streamable with url " + videoUrl)
+                    if (videoUrl == "https:") {
+                        onError(Throwable("No video found"))
+                    } else {
+                        fullscreenView?.showVideo(videoUrl)
                     }
+                }
 
-                    override fun onComplete() {
+                override fun onError(@io.reactivex.annotations.NonNull e: Throwable) {
+                    fullscreenView?.showNoVideoFound()
+                }
 
-                    }
-                }))
+                override fun onComplete() {
+
+                }
+            })
+        )
     }
 
     override fun takeView(view: FullscreenContract.View) {

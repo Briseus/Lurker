@@ -11,26 +11,27 @@ import javax.inject.Singleton
 
 @Singleton
 class RedditRepository @Inject
-constructor(@Remote private val redditRemoteApi: RedditDataSource, @Local private val redditLocalApi: RedditDataSource) : RedditDataSource {
+constructor(@Remote private val redditRemoteApi: RedditDataSource, @Local private val redditLocalApi: RedditDataSource) :
+    RedditDataSource {
 
     override fun saveSubreddits(subreddits: List<Subreddit>) {
-       return redditLocalApi.saveSubreddits(subreddits)
+        return redditLocalApi.saveSubreddits(subreddits)
     }
 
     override fun getSubreddits(): Flowable<List<Subreddit>> {
         return redditLocalApi
-                .getSubreddits()
-                .map {
-                    if (it.isNotEmpty()) {
-                        Flowable.fromArray(it)
-                    } else {
-                        redditRemoteApi.getSubreddits()
-                                .observeOn(Schedulers.io())
-                                .doOnNext {
-                                    redditLocalApi.saveSubreddits(it)
-                                }
-                    }
-                }.flatMap { it }
+            .getSubreddits()
+            .map {
+                if (it.isNotEmpty()) {
+                    Flowable.fromArray(it)
+                } else {
+                    redditRemoteApi.getSubreddits()
+                        .observeOn(Schedulers.io())
+                        .doOnNext {
+                            redditLocalApi.saveSubreddits(it)
+                        }
+                }
+            }.flatMap { it }
 
     }
 
@@ -42,7 +43,10 @@ constructor(@Remote private val redditRemoteApi: RedditDataSource, @Local privat
         return redditRemoteApi.getSubredditPosts(subredditUrl)
     }
 
-    override fun getMoreSubredditPosts(subredditUrl: String, nextpageId: String): Observable<kotlin.Pair<String, List<Post>>> {
+    override fun getMoreSubredditPosts(
+        subredditUrl: String,
+        nextpageId: String
+    ): Observable<kotlin.Pair<String, List<Post>>> {
         return redditRemoteApi.getMoreSubredditPosts(subredditUrl, nextpageId)
     }
 
@@ -50,13 +54,18 @@ constructor(@Remote private val redditRemoteApi: RedditDataSource, @Local privat
         redditLocalApi.refreshData()
     }
 
-    override fun getCommentsForPost(permaLinkUrl: String, isSingleCommentThread: Boolean): Observable<PostAndComments> {
+    override fun getCommentsForPost(
+        permaLinkUrl: String,
+        isSingleCommentThread: Boolean
+    ): Observable<PostAndComments> {
         return redditRemoteApi.getCommentsForPost(permaLinkUrl, isSingleCommentThread)
     }
 
-    override fun getMoreCommentsForPostAt(childCommentIds: List<String>,
-                                          linkId: String,
-                                          commentLevel: Int): Observable<List<Comment>> {
+    override fun getMoreCommentsForPostAt(
+        childCommentIds: List<String>,
+        linkId: String,
+        commentLevel: Int
+    ): Observable<List<Comment>> {
         return redditRemoteApi.getMoreCommentsForPostAt(childCommentIds, linkId, commentLevel)
     }
 
@@ -64,7 +73,10 @@ constructor(@Remote private val redditRemoteApi: RedditDataSource, @Local privat
         return redditRemoteApi.getSearchResults(query)
     }
 
-    override fun getMoreSearchResults(query: String, after: String): Flowable<kotlin.Pair<String, List<SearchResult>>> {
+    override fun getMoreSearchResults(
+        query: String,
+        after: String
+    ): Flowable<kotlin.Pair<String, List<SearchResult>>> {
         return redditRemoteApi.getMoreSearchResults(query, after)
     }
 }

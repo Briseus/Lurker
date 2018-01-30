@@ -14,7 +14,8 @@ import javax.inject.Inject
  * Presenter in the MVP model of displaying subreddits
  */
 class SubredditsPresenter @Inject
-internal constructor(private val mRedditRepository: RedditRepository) : SubredditsContract.Presenter {
+internal constructor(private val mRedditRepository: RedditRepository) :
+    SubredditsContract.Presenter {
 
     private var mSubredditsView: SubredditsContract.View? = null
     private val disposables = CompositeDisposable()
@@ -30,24 +31,25 @@ internal constructor(private val mRedditRepository: RedditRepository) : Subreddi
         // that the appm is busy until the response is handled.
         EspressoIdlingResource.increment() // App is busy until further notice
         disposables.add(mRedditRepository.getSubreddits()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableSubscriber<List<Subreddit>>() {
-                    override fun onComplete() {
-                        Timber.d("Got complete")
-                    }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(object : DisposableSubscriber<List<Subreddit>>() {
+                override fun onComplete() {
+                    Timber.d("Got complete")
+                }
 
-                    override fun onError(t: Throwable?) {
-                        mSubredditsView?.setProgressIndicator(false)
-                        Timber.e(t)
-                    }
+                override fun onError(t: Throwable?) {
+                    mSubredditsView?.setProgressIndicator(false)
+                    Timber.e(t)
+                }
 
-                    override fun onNext(subreddits: List<Subreddit>?) {
-                        subreddits?.let { mSubredditsView?.showSubreddits(it)  }
-                        mSubredditsView?.setProgressIndicator(false)
-                    }
+                override fun onNext(subreddits: List<Subreddit>?) {
+                    subreddits?.let { mSubredditsView?.showSubreddits(it) }
+                    mSubredditsView?.setProgressIndicator(false)
+                }
 
-                }))
+            })
+        )
     }
 
     override fun openSubreddit(subreddit: Subreddit) {

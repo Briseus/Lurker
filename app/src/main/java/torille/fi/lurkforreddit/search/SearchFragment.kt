@@ -20,7 +20,8 @@ import javax.inject.Inject
 
 class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.View {
 
-    @Inject internal lateinit var actionsListener: SearchContract.Presenter
+    @Inject
+    internal lateinit var actionsListener: SearchContract.Presenter
 
     private lateinit var adapter: SearchViewAdapter
     private lateinit var layoutManager: LinearLayoutManager
@@ -31,7 +32,11 @@ class SearchFragment @Inject constructor() : DaggerFragment(), SearchContract.Vi
         adapter = SearchViewAdapter(searchClickListener)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_search, container, false)
     }
 

@@ -14,8 +14,10 @@ import javax.inject.Singleton
  */
 @Singleton
 class NetworkHelper @Inject
-constructor(private val store: Store,
-            private val authApi: RedditService.Auth) {
+constructor(
+    private val store: Store,
+    private val authApi: RedditService.Auth
+) {
 
     @Throws(IOException::class)
     fun authenticateApp(): String {

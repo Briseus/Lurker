@@ -22,17 +22,17 @@ object DisplayHelper {
         val imagesPreviews = postDetails.images
         return if (imagesPreviews != null) {
             imagesPreviews.images[0].resolutions.toObservable()
-                    .filter({ imageResolution ->
-                        val pictureWidth = imageResolution.width
-                        val result = compareWidth(displayDPI, pictureWidth)
-                        Timber.d("Result is $result for ${imageResolution.url}")
-                        (result in 0.7..1.3)
-                    })
-                    .map {
-                        Timber.d("Chose ${it.width}")
-                        it.url.orEmpty()
-                    }
-                    .last("").blockingGet()
+                .filter({ imageResolution ->
+                    val pictureWidth = imageResolution.width
+                    val result = compareWidth(displayDPI, pictureWidth)
+                    Timber.d("Result is $result for ${imageResolution.url}")
+                    (result in 0.7..1.3)
+                })
+                .map {
+                    Timber.d("Chose ${it.width}")
+                    it.url.orEmpty()
+                }
+                .last("").blockingGet()
         } else {
             ""
         }

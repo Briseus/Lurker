@@ -14,7 +14,8 @@ import javax.inject.Singleton
 class Store @Inject
 constructor(context: Context) {
 
-    private val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+    private val sharedPreferences: SharedPreferences =
+        PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
 
     var token: String
         get() = sharedPreferences.getString(TOKEN, "")

@@ -47,9 +47,11 @@ import javax.inject.Inject
 
 class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenContract.View {
 
-    @Inject lateinit var actionsListener: FullscreenContract.Presenter
+    @Inject
+    lateinit var actionsListener: FullscreenContract.Presenter
 
-    @Inject lateinit var okHttpClient: OkHttpClient
+    @Inject
+    lateinit var okHttpClient: OkHttpClient
 
 
     override fun onResume() {
@@ -81,7 +83,11 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
         actionsListener.dropView()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_fullscreen, container, false)
     }
 
@@ -89,8 +95,8 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
         imageView.visibility = View.VISIBLE
 
         val imageRequest = ImageRequestBuilder
-                .newBuilderWithSource(Uri.parse(url))
-                .build()
+            .newBuilderWithSource(Uri.parse(url))
+            .build()
 
         if (Fresco.getImagePipeline().isInDiskCache(imageRequest).result == true) {
             setImage(imageRequest)
@@ -102,7 +108,8 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
 
     private fun setImage(imageRequest: ImageRequest) {
         progressBarHorizontal?.hide()
-        val cacheKey = Fresco.getImagePipeline().cacheKeyFactory.getEncodedCacheKey(imageRequest, this)
+        val cacheKey =
+            Fresco.getImagePipeline().cacheKeyFactory.getEncodedCacheKey(imageRequest, this)
         Fresco.getImagePipelineFactory().mainFileCache.getResource(cacheKey)?.let {
             val resource: FileBinaryResource? = it as FileBinaryResource
             resource?.let {
@@ -152,32 +159,39 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
         params.setMargins(0, topMargin, 0, 0)
     }
 
-    private fun setupController(url: String, previewImageUrl: String?): AbstractDraweeController<*, *> {
+    private fun setupController(
+        url: String,
+        previewImageUrl: String?
+    ): AbstractDraweeController<*, *> {
         progressBarHorizontal.visibility = View.INVISIBLE
         gifView.hierarchy.setProgressBarImage(progressBarHorizontal.progressDrawable)
 
         val previewImgUrl = if (previewImageUrl.isNullOrEmpty()) "" else previewImageUrl
 
         val lowResRequest = ImageRequestBuilder
-                .newBuilderWithSource(Uri.parse(previewImgUrl))
-                .build()
+            .newBuilderWithSource(Uri.parse(previewImgUrl))
+            .build()
 
         val imageRequest = ImageRequestBuilder
-                .newBuilderWithSource(Uri.parse(url))
-                .build()
+            .newBuilderWithSource(Uri.parse(url))
+            .build()
 
         return Fresco.newDraweeControllerBuilder()
-                .setAutoPlayAnimations(true)
-                .setImageRequest(imageRequest)
-                .setLowResImageRequest(lowResRequest)
-                .setOldController(gifView.controller)
-                .setControllerListener(object : BaseControllerListener<ImageInfo>() {
-                    override fun onFinalImageSet(id: String?, imageInfo: ImageInfo?, animatable: Animatable?) {
-                        super.onFinalImageSet(id, imageInfo, animatable)
-                        setTopMargin(0)
-                    }
-                })
-                .build()
+            .setAutoPlayAnimations(true)
+            .setImageRequest(imageRequest)
+            .setLowResImageRequest(lowResRequest)
+            .setOldController(gifView.controller)
+            .setControllerListener(object : BaseControllerListener<ImageInfo>() {
+                override fun onFinalImageSet(
+                    id: String?,
+                    imageInfo: ImageInfo?,
+                    animatable: Animatable?
+                ) {
+                    super.onFinalImageSet(id, imageInfo, animatable)
+                    setTopMargin(0)
+                }
+            })
+            .build()
     }
 
     override fun showVideo(url: String, isDash: Boolean) {
@@ -214,7 +228,11 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
 
             override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {}
 
-            override fun onTracksChanged(trackGroups: TrackGroupArray?, trackSelections: TrackSelectionArray?) {}
+            override fun onTracksChanged(
+                trackGroups: TrackGroupArray?,
+                trackSelections: TrackSelectionArray?
+            ) {
+            }
 
             override fun onPlayerError(error: ExoPlaybackException?) {
                 Timber.e(error)
@@ -237,23 +255,31 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
         return exoPlayer
     }
 
-    private fun setupVideoSource(url: String, isDash: Boolean, defaultBandwidthMeter: DefaultBandwidthMeter): MediaSource {
+    private fun setupVideoSource(
+        url: String,
+        isDash: Boolean,
+        defaultBandwidthMeter: DefaultBandwidthMeter
+    ): MediaSource {
         val control = CacheControl.Builder().build()
         val userAgent = Util.getUserAgent(context, getString(R.string.app_name))
-        val dataSourceFactory = OkHttpDataSourceFactory(okHttpClient,
-                userAgent, defaultBandwidthMeter, control)
+        val dataSourceFactory = OkHttpDataSourceFactory(
+            okHttpClient,
+            userAgent, defaultBandwidthMeter, control
+        )
         val extractorsFactory = DefaultExtractorsFactory()
         return if (isDash)
             DashMediaSource(
-                    Uri.parse(url),
-                    dataSourceFactory,
-                    DefaultDashChunkSource.Factory(dataSourceFactory),
-                    null, null)
-        else ExtractorMediaSource(
                 Uri.parse(url),
                 dataSourceFactory,
-                extractorsFactory,
-                null, null)
+                DefaultDashChunkSource.Factory(dataSourceFactory),
+                null, null
+            )
+        else ExtractorMediaSource(
+            Uri.parse(url),
+            dataSourceFactory,
+            extractorsFactory,
+            null, null
+        )
     }
 
     override fun showNoVideoFound() {

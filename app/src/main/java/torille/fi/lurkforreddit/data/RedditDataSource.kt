@@ -17,19 +17,28 @@ interface RedditDataSource {
 
     fun getSubredditPosts(subredditUrl: String): Observable<kotlin.Pair<String, List<Post>>>
 
-    fun getMoreSubredditPosts(subredditUrl: String,
-                              nextpageId: String): Observable<kotlin.Pair<String, List<Post>>>
+    fun getMoreSubredditPosts(
+        subredditUrl: String,
+        nextpageId: String
+    ): Observable<kotlin.Pair<String, List<Post>>>
 
     fun refreshData()
 
-    fun getCommentsForPost(permaLinkUrl: String, isSingleCommentThread: Boolean): Observable<PostAndComments>
+    fun getCommentsForPost(
+        permaLinkUrl: String,
+        isSingleCommentThread: Boolean
+    ): Observable<PostAndComments>
 
-    fun getMoreCommentsForPostAt(childCommentIds: List<String>,
-                                 linkId: String,
-                                 commentLevel: Int): Observable<List<Comment>>
+    fun getMoreCommentsForPostAt(
+        childCommentIds: List<String>,
+        linkId: String,
+        commentLevel: Int
+    ): Observable<List<Comment>>
 
     fun getSearchResults(query: String): Flowable<kotlin.Pair<String, List<SearchResult>>>
 
-    fun getMoreSearchResults(query: String,
-                             after: String): Flowable<kotlin.Pair<String, List<SearchResult>>>
+    fun getMoreSearchResults(
+        query: String,
+        after: String
+    ): Flowable<kotlin.Pair<String, List<SearchResult>>>
 }

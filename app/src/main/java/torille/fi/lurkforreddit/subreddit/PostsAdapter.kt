@@ -21,7 +21,10 @@ import timber.log.Timber
 import torille.fi.lurkforreddit.R
 import torille.fi.lurkforreddit.data.models.view.Post
 
-internal class PostsAdapter internal constructor(private val mClicklistener: SubredditFragment.postClickListener, private val imagePipeline: ImagePipeline) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+internal class PostsAdapter internal constructor(
+    private val mClicklistener: SubredditFragment.postClickListener,
+    private val imagePipeline: ImagePipeline
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val posts: SortedList<Post>
 
@@ -46,12 +49,18 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            VIEW_ITEM -> PostViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_post_small, parent, false))
-            VIEW_ERROR -> ErrorViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_error, parent, false))
-            else -> ProgressViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_progressbar, parent, false))
+            VIEW_ITEM -> PostViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_post_small, parent, false)
+            )
+            VIEW_ERROR -> ErrorViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_error, parent, false)
+            )
+            else -> ProgressViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_progressbar, parent, false)
+            )
         }
     }
 
@@ -87,8 +96,8 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
         val toIndex = if (amount > listMaxSize) listMaxSize else amount
 
         (fromIndex until toIndex)
-                .map { posts.get(it).previewImage }
-                .forEach { imagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(it), null) }
+            .map { posts.get(it).previewImage }
+            .forEach { imagePipeline.prefetchToBitmapCache(ImageRequest.fromUri(it), null) }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -172,7 +181,8 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
         private val openBrowser: Button = postView.findViewById(R.id.post_open_browser)
         private val image: SimpleDraweeView = postView.findViewById(R.id.post_image)
         private val baseControllerListener: BaseControllerListener<ImageInfo>
-        private val onClickListener: View.OnClickListener = View.OnClickListener { mClicklistener.onMediaClick(getItem(adapterPosition)) }
+        private val onClickListener: View.OnClickListener =
+            View.OnClickListener { mClicklistener.onMediaClick(getItem(adapterPosition)) }
 
         init {
             postView.setOnClickListener(onClickListener)
@@ -212,10 +222,10 @@ internal class PostsAdapter internal constructor(private val mClicklistener: Sub
                 image.visibility = View.VISIBLE
 
                 val draweeController = Fresco.newDraweeControllerBuilder()
-                        .setControllerListener(baseControllerListener)
-                        .setImageRequest(ImageRequest.fromUri(previewImage))
-                        .setOldController(image.controller)
-                        .build()
+                    .setControllerListener(baseControllerListener)
+                    .setImageRequest(ImageRequest.fromUri(previewImage))
+                    .setOldController(image.controller)
+                    .build()
 
                 image.controller = draweeController
 

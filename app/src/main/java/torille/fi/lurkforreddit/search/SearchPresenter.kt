@@ -21,10 +21,12 @@ internal constructor(private val redditRepository: RedditRepository) : SearchCon
         this.searchQuery = query
         searchView?.clearResults()
         searchView?.showProgressbar()
-        disposables.add(redditRepository.getSearchResults(query)
+        disposables.add(
+            redditRepository.getSearchResults(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableSubscriber<kotlin.Pair<String, List<SearchResult>>>() {
+                .subscribeWith(object :
+                    DisposableSubscriber<kotlin.Pair<String, List<SearchResult>>>() {
                     override fun onNext(resultPair: kotlin.Pair<String, List<SearchResult>>) {
                         searchAfter = resultPair.first
                         searchView?.showResults(resultPair.second)
@@ -44,10 +46,12 @@ internal constructor(private val redditRepository: RedditRepository) : SearchCon
 
     override fun searchMoreSubreddits() {
         searchView?.showProgressbar()
-        disposables.add(redditRepository.getMoreSearchResults(searchQuery!!, searchAfter!!)
+        disposables.add(
+            redditRepository.getMoreSearchResults(searchQuery!!, searchAfter!!)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableSubscriber<kotlin.Pair<String, List<SearchResult>>>() {
+                .subscribeWith(object :
+                    DisposableSubscriber<kotlin.Pair<String, List<SearchResult>>>() {
                     override fun onNext(resultPair: kotlin.Pair<String, List<SearchResult>>) {
                         searchAfter = resultPair.first
                         searchView?.showResults(resultPair.second)

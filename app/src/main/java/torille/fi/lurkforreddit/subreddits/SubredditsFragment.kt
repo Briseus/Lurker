@@ -29,7 +29,10 @@ class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsCon
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        subredditsAdapter = SubredditsAdapter(mItemListener, ContextCompat.getColor(context!!, R.color.colorAccent))
+        subredditsAdapter = SubredditsAdapter(
+            mItemListener,
+            ContextCompat.getColor(context!!, R.color.colorAccent)
+        )
     }
 
     override fun onResume() {
@@ -42,8 +45,10 @@ class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsCon
         actionsListener.dropView()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
         return inflater.inflate(R.layout.fragment_subreddits, container, false)
     }
@@ -56,9 +61,10 @@ class SubredditsFragment @Inject constructor() : DaggerFragment(), SubredditsCon
         subRecyclerView.layoutManager = LinearLayoutManager(context)
 
         refreshLayout.setColorSchemeColors(
-                ContextCompat.getColor(context, R.color.colorPrimary),
-                ContextCompat.getColor(context, R.color.colorAccent),
-                ContextCompat.getColor(context, R.color.colorPrimaryDark))
+            ContextCompat.getColor(context, R.color.colorPrimary),
+            ContextCompat.getColor(context, R.color.colorAccent),
+            ContextCompat.getColor(context, R.color.colorPrimaryDark)
+        )
         refreshLayout.setOnRefreshListener { actionsListener.loadSubreddits(true) }
     }
 

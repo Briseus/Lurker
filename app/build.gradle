@@ -128,7 +128,7 @@ dependencies {
     implementation "com.facebook.fresco:fresco:$rootProject.ext.frescoVersion"
     implementation "com.facebook.fresco:animated-gif:$rootProject.ext.frescoVersion"
     implementation "com.facebook.fresco:animated-webp:$rootProject.ext.frescoVersion"
-    implementation ("com.facebook.fresco:imagepipeline-okhttp3:$rootProject.ext.frescoVersion"){
+    implementation("com.facebook.fresco:imagepipeline-okhttp3:$rootProject.ext.frescoVersion") {
         exclude module: 'okhttp'
     }
     implementation "com.davemorrissey.labs:subsampling-scale-image-view:$rootProject.ext.subSamplingScaleImageViewVersion"
@@ -137,7 +137,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer-core:$rootProject.ext.exoplayerVersion"
     implementation "com.google.android.exoplayer:exoplayer-ui:$rootProject.ext.exoplayerVersion"
     implementation "com.google.android.exoplayer:exoplayer-dash:$rootProject.ext.exoplayerVersion"
-    implementation ("com.google.android.exoplayer:extension-okhttp:$rootProject.ext.exoplayerVersion"){
+    implementation("com.google.android.exoplayer:extension-okhttp:$rootProject.ext.exoplayerVersion") {
         exclude module: 'okhttp'
     }
 
@@ -150,7 +150,6 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$rootProject.ext.room"
     kapt "android.arch.persistence.room:compiler:$rootProject.ext.room"
     implementation "android.arch.persistence.room:rxjava2:$rootProject.ext.room"
-
 
     // Timber and leak canary dependencies
     implementation "com.jakewharton.timber:timber:$rootProject.ext.timberVersion"

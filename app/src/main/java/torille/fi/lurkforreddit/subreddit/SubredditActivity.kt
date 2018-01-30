@@ -15,8 +15,10 @@ import javax.inject.Inject
 
 class SubredditActivity : DaggerAppCompatActivity() {
 
-    @Inject lateinit var subredditPresenter: SubredditPresenter
-    @Inject lateinit var subreddit: Subreddit
+    @Inject
+    lateinit var subredditPresenter: SubredditPresenter
+    @Inject
+    lateinit var subreddit: Subreddit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,12 +27,17 @@ class SubredditActivity : DaggerAppCompatActivity() {
 
         val actionBar = supportActionBar
 
-        actionBar?.setHomeAsUpIndicator(resources.getDrawable(R.drawable.ic_arrow_back_white_24px, null))
+        actionBar?.setHomeAsUpIndicator(
+            resources.getDrawable(
+                R.drawable.ic_arrow_back_white_24px,
+                null
+            )
+        )
         actionBar?.setDisplayHomeAsUpEnabled(true)
         actionBar?.title = subreddit.displayName
 
         val subredditFragment: SubredditFragment? = supportFragmentManager
-                .findFragmentById(R.id.contentFrame) as? SubredditFragment
+            .findFragmentById(R.id.contentFrame) as? SubredditFragment
 
         if (subredditFragment == null) {
             Timber.d(subreddit.toString())

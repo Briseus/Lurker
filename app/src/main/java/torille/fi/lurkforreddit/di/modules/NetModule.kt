@@ -48,12 +48,14 @@ class NetModule {
 
     @Provides
     @Singleton
-    internal fun provideOkHttpClient(cache: Cache,
-                                     loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    internal fun provideOkHttpClient(
+        cache: Cache,
+        loggingInterceptor: HttpLoggingInterceptor
+    ): OkHttpClient {
         return OkHttpClient.Builder()
-                .cache(cache)
-                .addNetworkInterceptor(loggingInterceptor)
-                .build()
+            .cache(cache)
+            .addNetworkInterceptor(loggingInterceptor)
+            .build()
     }
 
     @Provides
@@ -66,7 +68,7 @@ class NetModule {
     @Singleton
     internal fun provideGson(): Gson {
         return GsonBuilder()
-                .create()
+            .create()
     }
 
     @Provides

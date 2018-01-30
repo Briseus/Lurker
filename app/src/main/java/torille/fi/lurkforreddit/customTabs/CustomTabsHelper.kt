@@ -31,7 +31,8 @@ object CustomTabsHelper {
     internal val BETA_PACKAGE = "com.chrome.beta"
     internal val DEV_PACKAGE = "com.chrome.dev"
     internal val LOCAL_PACKAGE = "com.google.android.apps.chrome"
-    private val ACTION_CUSTOM_TABS_CONNECTION = "android.support.customtabs.action.CustomTabsService"
+    private val ACTION_CUSTOM_TABS_CONNECTION =
+        "android.support.customtabs.action.CustomTabsService"
 
     private var sPackageNameToUse: String? = null
 
@@ -78,8 +79,8 @@ object CustomTabsHelper {
         } else if (packagesSupportingCustomTabs.size == 1) {
             sPackageNameToUse = packagesSupportingCustomTabs[0]
         } else if (!TextUtils.isEmpty(defaultViewHandlerPackageName)
-                && !hasSpecializedHandlerIntents(context, activityIntent)
-                && packagesSupportingCustomTabs.contains(defaultViewHandlerPackageName)) {
+            && !hasSpecializedHandlerIntents(context, activityIntent)
+            && packagesSupportingCustomTabs.contains(defaultViewHandlerPackageName)) {
             sPackageNameToUse = defaultViewHandlerPackageName
         } else if (packagesSupportingCustomTabs.contains(STABLE_PACKAGE)) {
             sPackageNameToUse = STABLE_PACKAGE
@@ -104,8 +105,9 @@ object CustomTabsHelper {
         try {
             val pm = context.packageManager
             val handlers = pm.queryIntentActivities(
-                    intent,
-                    PackageManager.GET_RESOLVED_FILTER)
+                intent,
+                PackageManager.GET_RESOLVED_FILTER
+            )
             if (handlers == null || handlers.size == 0) {
                 return false
             }

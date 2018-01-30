@@ -46,13 +46,19 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mListAdapter = PostsAdapter(mClickListener,
-                Fresco.getImagePipeline())
+        mListAdapter = PostsAdapter(
+            mClickListener,
+            Fresco.getImagePipeline()
+        )
         DisplayHelper.init(context!!)
 
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_subreddit, container, false)
     }
 
@@ -86,7 +92,13 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
 
                     if (!refreshing && scrolledItems > lastFetch) {
                         lastFetch = scrolledItems + (PREFETCH_SIZE - 1)
-                        launch { mListAdapter.prefetchImages(lastFetch, PREFETCH_SIZE, totalItemCount) }
+                        launch {
+                            mListAdapter.prefetchImages(
+                                lastFetch,
+                                PREFETCH_SIZE,
+                                totalItemCount
+                            )
+                        }
                     }
 
                     if (!refreshing && scrolledItems >= totalItemCount - 4) {
@@ -101,9 +113,10 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
         postRecyclerView.adapter = mListAdapter
 
         refreshLayout.setColorSchemeColors(
-                ContextCompat.getColor(context, R.color.colorPrimary),
-                ContextCompat.getColor(context, R.color.colorAccent),
-                ContextCompat.getColor(context, R.color.colorPrimaryDark))
+            ContextCompat.getColor(context, R.color.colorPrimary),
+            ContextCompat.getColor(context, R.color.colorAccent),
+            ContextCompat.getColor(context, R.color.colorPrimaryDark)
+        )
         refreshLayout.setOnRefreshListener {
             mListAdapter.clear()
             mActionsListener.loadPosts()
@@ -177,10 +190,13 @@ class SubredditFragment @Inject constructor() : DaggerFragment(), SubredditContr
 
         val activity = activity
         launch(UI) {
-            CustomTabActivityHelper.openCustomTab(activity,
-                    MediaHelper.createCustomTabIntentAsync(activity!!,
-                            customTabActivityHelper.session).await(),
-                    url
+            CustomTabActivityHelper.openCustomTab(
+                activity,
+                MediaHelper.createCustomTabIntentAsync(
+                    activity!!,
+                    customTabActivityHelper.session
+                ).await(),
+                url
             ) { _, _ ->
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)
