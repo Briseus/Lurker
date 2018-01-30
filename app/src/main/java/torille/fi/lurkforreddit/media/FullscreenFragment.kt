@@ -104,8 +104,10 @@ class FullscreenFragment @Inject constructor() : DaggerFragment(), FullscreenCon
         progressBarHorizontal?.hide()
         val cacheKey = Fresco.getImagePipeline().cacheKeyFactory.getEncodedCacheKey(imageRequest, this)
         Fresco.getImagePipelineFactory().mainFileCache.getResource(cacheKey)?.let {
-            val resource: FileBinaryResource = it as FileBinaryResource
-            imageView.setImage(ImageSource.uri(resource.file.absolutePath))
+            val resource: FileBinaryResource? = it as FileBinaryResource
+            resource?.let {
+                imageView.setImage(ImageSource.uri(resource.file.absolutePath))
+            }
         }
 
     }
